@@ -971,14 +971,14 @@ def welcome_page(pdf, page_no, use_colors=False, book_label=None):
     # -----------------------------------------------------------------------
     # 3. LOWER-MIDDLE SECTION: MOTIVATING TEXT FOR ADULTS (Why Play & Logic Matter)
     # -----------------------------------------------------------------------
-    adult_box_h = 90
+    adult_box_h = 98
     pg.fill_color("#eff6ff")
     pg.stroke_color("#93c5fd")
     pg.line_width(0.9)
     pg.round_rect(MARGIN, y, width, adult_box_h, 8, fill=True, stroke=True)
 
-    pg.text(MARGIN + 10, y + 14, "Why Play, Math, and Logic Matter", 10.5, True, color="#1e3a8a")
-    ya = y + 17
+    pg.text(MARGIN + 10, y + 14.5, "Why Play, Math, and Logic Matter", 10.5, True, color="#1e3a8a")
+    ya = y + 18
     ya = pg.rich_paragraph(
         MARGIN + 10, ya,
         [
@@ -986,7 +986,7 @@ def welcome_page(pdf, page_no, use_colors=False, book_label=None):
             ("When you test an idea, spot a pattern, and figure out why a piece belongs in a single spot, you\u2019re thinking like a mathematician without ever feeling like you\u2019re doing homework.", False, False, "#1e293b"),
         ],
         8.4, width - 20, leading=1.20,
-    ) + 2.5
+    ) + 3
     pg.rich_paragraph(
         MARGIN + 10, ya,
         [
@@ -1003,7 +1003,7 @@ def welcome_page(pdf, page_no, use_colors=False, book_label=None):
     # -----------------------------------------------------------------------
     # 4. BOTTOM SECTION: ADVICE FOR DADS (+ Central Kid Easter Egg)
     # -----------------------------------------------------------------------
-    dad_box_h = 224
+    dad_box_h = 216
     pg.fill_color("#f8fafc")
     pg.stroke_color("#64748b")
     pg.line_width(1.0)
@@ -1076,20 +1076,21 @@ def welcome_page(pdf, page_no, use_colors=False, book_label=None):
             8.3, width - 31, leading=1.19,
         ) + 2
 
-    y += dad_box_h + 6
+    y += dad_box_h + 7
 
     # Keep Growing Together sign-off strip
     pg.rich_paragraph(
         MARGIN + 4, y,
         [
             ("Keep Growing Together:", True, False, INK),
-            ("This set is just the first in a growing series of", False, False, "#444444"),
+            ("Sudoku has endless room for new rules, bigger grids, and wilder challenges, and this set is just the first in a growing series of", False, False, "#444444"),
             ("DoDad Puzzles\u2122", True, False, INK),
             ("missions. Visit", False, False, "#444444"),
             ("dodadpuzzles.com", True, False, "#1d6fd8"),
             ("for new puzzle quests, bonus challenges, and upcoming releases.", False, False, "#444444"),
+            ("(Final Easter Egg: If a kid made it all the way to the very last line on this page, Dad automatically owes you first pick of the pieces.)", False, True, "#64748b"),
         ],
-        8.2, width - 8, leading=1.18,
+        8.1, width - 8, leading=1.18,
     )
 
     if book_label is None:
