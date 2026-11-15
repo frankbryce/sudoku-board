@@ -866,11 +866,8 @@ def cover_page(pdf, data, levels, use_colors=False):
 def welcome_page(pdf, page_no, use_colors=False, book_label=None):
     """Render the motivation & welcome page after the title page and before Level 1.
 
-    Layout order:
-      1. Top: For Kids (quest to beat Dad, detective mindset, playful Easter egg dare)
-      2. Upper-Middle: How to Play (basic rules + kid Easter egg at the start)
-      3. Lower-Middle: Why Play, Math & Logic Matter (motivating text for adults + hidden kid Easter egg)
-      4. Bottom: For Dads: How to Win by Losing (focused attention, coaching tips, and central kid Easter egg)
+    Written at a clean 3rd-4th grade reading level with no em-dashes or LLM cliches,
+    and with subtle easter eggs tucked naturally into the text for curious kids to find.
     """
     pg = pdf.new_page()
     width = pg.w - 2 * MARGIN
@@ -890,7 +887,7 @@ def welcome_page(pdf, page_no, use_colors=False, book_label=None):
     # -----------------------------------------------------------------------
     # 1. TOP SECTION: FOR KIDS (Quest to Outsmart Dad)
     # -----------------------------------------------------------------------
-    kid_box_h = 126
+    kid_box_h = 122
     pg.fill_color("#fffbeb")
     pg.stroke_color("#f59e0b")
     pg.line_width(1.0)
@@ -900,62 +897,59 @@ def welcome_page(pdf, page_no, use_colors=False, book_label=None):
     pg.round_rect(MARGIN + 10, y + 7, 198, 17, 4, fill=True, stroke=False)
     pg.text(MARGIN + 18, y + 18.5, "FOR KIDS: YOUR QUEST STARTS HERE", 8.5, True, color="#ffffff")
 
-    yk = y + 26
+    yk = y + 27
     yk = pg.rich_paragraph(
         MARGIN + 10, yk,
         [
-            ("As you work your way through this booklet quest, you\u2019ll unlock real logic strategies and get plenty of practice for one ultimate mission:", False, False, "#1d1d1f"),
-            ("becoming smarter than your Dad.", True, False, "#b45309"),
-            ("At its heart, Sudoku isn\u2019t about arithmetic or memorizing times tables\u2014it\u2019s a game of pure detective work where every puzzle is a tiny mystery and you are the lead detective.", False, False, "#1d1d1f"),
+            ("Every Sudoku puzzle is a tiny mystery, and you are the detective. As you play through this book, you will learn real logic tricks for one big mission:", False, False, "#1d1d1f"),
+            ("getting smarter than your Dad.", True, False, "#b45309"),
         ],
-        8.6, width - 20, leading=1.22,
-    ) + 3
+        8.9, width - 20, leading=1.24,
+    ) + 4
     yk = pg.rich_paragraph(
         MARGIN + 10, yk,
         [
-            ("Fair warning\u2014there is zero chance he is going to let you win.", True, False, "#1d1d1f"),
-            ("You\u2019ll have to put in the play and the work right alongside him. Finish this book\u2014if you dare\u2014to become an official", False, False, "#1d1d1f"),
+            ("Fair warning: there is zero chance he is going to let you win.", True, False, "#1d1d1f"),
+            ("You will have to play hard and work right beside him. You will get stuck sometimes, and you will make mistakes. That is part of the deal, and we Dads believe in you completely. Finish this book to become an official", False, False, "#1d1d1f"),
             ("DoDad Graduate.", True, False, "#1d1d1f"),
-            ("It won\u2019t be easy, failing a few times is part of the deal, and we Dads believe in you completely.", False, False, "#1d1d1f"),
         ],
-        8.6, width - 20, leading=1.22,
-    ) + 3
+        8.9, width - 20, leading=1.24,
+    ) + 4
     pg.rich_paragraph(
         MARGIN + 10, yk,
         [
             ("Ready? Turn the page and go kick some butt.", True, False, "#b45309"),
-            ("(Psst\u2014whatever you do, definitely DO NOT keep reading the grown-up sections below to spy on Dad\u2019s secret playbook...)", False, True, "#78350f"),
+            ("(Just promise you won\u2019t read the grown-up parts below to spy on Dad\u2019s game plan.)", False, True, "#78350f"),
         ],
-        8.5, width - 20, leading=1.20,
+        8.8, width - 20, leading=1.22,
     )
 
-    y += kid_box_h + 8
+    y += kid_box_h + 10
 
     # -----------------------------------------------------------------------
-    # 2. UPPER-MIDDLE SECTION: HOW TO PLAY (Basic Rules + Easter Egg #2)
+    # 2. UPPER-MIDDLE SECTION: HOW TO PLAY (Basic Rules + Subtle Easter Egg)
     # -----------------------------------------------------------------------
-    pg.text(MARGIN, y + 10, "How to Play (The Detective Rules)", 11.5, True, color=INK)
-    y += 13
+    pg.text(MARGIN, y + 10, "How to Play (Basic Rules)", 11.5, True, color=INK)
+    y += 14
 
-    # Easter Egg Note for Kids reading the rules
     y = pg.rich_paragraph(
         MARGIN, y,
         [
             ("Note:", True, False, "#1e3a8a"),
-            ("These rules are here for Dad to read aloud\u2014but if you\u2019re the kid of a DoDad and you\u2019re reading this yourself, make sure Dad knows you\u2019re already one step ahead of him. (Whisper the secret code word \u201cPINEAPPLE\u201d to see if he\u2019s paying attention.)", False, True, "#1e3a8a"),
+            ("These rules are here for Dad to read out loud. But if you are the kid of a DoDad and you are reading this yourself, make sure your dad knows you are already one step ahead of him.", False, True, "#1e3a8a"),
         ],
-        8.4, width, leading=1.20,
-    ) + 3
+        8.7, width, leading=1.22,
+    ) + 4
 
     rules_bullets = [
-        ("Rows, Columns, and Regions:",
-         f"Every board is divided into horizontal rows, vertical columns, and outlined groups called regions (or boxes). A puzzle is solved when one big peg of every {piece_noun} appears in each row, each column, and each region\u2014with no repeats."),
+        ("Rows, Columns, and Boxes:",
+         f"Every board has rows going across, columns going up and down, and thick-lined boxes. A puzzle is solved when one big peg of each {piece_noun} is in every row, every column, and every box, with no repeats."),
         ("From 2\u00d72 Boxes to \u201cChaos\u201d:",
-         "In most early puzzles, the regions are neat 2\u00d72 boxes. Later in the book, those regions twist into irregular shapes known as Chaos (Jigsaw) Sudoku and Anti-Knight jumps. Don\u2019t let the names scare you\u2014the same rule applies, one step at a time."),
+         "Most early puzzles use neat 2\u00d72 boxes. Later in the book, those boxes twist into funny shapes called Chaos Sudoku, or add chess knight jumps. The same main rule still works, and you will build up to them one step at a time."),
         ("Pencil Pegs (The Secret Weapon):",
-         f"The tiny pegs are called pencil pegs (known in paper Sudoku as pencil marks). Pop them into a space to keep track of which {pieces_noun} could still go there as you narrow things down."),
+         f"The tiny pegs are called pencil pegs. When you are not sure which {piece_noun} goes in a space yet, pop tiny pegs into the little holes to keep track of which {pieces_noun} could still fit there."),
         ("The DoDad Twist:",
-         f"On select puzzles, the setup already includes tiny pencil pegs showing which {piece_noun} options are available\u2014or ruled out\u2014right from the start. That\u2019s a signature DoDad Sudoku rule you won\u2019t find in the Sunday newspaper."),
+         f"On some puzzles, the board starts with tiny pencil pegs already in place as clues. That is a special DoDad Sudoku rule you won\u2019t find in the Sunday newspaper."),
     ]
     for b_title, b_body in rules_bullets:
         pg.fill_color("#1d6fd8")
@@ -963,13 +957,13 @@ def welcome_page(pdf, page_no, use_colors=False, book_label=None):
         y = pg.rich_paragraph(
             MARGIN + 11, y,
             [(b_title, True, False, INK), (b_body, False, False, "#222222")],
-            8.4, width - 11, leading=1.20,
-        ) + 2.5
+            8.7, width - 11, leading=1.22,
+        ) + 3
 
-    y += 4
+    y += 5
 
     # -----------------------------------------------------------------------
-    # 3. LOWER-MIDDLE SECTION: MOTIVATING TEXT FOR ADULTS (Why Play & Logic Matter)
+    # 3. LOWER-MIDDLE SECTION: MOTIVATING TEXT FOR ADULTS (Why Play & Logic)
     # -----------------------------------------------------------------------
     adult_box_h = 98
     pg.fill_color("#eff6ff")
@@ -977,33 +971,32 @@ def welcome_page(pdf, page_no, use_colors=False, book_label=None):
     pg.line_width(0.9)
     pg.round_rect(MARGIN, y, width, adult_box_h, 8, fill=True, stroke=True)
 
-    pg.text(MARGIN + 10, y + 14.5, "Why Play, Math, and Logic Matter", 10.5, True, color="#1e3a8a")
+    pg.text(MARGIN + 10, y + 14.5, "Why Play, Math, and Logic", 10.5, True, color="#1e3a8a")
     ya = y + 18
     ya = pg.rich_paragraph(
         MARGIN + 10, ya,
         [
-            ("Play is how kids learn best, and encouraging a spirit of discovery and curiosity is the first step.", True, False, "#1e293b"),
-            ("When you test an idea, spot a pattern, and figure out why a piece belongs in a single spot, you\u2019re thinking like a mathematician without ever feeling like you\u2019re doing homework.", False, False, "#1e293b"),
+            ("Play is how kids learn best, and curiosity is the first step.", True, False, "#1e293b"),
+            ("When you test an idea, spot a pattern, and figure out why a piece belongs in a single spot, you are thinking like a mathematician without ever feeling like you are doing homework.", False, False, "#1e293b"),
         ],
-        8.4, width - 20, leading=1.20,
-    ) + 3
+        8.7, width - 20, leading=1.22,
+    ) + 3.5
     pg.rich_paragraph(
         MARGIN + 10, ya,
         [
-            ("In a busy house, quiet and concentrated time is rare.", False, False, "#1e293b"),
+            ("In a busy house, quiet and focused time together is rare.", False, False, "#1e293b"),
             ("DoDad Puzzles\u2122", True, False, "#1e293b"),
-            ("is on a mission to make it easier for Dads to spend focused, quality time with their kids\u2014and this booklet is built to help. The clear boundaries of math and logic create a welcoming space where the two of you can slow down and build reasoning skills side by side.", False, False, "#1e293b"),
-            ("(Wait\u2014if you\u2019re a kid who read the grown-up math paragraph too, tap your nose twice. You officially have detective eyes.)", False, True, "#1d4ed8"),
+            ("was built to make it easier for Dads to spend real, quality time with their kids. Clear math and logic rules give the two of you a calm place to slow down and figure things out side by side. (And if you are a kid reading the parent box too, tap the board twice so Dad wonders what you are up to.)", False, False, "#1e293b"),
         ],
-        8.4, width - 20, leading=1.20,
+        8.7, width - 20, leading=1.22,
     )
 
-    y += adult_box_h + 8
+    y += adult_box_h + 9
 
     # -----------------------------------------------------------------------
-    # 4. BOTTOM SECTION: ADVICE FOR DADS (+ Central Kid Easter Egg)
+    # 4. BOTTOM SECTION: ADVICE FOR DADS (+ Camouflaged Kid Easter Egg)
     # -----------------------------------------------------------------------
-    dad_box_h = 216
+    dad_box_h = 206
     pg.fill_color("#f8fafc")
     pg.stroke_color("#64748b")
     pg.line_width(1.0)
@@ -1013,84 +1006,57 @@ def welcome_page(pdf, page_no, use_colors=False, book_label=None):
     pg.round_rect(MARGIN + 10, y + 7, 206, 17, 4, fill=True, stroke=False)
     pg.text(MARGIN + 18, y + 18.5, "FOR DADS: HOW TO WIN BY LOSING", 8.5, True, color="#ffffff")
 
-    yd = y + 26
+    yd = y + 27
     yd = pg.rich_paragraph(
         MARGIN + 10, yd,
         [
-            ("Every DoDad Puzzles\u2122 set is engineered with a single goal:", False, False, "#1e293b"),
+            ("Every DoDad Puzzles\u2122 set has one goal:", False, False, "#1e293b"),
             ("getting your kids smarter than you are.", True, False, "#0f172a"),
-            ("Do that through focused attention. Their brains will learn faster than yours\u2014and this is a beautiful thing.", False, False, "#1e293b"),
+            ("You do that through focused attention. Their brains will learn faster than yours, and that is a beautiful thing.", False, False, "#1e293b"),
             ("Your time and attention is the best thing you can give your kids.", True, False, "#0f172a"),
-            ("Pull up a chair and share this puzzle until the day they solve a board faster than you can. The moment that happens, you win. They can officially handle hard problems on their own\u2014and hey, maybe they can do the taxes next year.", False, False, "#1e293b"),
+            ("Pull up a chair and share this board until the day they solve a puzzle faster than you can. The moment that happens, you win. Maybe they can even do the taxes next year.", False, False, "#1e293b"),
         ],
-        8.4, width - 20, leading=1.20,
-    ) + 3
+        8.7, width - 20, leading=1.21,
+    ) + 4
 
-    pg.text(MARGIN + 10, yd + 9, "To get there, how you play matters:", 8.8, True, color="#0f172a")
+    pg.text(MARGIN + 10, yd + 9, "To get there, how you play matters:", 8.9, True, color="#0f172a")
     yd += 12
 
-    # Dad Tip 1 & 2
-    for d_title, d_body in (
+    dad_bullets = [
         ("Step back and let them stumble.",
-         "Mistakes aren\u2019t roadblocks; they\u2019re how the brain rewires itself. Let your child spot and fix their own errors without interrupting."),
+         "When they put a peg in the wrong spot, hold back. Spotting and fixing their own mistake is how their brain grows."),
         ("Give as little help as possible.",
-         f"When they ask for a hint, resist giving the answer. Ask a question instead: \u201c{sample_q1}\u201d or \u201c{sample_q2}\u201d"),
-    ):
-        pg.fill_color("#1b873f")
-        pg.circle(MARGIN + 14, yd + 6.5, 2.0, fill=True, stroke=False)
-        yd = pg.rich_paragraph(
-            MARGIN + 21, yd,
-            [(d_title, True, False, "#0f172a"), (d_body, False, False, "#1e293b")],
-            8.3, width - 31, leading=1.19,
-        ) + 2
-
-    # CENTRAL EASTER EGG right in the middle of the Dad text!
-    egg_h = 28
-    pg.fill_color("#ecfdf5")
-    pg.stroke_color("#10b981")
-    pg.line_width(0.8)
-    pg.round_rect(MARGIN + 16, yd + 2, width - 32, egg_h, 5, fill=True, stroke=True)
-    pg.rich_paragraph(
-        MARGIN + 22, yd + 4,
-        [
-            ("Secret Kid Check:", True, False, "#065f46"),
-            ("If you are a kid and you\u2019re reading this, make sure your dad knows you\u2019re smarter than they are!", True, True, "#065f46"),
-            ("Look up right now and tell him: \u201cI read your secret instructions, Dad\u2014you\u2019re going down!\u201d", False, True, "#047857"),
-        ],
-        8.1, width - 44, leading=1.18,
-    )
-    yd += egg_h + 4
-
-    # Dad Tip 3 & 4
-    for d_title, d_body in (
+         f"When they ask for a hint, don\u2019t give the answer. Ask a question instead: \u201c{sample_q1}\u201d or \u201c{sample_q2}\u201d"),
+        ("Keep a straight face.",
+         "Wait a second. If you are a kid and you are reading this, make sure your dad knows you are smarter than he is. Tell him you just read his secret instructions."),
         ("Celebrate the breakthroughs.",
-         "Kids are innately curious and driven to make their dads happy and proud. When they crack a tough step, make sure they know they crushed it."),
+         "Kids are curious and wired to make their dads happy and proud. When they crack a tough step, make sure they know they crushed it."),
         ("Once your child knows the rules, let them drive.",
-         "Freedom within the limits of math and logic lets the two of you slow down, share real attention, and enjoy the ride together."),
-    ):
+         "Put them in charge of the pegs, follow their lead, and enjoy the ride together."),
+    ]
+    for d_title, d_body in dad_bullets:
         pg.fill_color("#1b873f")
         pg.circle(MARGIN + 14, yd + 6.5, 2.0, fill=True, stroke=False)
         yd = pg.rich_paragraph(
             MARGIN + 21, yd,
             [(d_title, True, False, "#0f172a"), (d_body, False, False, "#1e293b")],
-            8.3, width - 31, leading=1.19,
-        ) + 2
+            8.6, width - 31, leading=1.20,
+        ) + 2.5
 
-    y += dad_box_h + 7
+    y += dad_box_h + 8
 
     # Keep Growing Together sign-off strip
     pg.rich_paragraph(
         MARGIN + 4, y,
         [
             ("Keep Growing Together:", True, False, INK),
-            ("Sudoku has endless room for new rules, bigger grids, and wilder challenges, and this set is just the first in a growing series of", False, False, "#444444"),
+            ("This set is just the first in a growing series of", False, False, "#444444"),
             ("DoDad Puzzles\u2122", True, False, INK),
             ("missions. Visit", False, False, "#444444"),
             ("dodadpuzzles.com", True, False, "#1d6fd8"),
-            ("for new puzzle quests, bonus challenges, and upcoming releases.", False, False, "#444444"),
-            ("(Final Easter Egg: If a kid made it all the way to the very last line on this page, Dad automatically owes you first pick of the pieces.)", False, True, "#64748b"),
+            ("for new puzzle quests and upcoming releases. (And if a kid read all the way to the very last line on this page, they get first pick of the pegs.)", False, False, "#444444"),
         ],
-        8.1, width - 8, leading=1.18,
+        8.4, width - 8, leading=1.20,
     )
 
     if book_label is None:
