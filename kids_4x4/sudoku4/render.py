@@ -887,7 +887,7 @@ def welcome_page(pdf, page_no, use_colors=False, book_label=None):
     # -----------------------------------------------------------------------
     # 1. TOP SECTION: FOR KIDS (Quest to Outsmart Dad)
     # -----------------------------------------------------------------------
-    kid_box_h = 122
+    kid_box_h = 126
     pg.fill_color("#fffbeb")
     pg.stroke_color("#f59e0b")
     pg.line_width(1.0)
@@ -904,8 +904,8 @@ def welcome_page(pdf, page_no, use_colors=False, book_label=None):
             ("Every Sudoku puzzle is a tiny mystery, and you are the detective. As you play through this book, you will learn real logic tricks for one big mission:", False, False, "#1d1d1f"),
             ("getting smarter than your Dad.", True, False, "#b45309"),
         ],
-        8.9, width - 20, leading=1.24,
-    ) + 4
+        8.8, width - 20, leading=1.22,
+    ) + 3.5
     yk = pg.rich_paragraph(
         MARGIN + 10, yk,
         [
@@ -913,33 +913,33 @@ def welcome_page(pdf, page_no, use_colors=False, book_label=None):
             ("You will have to play hard and work right beside him. You will get stuck sometimes, and you will make mistakes. That is part of the deal, and we Dads believe in you completely. Finish this book to become an official", False, False, "#1d1d1f"),
             ("DoDad Graduate.", True, False, "#1d1d1f"),
         ],
-        8.9, width - 20, leading=1.24,
-    ) + 4
+        8.8, width - 20, leading=1.22,
+    ) + 3.5
     pg.rich_paragraph(
         MARGIN + 10, yk,
         [
             ("Ready? Turn the page and go kick some butt.", True, False, "#b45309"),
-            ("(Just promise you won\u2019t read the grown-up parts below to spy on Dad\u2019s game plan.)", False, True, "#78350f"),
+            ("(Whatever you do, definitely DO NOT keep reading the grown-up parts below to spy on Dad\u2019s secret playbook. That would be totally unfair.)", False, True, "#78350f"),
         ],
-        8.8, width - 20, leading=1.22,
+        8.7, width - 20, leading=1.20,
     )
 
-    y += kid_box_h + 10
+    y += kid_box_h + 9
 
     # -----------------------------------------------------------------------
     # 2. UPPER-MIDDLE SECTION: HOW TO PLAY (Basic Rules + Subtle Easter Egg)
     # -----------------------------------------------------------------------
     pg.text(MARGIN, y + 10, "How to Play (Basic Rules)", 11.5, True, color=INK)
-    y += 14
+    y += 13
 
     y = pg.rich_paragraph(
         MARGIN, y,
         [
             ("Note:", True, False, "#1e3a8a"),
-            ("These rules are here for Dad to read out loud. But if you are the kid of a DoDad and you are reading this yourself, make sure your dad knows you are already one step ahead of him.", False, True, "#1e3a8a"),
+            ("These rules are here for Dad to read out loud. But if you are the kid of a DoDad and you are reading this yourself, make sure Dad knows you are already one step ahead of him. (Whisper the secret code word \u201cPINEAPPLE\u201d to see if he is even paying attention.)", False, True, "#1e3a8a"),
         ],
-        8.7, width, leading=1.22,
-    ) + 4
+        8.6, width, leading=1.20,
+    ) + 3.5
 
     rules_bullets = [
         ("Rows, Columns, and Boxes:",
@@ -957,8 +957,8 @@ def welcome_page(pdf, page_no, use_colors=False, book_label=None):
         y = pg.rich_paragraph(
             MARGIN + 11, y,
             [(b_title, True, False, INK), (b_body, False, False, "#222222")],
-            8.7, width - 11, leading=1.22,
-        ) + 3
+            8.6, width - 11, leading=1.20,
+        ) + 2.5
 
     y += 5
 
@@ -979,24 +979,24 @@ def welcome_page(pdf, page_no, use_colors=False, book_label=None):
             ("Play is how kids learn best, and curiosity is the first step.", True, False, "#1e293b"),
             ("When you test an idea, spot a pattern, and figure out why a piece belongs in a single spot, you are thinking like a mathematician without ever feeling like you are doing homework.", False, False, "#1e293b"),
         ],
-        8.7, width - 20, leading=1.22,
-    ) + 3.5
+        8.6, width - 20, leading=1.21,
+    ) + 3
     pg.rich_paragraph(
         MARGIN + 10, ya,
         [
             ("In a busy house, quiet and focused time together is rare.", False, False, "#1e293b"),
             ("DoDad Puzzles\u2122", True, False, "#1e293b"),
-            ("was built to make it easier for Dads to spend real, quality time with their kids. Clear math and logic rules give the two of you a calm place to slow down and figure things out side by side. (And if you are a kid reading the parent box too, tap the board twice so Dad wonders what you are up to.)", False, False, "#1e293b"),
+            ("was built to make it easier for Dads to spend real, quality time with their kids. Clear math and logic rules give the two of you a calm place to slow down and figure things out side by side. (Wait. If you are a kid and you just read the boring parent box too, tap your nose twice. Your detective skills are officially getting scary.)", False, False, "#1e293b"),
         ],
-        8.7, width - 20, leading=1.22,
+        8.6, width - 20, leading=1.21,
     )
 
-    y += adult_box_h + 9
+    y += adult_box_h + 8
 
     # -----------------------------------------------------------------------
     # 4. BOTTOM SECTION: ADVICE FOR DADS (+ Camouflaged Kid Easter Egg)
     # -----------------------------------------------------------------------
-    dad_box_h = 206
+    dad_box_h = 208
     pg.fill_color("#f8fafc")
     pg.stroke_color("#64748b")
     pg.line_width(1.0)
@@ -1016,7 +1016,7 @@ def welcome_page(pdf, page_no, use_colors=False, book_label=None):
             ("Your time and attention is the best thing you can give your kids.", True, False, "#0f172a"),
             ("Pull up a chair and share this board until the day they solve a puzzle faster than you can. The moment that happens, you win. Maybe they can even do the taxes next year.", False, False, "#1e293b"),
         ],
-        8.7, width - 20, leading=1.21,
+        8.6, width - 20, leading=1.20,
     ) + 4
 
     pg.text(MARGIN + 10, yd + 9, "To get there, how you play matters:", 8.9, True, color="#0f172a")
@@ -1028,7 +1028,7 @@ def welcome_page(pdf, page_no, use_colors=False, book_label=None):
         ("Give as little help as possible.",
          f"When they ask for a hint, don\u2019t give the answer. Ask a question instead: \u201c{sample_q1}\u201d or \u201c{sample_q2}\u201d"),
         ("Keep a straight face.",
-         "Wait a second. If you are a kid and you are reading this, make sure your dad knows you are smarter than he is. Tell him you just read his secret instructions."),
+         "Hold on. If you are a kid and you are reading this right now, stop and make sure your dad knows you are smarter than they are! Look up and tell him: \u201cI just read your secret instructions, Dad. You\u2019re going down.\u201d"),
         ("Celebrate the breakthroughs.",
          "Kids are curious and wired to make their dads happy and proud. When they crack a tough step, make sure they know they crushed it."),
         ("Once your child knows the rules, let them drive.",
@@ -1040,10 +1040,10 @@ def welcome_page(pdf, page_no, use_colors=False, book_label=None):
         yd = pg.rich_paragraph(
             MARGIN + 21, yd,
             [(d_title, True, False, "#0f172a"), (d_body, False, False, "#1e293b")],
-            8.6, width - 31, leading=1.20,
+            8.5, width - 31, leading=1.20,
         ) + 2.5
 
-    y += dad_box_h + 8
+    y += dad_box_h + 7
 
     # Keep Growing Together sign-off strip
     pg.rich_paragraph(
@@ -1054,9 +1054,9 @@ def welcome_page(pdf, page_no, use_colors=False, book_label=None):
             ("DoDad Puzzles\u2122", True, False, INK),
             ("missions. Visit", False, False, "#444444"),
             ("dodadpuzzles.com", True, False, "#1d6fd8"),
-            ("for new puzzle quests and upcoming releases. (And if a kid read all the way to the very last line on this page, they get first pick of the pegs.)", False, False, "#444444"),
+            ("for new puzzle quests and upcoming releases. (If a kid made it all the way to the very last line on this page, Dad automatically owes you first pick of the pegs. Sorry, Dad, rules are rules.)", False, False, "#444444"),
         ],
-        8.4, width - 8, leading=1.20,
+        8.3, width - 8, leading=1.19,
     )
 
     if book_label is None:
