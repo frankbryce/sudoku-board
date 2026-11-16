@@ -383,18 +383,19 @@ module border_bar_notch() {
             ]);
 }
 
-// 2D perimeter border ring around [0, span_x] x [0, span_y] with half-width hw
-module perimeter_ring_2d(span_x, span_y, hw) {
+// 2D perimeter border ring around [0, span_x] x [0, span_y]
+// Extends inward by hw_in and outward by hw_out (so hw_out = divider_hw makes the outer edge flush!)
+module perimeter_ring_2d(span_x, span_y, hw_in, hw_out, r_out = 0.2) {
     difference() {
         translate([span_x / 2, span_y / 2])
-            rounded_rect_2d(span_x + 2 * hw, span_y + 2 * hw, hw);
+            rounded_rect_2d(span_x + 2 * hw_out, span_y + 2 * hw_out, r_out);
         translate([span_x / 2, span_y / 2])
-            square([span_x - 2 * hw, span_y - 2 * hw], center = true);
+            square([span_x - 2 * hw_in, span_y - 2 * hw_in], center = true);
     }
 }
 
 // 2D perimeter border strip for a single modular 1x1 tile clipped to [x0, x1] x [y0, y1]
-module tile_perimeter_2d(hw, x0, x1, y0, y1, has_n, has_s, has_e, has_w) {
+module tile_perimeter_2d(hw_in, hw_out, r_out, x0, x1, y0, y1, has_n, has_s, has_e, has_w) {
     big = 4 * cell_pitch;
     bx0 = has_w ? 0          : -big;
     bx1 = has_e ? cell_pitch :  big;
@@ -404,9 +405,9 @@ module tile_perimeter_2d(hw, x0, x1, y0, y1, has_n, has_s, has_e, has_w) {
         translate([x0, y0]) square([x1 - x0, y1 - y0]);
         difference() {
             translate([(bx0 + bx1) / 2, (by0 + by1) / 2])
-                rounded_rect_2d((bx1 - bx0) + 2 * hw, (by1 - by0) + 2 * hw, hw);
+                rounded_rect_2d((bx1 - bx0) + 2 * hw_out, (by1 - by0) + 2 * hw_out, r_out);
             translate([(bx0 + bx1) / 2, (by0 + by1) / 2])
-                square([(bx1 - bx0) - 2 * hw, (by1 - by0) - 2 * hw], center = true);
+                square([(bx1 - bx0) - 2 * hw_in, (by1 - by0) - 2 * hw_in], center = true);
         }
     }
 }
@@ -574,13 +575,13 @@ module board_tile(
                 }
             }
 
-            // 1b. Permanent raised outer border crown shoulder (matches region_bar shoulder)
+            // 1b. Permanent raised outer border crown shoulder (flush with outer board wall: 4.8 mm wide!)
             if (has_any_outer) {
                 difference() {
                     translate([0, 0, total_plate_h - eps])
                         linear_extrude(height = border_shoulder_h + eps)
                             tile_perimeter_2d(
-                                region_bar_crown_width / 2,
+                                region_bar_crown_width / 2, divider_hw, 0.1,
                                 x0, x1, y0, y1,
                                 has_north_wall, has_south_wall, has_east_wall, has_west_wall
                             );
@@ -596,7 +597,7 @@ module board_tile(
                     translate([0, 0, total_plate_h + border_shoulder_h - eps])
                         linear_extrude(height = border_paint_ridge_h + eps)
                             tile_perimeter_2d(
-                                border_paint_ridge_w / 2,
+                                border_paint_ridge_w / 2, divider_hw - 0.55, 0.8,
                                 x0, x1, y0, y1,
                                 has_north_wall, has_south_wall, has_east_wall, has_west_wall
                             );
@@ -685,11 +686,11 @@ module monolithic_board(n_cells = 4, border_color = undef) {
                 }
             }
 
-            // 1b. Permanent raised outer border crown shoulder (matches region_bar shoulder)
+            // 1b. Permanent raised outer border crown shoulder (flush with outer board wall: 4.8 mm wide!)
             difference() {
                 translate([0, 0, total_plate_h - eps])
                     linear_extrude(height = border_shoulder_h + eps)
-                        perimeter_ring_2d(span, span, region_bar_crown_width / 2);
+                        perimeter_ring_2d(span, span, region_bar_crown_width / 2, divider_hw, 0.1);
                 monolithic_border_notches(n_cells);
             }
         }
@@ -699,7 +700,7 @@ module monolithic_board(n_cells = 4, border_color = undef) {
             difference() {
                 translate([0, 0, total_plate_h + border_shoulder_h - eps])
                     linear_extrude(height = border_paint_ridge_h + eps)
-                        perimeter_ring_2d(span, span, border_paint_ridge_w / 2);
+                        perimeter_ring_2d(span, span, border_paint_ridge_w / 2, divider_hw - 0.55, 0.8);
                 monolithic_border_notches(n_cells);
             }
     }
@@ -781,11 +782,18 @@ module main_piece(paint_color = undef, label = "") {
     z_w2 = plinth_h + taper_dn;
     taper_up = (tile_crown_w - tile_waist_w) / 2;
     paint_pad_h = 0.90;
-    crown_h = 3.2;
+    crown_h = 4.6;
     z_w4 = (main_tile_height - paint_pad_h) - crown_h;
     z_w3 = z_w4 - taper_up;
     pad_w = tile_crown_w - 2.4;
     label_h = 0.80;
+
+    // Deep 4-side rubber-band retention channel parameters (1.25 mm deep x 2.6 mm tall)
+    rb_z_bot = main_tile_height - paint_pad_h - 3.9; // 11.2 mm
+    rb_chamf = 0.65;
+    rb_flat_h = 1.30;
+    rb_depth = 1.25;
+    rb_inner_w = tile_crown_w - 2 * rb_depth;        // 23.3 mm root width
 
     difference() {
         union() {
@@ -802,7 +810,7 @@ module main_piece(paint_color = undef, label = "") {
                 hull() {
                     translate([0, 0, plinth_h - eps])
                         linear_extrude(height = eps)
-                            rounded_rect_2d(tile_base_w, tile_base_w, 2.2);
+                             rounded_rect_2d(tile_base_w, tile_base_w, 2.2);
                     translate([0, 0, z_w2])
                         linear_extrude(height = max(0.8, z_w3 - z_w2))
                             rounded_rect_2d(tile_waist_w, tile_waist_w, 3.0);
@@ -837,24 +845,30 @@ module main_piece(paint_color = undef, label = "") {
                     raised_label(label, text_size = pad_w * 0.58, height = label_h);
         }
 
-        // 4-Side Marker Color Groove near upper crown
+        // Deep 4-Side Rubber-Band Retention Channel around upper crown
         difference() {
-            translate([0, 0, main_tile_height - paint_pad_h - 2.3])
-                linear_extrude(height = 1.4)
+            translate([0, 0, rb_z_bot])
+                linear_extrude(height = rb_flat_h + 2 * rb_chamf)
                     rounded_rect_2d(tile_crown_w + 2, tile_crown_w + 2, 4.2);
+            // Lower 45-deg print-safe bevel
             hull() {
-                translate([0, 0, main_tile_height - paint_pad_h - 2.3 - eps])
+                translate([0, 0, rb_z_bot - eps])
                     linear_extrude(height = eps)
                         rounded_rect_2d(tile_crown_w, tile_crown_w, 3.8);
-                translate([0, 0, main_tile_height - paint_pad_h - 1.6])
+                translate([0, 0, rb_z_bot + rb_chamf])
                     linear_extrude(height = eps)
-                        rounded_rect_2d(tile_crown_w - 1.0, tile_crown_w - 1.0, 3.4);
+                        rounded_rect_2d(rb_inner_w, rb_inner_w, 2.8);
             }
+            // Flat rubber-band seating root
+            translate([0, 0, rb_z_bot + rb_chamf - eps])
+                linear_extrude(height = rb_flat_h + 2 * eps)
+                    rounded_rect_2d(rb_inner_w, rb_inner_w, 2.8);
+            // Upper 45-deg retention bevel
             hull() {
-                translate([0, 0, main_tile_height - paint_pad_h - 1.6])
+                translate([0, 0, rb_z_bot + rb_chamf + rb_flat_h])
                     linear_extrude(height = eps)
-                        rounded_rect_2d(tile_crown_w - 1.0, tile_crown_w - 1.0, 3.4);
-                translate([0, 0, main_tile_height - paint_pad_h - 0.9 + eps])
+                        rounded_rect_2d(rb_inner_w, rb_inner_w, 2.8);
+                translate([0, 0, rb_z_bot + rb_flat_h + 2 * rb_chamf + eps])
                     linear_extrude(height = eps)
                         rounded_rect_2d(tile_crown_w, tile_crown_w, 3.8);
             }
@@ -863,13 +877,20 @@ module main_piece(paint_color = undef, label = "") {
 }
 
 // ============================================================================
-// Universal Non-Rolling Anti-Tip Pencil-Mark Peg (17.5 mm tall; 5.7-6.2 mm seated)
+// Universal Non-Rolling Anti-Tip Pencil-Mark Peg (16.0 mm tall; 5.7-6.2 mm seated)
 // ============================================================================
 
 module pencil_peg(paint_color = undef, label = "") {
     paint_cap_h = 0.80;
     cap_flat_d = peg_eff_flat_d - 0.9;
     label_h = 0.60;
+
+    // Deep circumferential rubber-band retention notch in the upper finger-grip zone
+    // (0.95 mm radial depth x 2.60 mm tall, well above the 6.2 mm board socket!)
+    rb_z_bot = peg_height - paint_cap_h - 3.70; // 11.50 mm
+    rb_chamf = 0.75;
+    rb_flat_h = 1.10;
+    rb_inner_d = peg_eff_flat_d - 1.90;         // 3.90 mm across flats at root
 
     difference() {
         union() {
@@ -893,23 +914,29 @@ module pencil_peg(paint_color = undef, label = "") {
                     raised_label(label, text_size = cap_flat_d * 0.62, height = label_h, bold_offset = 0.04);
         }
 
-        // Grip groove below the raised paint cap
+        // Deep Rubber-Band Retention Notch below the raised paint cap
         difference() {
-            translate([0, 0, peg_height - paint_cap_h - 2.2])
-                cylinder(d = peg_circum_d + 2, h = 1.4);
+            translate([0, 0, rb_z_bot])
+                cylinder(d = peg_circum_d + 2, h = rb_flat_h + 2 * rb_chamf);
+            // Lower 45-deg print-safe bevel
             hull() {
-                translate([0, 0, peg_height - paint_cap_h - 2.2 - eps])
+                translate([0, 0, rb_z_bot - eps])
                     linear_extrude(height = eps)
                         octagon_2d(peg_eff_flat_d);
-                translate([0, 0, peg_height - paint_cap_h - 1.5])
+                translate([0, 0, rb_z_bot + rb_chamf])
                     linear_extrude(height = eps)
-                        octagon_2d(peg_eff_flat_d - 0.9);
+                        octagon_2d(rb_inner_d);
             }
+            // Flat rubber-band seating root
+            translate([0, 0, rb_z_bot + rb_chamf - eps])
+                linear_extrude(height = rb_flat_h + 2 * eps)
+                    octagon_2d(rb_inner_d);
+            // Upper 45-deg retention bevel
             hull() {
-                translate([0, 0, peg_height - paint_cap_h - 1.5])
+                translate([0, 0, rb_z_bot + rb_chamf + rb_flat_h])
                     linear_extrude(height = eps)
-                        octagon_2d(peg_eff_flat_d - 0.9);
-                translate([0, 0, peg_height - paint_cap_h - 0.8 + eps])
+                        octagon_2d(rb_inner_d);
+                translate([0, 0, rb_z_bot + rb_flat_h + 2 * rb_chamf + eps])
                     linear_extrude(height = eps)
                         octagon_2d(peg_eff_flat_d);
             }

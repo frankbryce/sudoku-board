@@ -1,6 +1,8 @@
 SCAD := src/color_sudoku_board.scad
+HOLDER_SCAD := kids_4x4/holder/piece_holder.scad
 OPENSCAD := openscad
 CENTER_MARK_MODE ?= 2x2
+HOLDER_OPTION ?= B
 
 LABELS := 1 2 3 4 5 6 7 8 9 A B C D E F G H I
 MAIN_LABELED_STLS := $(addprefix stl/main_piece_,$(addsuffix .stl,$(LABELS)))
@@ -8,6 +10,7 @@ PEG_LABELED_STLS := $(addprefix stl/pencil_peg_,$(addsuffix .stl,$(LABELS)))
 
 STLS := \
 	stl/board_4x4.stl \
+	stl/piece_holder.stl \
 	stl/tile_center.stl \
 	stl/tile_edge_n.stl \
 	stl/tile_edge_s.stl \
@@ -38,6 +41,10 @@ renders/finished_board_9x9.png: $(SCAD)
 renders/finished_board_closeup.png: $(SCAD)
 	@mkdir -p $(dir $@)
 	$(OPENSCAD) -o $@ --imgsize=1600,1200 --autocenter --viewall --projection=p -D 'render_mode="assembly_preview"' -D 'center_mark_mode="$(CENTER_MARK_MODE)"' $<
+
+stl/piece_holder.stl: $(HOLDER_SCAD) $(SCAD)
+	@mkdir -p $(dir $@)
+	$(OPENSCAD) -o $@ -D 'option="$(HOLDER_OPTION)"' -D 'part="base"' $<
 
 stl/main_piece_%.stl: $(SCAD)
 	@mkdir -p $(dir $@)
