@@ -125,6 +125,13 @@ bar_tongue_w = region_slot_width - 2 * region_bar_clearance;
 bar_tongue_h = region_slot_depth + 0.25; // keeps crown 0.25 mm clear above wall posts
 bar_bevel_h = (region_bar_crown_width - bar_tongue_w) / 2; // 45-deg print-safe slope
 
+// Permanent outer border derived dimensions (matches seated region_bar height & profile)
+border_paint_ridge_h = 0.70;
+border_paint_ridge_w = region_bar_crown_width - 1.1; // 2.9 mm flat paint ridge
+border_shoulder_h = (bar_tongue_h - region_slot_depth) + bar_bevel_h + (region_bar_crown_height - border_paint_ridge_h);
+border_total_h = border_shoulder_h + border_paint_ridge_h; // 3.33 mm above total_plate_h
+board_total_h = total_plate_h + border_total_h;           // 15.83 mm total height with border
+
 // ============================================================================
 // 2D / 3D Helper Primitives
 // ============================================================================
@@ -358,6 +365,52 @@ module region_slot_y(x_pos, y_start, y_end) {
     }
 }
 
+// 45-degree mitered notch cut into the inner side of the permanent outer border
+// so perpendicular region_bar_1x / 2x / 3x crowns seat flush into the border.
+// Centered at (0, 0) on the perimeter grid line; bar enters from +Y toward y = 0.
+module border_bar_notch() {
+    nw = region_bar_crown_width / 2 + region_bar_clearance; // 2.18 mm half-width
+    reach = divider_hw + 0.6;
+
+    translate([0, 0, total_plate_h - 0.05])
+        linear_extrude(height = border_total_h + 0.25)
+            polygon([
+                [0,   0],
+                [ nw, nw],
+                [ nw, reach],
+                [-nw, reach],
+                [-nw, nw]
+            ]);
+}
+
+// 2D perimeter border ring around [0, span_x] x [0, span_y] with half-width hw
+module perimeter_ring_2d(span_x, span_y, hw) {
+    difference() {
+        translate([span_x / 2, span_y / 2])
+            rounded_rect_2d(span_x + 2 * hw, span_y + 2 * hw, hw);
+        translate([span_x / 2, span_y / 2])
+            square([span_x - 2 * hw, span_y - 2 * hw], center = true);
+    }
+}
+
+// 2D perimeter border strip for a single modular 1x1 tile clipped to [x0, x1] x [y0, y1]
+module tile_perimeter_2d(hw, x0, x1, y0, y1, has_n, has_s, has_e, has_w) {
+    big = 4 * cell_pitch;
+    bx0 = has_w ? 0          : -big;
+    bx1 = has_e ? cell_pitch :  big;
+    by0 = has_s ? 0          : -big;
+    by1 = has_n ? cell_pitch :  big;
+    intersection() {
+        translate([x0, y0]) square([x1 - x0, y1 - y0]);
+        difference() {
+            translate([(bx0 + bx1) / 2, (by0 + by1) / 2])
+                rounded_rect_2d((bx1 - bx0) + 2 * hw, (by1 - by0) + 2 * hw, hw);
+            translate([(bx0 + bx1) / 2, (by0 + by1) / 2])
+                square([(bx1 - bx0) - 2 * hw, (by1 - by0) - 2 * hw], center = true);
+        }
+    }
+}
+
 // ============================================================================
 // Board Plate Generator (Configurable NxN subgrid; 3x3 default, 1x1 test)
 // ============================================================================
@@ -435,11 +488,19 @@ module board_subgrid(n_cells = 3, include_dovetails = true) {
 //   - tile_corner_sw (N=false, S=true,  E=false, W=true)
 //   - tile_corner_se (N=false, S=true,  E=true,  W=false)
 
+module tile_border_notches(has_n, has_s, has_e, has_w) {
+    if (has_w && !has_s) translate([0,          0,          0]) rotate([0, 0, -90]) border_bar_notch();
+    if (has_e && !has_s) translate([cell_pitch, 0,          0]) rotate([0, 0,  90]) border_bar_notch();
+    if (has_s && !has_e) translate([cell_pitch, 0,          0]) rotate([0, 0,   0]) border_bar_notch();
+    if (has_n && !has_e) translate([cell_pitch, cell_pitch, 0]) rotate([0, 0, 180]) border_bar_notch();
+}
+
 module board_tile(
     has_north_wall = false,
     has_south_wall = false,
     has_east_wall  = false,
-    has_west_wall  = false
+    has_west_wall  = false,
+    border_color   = undef
 ) {
     x0 = has_west_wall ? -divider_hw : divider_hw;
     x1 = cell_pitch + divider_hw;
@@ -447,176 +508,200 @@ module board_tile(
     y1 = cell_pitch + (has_north_wall ? divider_hw : -divider_hw);
     w_x = x1 - x0;
     w_y = y1 - y0;
+    has_any_outer = has_north_wall || has_south_wall || has_east_wall || has_west_wall;
 
-    // Stop interior region slots inside the solid outer perimeter wall while leaving
-    // full clearance for region_bar_1x / 2x / 3x tips (bar tip reaches 0.25 mm from
-    // cell edge; stopping the slot at 0.55 mm inside the outer wall gives 0.30 mm end
-    // clearance for jigsaw & box bars while keeping a solid 2.25 mm outer barrier wall).
-    outer_slot_stop = region_slot_width / 2 + 0.55; // 2.05 mm inside the 2.80 mm divider_hw
+    // Extend interior region slots all the way to the outer perimeter grid line (0.0 mm)
+    // so region_bar_1x / 2x / 3x tips (at 0.25 mm) have 0.25 mm end clearance while keeping
+    // the full 2.80 mm (divider_hw) outer barrier wall solid on the outside of the board.
+    outer_slot_stop = 0.0;
     slot_x_min = has_west_wall  ? outer_slot_stop : (x0 - eps);
     slot_x_max = has_east_wall  ? (cell_pitch - outer_slot_stop) : (x1 + eps);
     slot_y_min = has_south_wall ? outer_slot_stop : (y0 - eps);
     slot_y_max = has_north_wall ? (cell_pitch - outer_slot_stop) : (y1 + eps);
 
-    difference() {
-        union() {
-            // 1. Solid tile body with elephant-foot bevel
-            hull() {
-                translate([x0 + elephant_foot_bevel, y0 + elephant_foot_bevel, 0])
-                    cube([w_x - 2 * elephant_foot_bevel, w_y - 2 * elephant_foot_bevel, eps]);
-                translate([x0, y0, elephant_foot_bevel])
-                    cube([w_x, w_y, total_plate_h - elephant_foot_bevel]);
+    union() {
+        color(border_color == undef ? undef : "#F5F5F2") {
+            difference() {
+                union() {
+                    // 1. Solid tile body with elephant-foot bevel
+                    hull() {
+                        translate([x0 + elephant_foot_bevel, y0 + elephant_foot_bevel, 0])
+                            cube([w_x - 2 * elephant_foot_bevel, w_y - 2 * elephant_foot_bevel, eps]);
+                        translate([x0, y0, elephant_foot_bevel])
+                            cube([w_x, w_y, total_plate_h - elephant_foot_bevel]);
+                    }
+
+                    // 2. Outward Male jigsaw nubbins on Bottom (South) and Right (East) only when interior
+                    if (!has_south_wall) {
+                        translate([0.5 * cell_pitch, y0, 0])
+                            male_dovetail_south();
+                    }
+                    if (!has_east_wall) {
+                        translate([x0 + w_x, 0.5 * cell_pitch, 0])
+                            rotate([0, 0, 90])
+                                male_dovetail_south();
+                    }
+                }
+
+                // 3. Cell interior & peg sockets
+                cell_interior_cuts(0.5 * cell_pitch, 0.5 * cell_pitch);
+
+                // 4. Interior region slots on Bottom (South) and Right (East), stopped at outer grid line
+                if (!has_south_wall) {
+                    region_slot_x(0, slot_x_min, slot_x_max);
+                }
+                if (!has_east_wall) {
+                    region_slot_y(cell_pitch, slot_y_min, slot_y_max);
+                }
+
+                // 4b. Remove isolated 1.3x1.3 mm corner nubbin at Bottom-Right only when both S & E slots exist
+                if (!has_south_wall && !has_east_wall) {
+                    nub_w = slot_wall_thickness + 2 * eps;
+                    nub_h = region_slot_depth + 2 * eps;
+                    translate([cell_pitch + region_slot_width / 2 - eps, -divider_hw - eps, slot_floor_z])
+                        cube([nub_w, nub_w, nub_h]);
+                }
+
+                // 5. Inward Female vaulted-roof jigsaw sockets on Top (North) and Left (West) only when interior
+                if (!has_north_wall) {
+                    translate([0.5 * cell_pitch, y0 + w_y, 0])
+                        female_dovetail_cut_from_north();
+                }
+                if (!has_west_wall) {
+                    translate([x0, 0.5 * cell_pitch, 0])
+                        rotate([0, 0, 90])
+                            female_dovetail_cut_from_north();
+                }
             }
 
-            // 2. Outward Male jigsaw nubbins on Bottom (South) and Right (East) only when interior
-            if (!has_south_wall) {
-                translate([0.5 * cell_pitch, y0, 0])
-                    male_dovetail_south();
+            // 1b. Permanent raised outer border crown shoulder (matches region_bar shoulder)
+            if (has_any_outer) {
+                difference() {
+                    translate([0, 0, total_plate_h - eps])
+                        linear_extrude(height = border_shoulder_h + eps)
+                            tile_perimeter_2d(
+                                region_bar_crown_width / 2,
+                                x0, x1, y0, y1,
+                                has_north_wall, has_south_wall, has_east_wall, has_west_wall
+                            );
+                    tile_border_notches(has_north_wall, has_south_wall, has_east_wall, has_west_wall);
+                }
             }
-            if (!has_east_wall) {
-                translate([x0 + w_x, 0.5 * cell_pitch, 0])
-                    rotate([0, 0, 90])
-                        male_dovetail_south();
-            }
         }
 
-        // 3. Cell interior & peg sockets
-        cell_interior_cuts(0.5 * cell_pitch, 0.5 * cell_pitch);
-
-        // 4. Interior region slots on Bottom (South) and Right (East), stopped by any outer wall
-        if (!has_south_wall) {
-            region_slot_x(0, slot_x_min, slot_x_max);
-        }
-        if (!has_east_wall) {
-            region_slot_y(cell_pitch, slot_y_min, slot_y_max);
-        }
-
-        // 4b. Remove isolated 1.3x1.3 mm corner nubbin at Bottom-Right only when both S & E slots exist
-        if (!has_south_wall && !has_east_wall) {
-            nub_w = slot_wall_thickness + 2 * eps;
-            nub_h = region_slot_depth + 2 * eps;
-            translate([cell_pitch + region_slot_width / 2 - eps, -divider_hw - eps, slot_floor_z])
-                cube([nub_w, nub_w, nub_h]);
-        }
-
-        // 5. Inward Female vaulted-roof jigsaw sockets on Top (North) and Left (West) only when interior
-        if (!has_north_wall) {
-            translate([0.5 * cell_pitch, y0 + w_y, 0])
-                female_dovetail_cut_from_north();
-        }
-        if (!has_west_wall) {
-            translate([x0, 0.5 * cell_pitch, 0])
-                rotate([0, 0, 90])
-                    female_dovetail_cut_from_north();
+        // 6. Raised flat paint ridge on top of the permanent outer border (proud 0.70 mm for black marker)
+        if (has_any_outer) {
+            color(border_color)
+                difference() {
+                    translate([0, 0, total_plate_h + border_shoulder_h - eps])
+                        linear_extrude(height = border_paint_ridge_h + eps)
+                            tile_perimeter_2d(
+                                border_paint_ridge_w / 2,
+                                x0, x1, y0, y1,
+                                has_north_wall, has_south_wall, has_east_wall, has_west_wall
+                            );
+                    tile_border_notches(has_north_wall, has_south_wall, has_east_wall, has_west_wall);
+                }
         }
     }
 }
 
 // Helper: places the appropriate flush-perimeter tile at grid coordinate (ix, iy)
 // within an ncols x nrows board (ix = 0..ncols-1 W->E, iy = 0..nrows-1 S->N).
-module board_grid_tile(ix, iy, ncols, nrows) {
+module board_grid_tile(ix, iy, ncols, nrows, border_color = undef) {
     translate([ix * cell_pitch, iy * cell_pitch, 0])
         board_tile(
             has_north_wall = (iy == nrows - 1),
             has_south_wall = (iy == 0),
             has_east_wall  = (ix == ncols - 1),
-            has_west_wall  = (ix == 0)
+            has_west_wall  = (ix == 0),
+            border_color   = border_color
         );
 }
 
-// Monolithic single-piece N x N board with flush solid outer walls and captured interior slots
-// (For n_cells = 4: 145.6 x 145.6 x 12.5 mm — prints in one piece on a 180x180 mm A1 Mini bed)
-module monolithic_board(n_cells = 4) {
+module monolithic_border_notches(n_cells) {
+    if (n_cells > 1) {
+        span = n_cells * cell_pitch;
+        for (k = [1 : n_cells - 1]) {
+            translate([k * cell_pitch, 0,    0]) rotate([0, 0,   0]) border_bar_notch();
+            translate([k * cell_pitch, span, 0]) rotate([0, 0, 180]) border_bar_notch();
+            translate([0,    k * cell_pitch, 0]) rotate([0, 0, -90]) border_bar_notch();
+            translate([span, k * cell_pitch, 0]) rotate([0, 0,  90]) border_bar_notch();
+        }
+    }
+}
+
+// Monolithic single-piece N x N board with flush solid outer walls, permanent raised black-paint
+// border, and 45-degree mitered border notches where interior region bars meet the outer edge
+// (For n_cells = 4: 145.6 x 145.6 x 15.83 mm — prints in one piece on a 180x180 mm A1 Mini bed)
+module monolithic_board(n_cells = 4, border_color = undef) {
     span = n_cells * cell_pitch;
     x0 = -divider_hw;
     y0 = -divider_hw;
     w = span + 2 * divider_hw;
-    // Extend interior slots just past the perimeter grid line (0 / span) so
-    // region_bar_1x / 2x / 3x tips (at 0.25 mm) seat cleanly against the outer wall
-    // while keeping 2.7 mm of solid outer wall barrier.
-    outer_slot_stop = -0.1;
-
-    border_top_z = slot_floor_z + bar_tongue_h + bar_bevel_h + region_bar_crown_height;
-    paint_ridge_h = 0.70;
-    paint_ridge_w = region_bar_crown_width - 1.1;
-    border_shoulder_z = border_top_z - paint_ridge_h;
-    notch_w = region_bar_crown_width + 0.5;
-    notch_in = 0.25; // notch reaches 0.25 mm past grid line (leaves 1.75 mm continuous outer border)
+    // Extend interior region slots to the perimeter grid line (0.0 mm) so region_bar tips (at 0.25 mm)
+    // have 0.25 mm end clearance while keeping the full 2.80 mm outer barrier wall solid.
+    outer_slot_stop = 0.0;
 
     union() {
-        difference() {
-            // 1. Solid one-piece board body with elephant-foot bevel on the outer perimeter
-            hull() {
-                translate([x0 + elephant_foot_bevel, y0 + elephant_foot_bevel, 0])
-                    cube([w - 2 * elephant_foot_bevel, w - 2 * elephant_foot_bevel, eps]);
-                translate([x0, y0, elephant_foot_bevel])
-                    cube([w, w, total_plate_h - elephant_foot_bevel]);
-            }
-
-            // 2. Cell interiors & peg sockets for all n_cells x n_cells squares
-            for (ix = [0 : n_cells - 1], iy = [0 : n_cells - 1]) {
-                cell_interior_cuts((ix + 0.5) * cell_pitch, (iy + 0.5) * cell_pitch);
-            }
-
-            // 3. Full grid of interior region slots (k = 1..n_cells-1 in both X and Y) for
-            //    both standard 2x2 box bars and 1x1 Jigsaw bars, stopped inside the outer wall.
-            if (n_cells > 1) {
-                for (k = [1 : n_cells - 1]) {
-                    region_slot_x(k * cell_pitch, outer_slot_stop, span - outer_slot_stop);
-                    region_slot_y(k * cell_pitch, outer_slot_stop, span - outer_slot_stop);
+        color(border_color == undef ? undef : "#F5F5F2") {
+            difference() {
+                // 1. Solid one-piece board body with elephant-foot bevel on the outer perimeter
+                hull() {
+                    translate([x0 + elephant_foot_bevel, y0 + elephant_foot_bevel, 0])
+                        cube([w - 2 * elephant_foot_bevel, w - 2 * elephant_foot_bevel, eps]);
+                    translate([x0, y0, elephant_foot_bevel])
+                        cube([w, w, total_plate_h - elephant_foot_bevel]);
                 }
-                // Remove isolated 1.3x1.3 mm corner posts at interior slot intersections (kx, ky = 1..n_cells-1)
-                // so adjacent perpendicular region bars (like Jigsaw turns) never collide with corner posts!
-                nub_w = slot_wall_thickness + 2 * eps;
-                nub_h = region_slot_depth + 2 * eps;
-                for (kx = [1 : n_cells - 1], ky = [1 : n_cells - 1]) {
-                    for (sx = [-1, 1], sy = [-1, 1]) {
-                        cx_post = kx * cell_pitch + sx * (region_slot_width / 2 - eps);
-                        cy_post = ky * cell_pitch + sy * (region_slot_width / 2 - eps);
-                        translate([
-                            sx > 0 ? cx_post : (cx_post - nub_w),
-                            sy > 0 ? cy_post : (cy_post - nub_w),
-                            slot_floor_z
-                        ])
-                            cube([nub_w, nub_w, nub_h]);
+
+                // 2. Cell interiors & peg sockets for all n_cells x n_cells squares
+                for (ix = [0 : n_cells - 1], iy = [0 : n_cells - 1]) {
+                    cell_interior_cuts((ix + 0.5) * cell_pitch, (iy + 0.5) * cell_pitch);
+                }
+
+                // 3. Full grid of interior region slots (k = 1..n_cells-1 in both X and Y) for
+                //    both standard 2x2 box bars and 1x1 Jigsaw bars, stopped at the outer grid line.
+                if (n_cells > 1) {
+                    for (k = [1 : n_cells - 1]) {
+                        region_slot_x(k * cell_pitch, outer_slot_stop, span - outer_slot_stop);
+                        region_slot_y(k * cell_pitch, outer_slot_stop, span - outer_slot_stop);
+                    }
+                    // Remove isolated 1.3x1.3 mm corner posts at interior slot intersections (kx, ky = 1..n_cells-1)
+                    // so adjacent perpendicular region bars (like Jigsaw turns) never collide with corner posts!
+                    nub_w = slot_wall_thickness + 2 * eps;
+                    nub_h = region_slot_depth + 2 * eps;
+                    for (kx = [1 : n_cells - 1], ky = [1 : n_cells - 1]) {
+                        for (sx = [-1, 1], sy = [-1, 1]) {
+                            cx_post = kx * cell_pitch + sx * (region_slot_width / 2 - eps);
+                            cy_post = ky * cell_pitch + sy * (region_slot_width / 2 - eps);
+                            translate([
+                                sx > 0 ? cx_post : (cx_post - nub_w),
+                                sy > 0 ? cy_post : (cy_post - nub_w),
+                                slot_floor_z
+                            ])
+                                cube([nub_w, nub_w, nub_h]);
+                        }
                     }
                 }
             }
+
+            // 1b. Permanent raised outer border crown shoulder (matches region_bar shoulder)
+            difference() {
+                translate([0, 0, total_plate_h - eps])
+                    linear_extrude(height = border_shoulder_h + eps)
+                        perimeter_ring_2d(span, span, region_bar_crown_width / 2);
+                monolithic_border_notches(n_cells);
+            }
         }
 
-        // 4. Raised permanent outer border (matches region_bar crown & paint ridge height)
-        //    Centered on the perimeter grid lines (0 and span) so it aligns with the puzzle grid.
-        difference() {
-            for (edge = [0 : 3]) {
-                translate([span / 2, span / 2, 0])
-                rotate([0, 0, edge * 90])
-                translate([-span / 2, -span / 2, 0]) {
-                    // Lower crown shoulder
-                    hull() {
-                        translate([-bar_tongue_w / 2, -bar_tongue_w / 2, total_plate_h - eps])
-                            cube([span + bar_tongue_w, bar_tongue_w, eps]);
-                        translate([-region_bar_crown_width / 2, -region_bar_crown_width / 2, total_plate_h + 0.25 + bar_bevel_h])
-                            cube([span + region_bar_crown_width, region_bar_crown_width, border_shoulder_z - (total_plate_h + 0.25 + bar_bevel_h)]);
-                    }
-                    // Raised flat paint ridge on top
-                    translate([-paint_ridge_w / 2, -paint_ridge_w / 2, border_shoulder_z - eps])
-                        cube([span + paint_ridge_w, paint_ridge_w, paint_ridge_h + eps]);
-                }
+        // 4. Raised flat paint ridge on top of the permanent outer border (proud 0.70 mm for black marker)
+        color(border_color)
+            difference() {
+                translate([0, 0, total_plate_h + border_shoulder_h - eps])
+                    linear_extrude(height = border_paint_ridge_h + eps)
+                        perimeter_ring_2d(span, span, border_paint_ridge_w / 2);
+                monolithic_border_notches(n_cells);
             }
-            if (n_cells > 1) {
-                for (k = [1 : n_cells - 1]) {
-                    // Notches in the raised permanent border so region_bars seat into the perimeter
-                    translate([k * cell_pitch - notch_w / 2, -notch_in, total_plate_h - eps])
-                        cube([notch_w, divider_hw + notch_in + eps, border_top_z - total_plate_h + 1]);
-                    translate([k * cell_pitch - notch_w / 2, span - divider_hw - eps, total_plate_h - eps])
-                        cube([notch_w, divider_hw + notch_in + eps, border_top_z - total_plate_h + 1]);
-                    translate([-notch_in, k * cell_pitch - notch_w / 2, total_plate_h - eps])
-                        cube([divider_hw + notch_in + eps, notch_w, border_top_z - total_plate_h + 1]);
-                    translate([span - divider_hw - eps, k * cell_pitch - notch_w / 2, total_plate_h - eps])
-                        cube([divider_hw + notch_in + eps, notch_w, border_top_z - total_plate_h + 1]);
-                }
-            }
-        }
     }
 }
 
@@ -896,10 +981,8 @@ module assembly_preview() {
 
     peg_floor_z = base_thickness - peg_socket_depth;
 
-    color("#F7F7F5") {
-        for (ix = [0 : 2], iy = [0 : 2]) {
-            board_grid_tile(ix, iy, 3, 3);
-        }
+    for (ix = [0 : 2], iy = [0 : 2]) {
+        board_grid_tile(ix, iy, 3, 3, "#7209B7");
     }
 
     translate([0.5 * cell_pitch, 2.5 * cell_pitch, base_thickness])
@@ -942,10 +1025,8 @@ module full_board_preview() {
     c_pts = central_mark_coords();
 
     // 1. White 9x9 modular jigsaw board (49 + 7*4 + 4 = 81 tiles) with flush outer perimeter
-    color("#F5F5F2") {
-        for (ix = [0 : 8], iy = [0 : 8]) {
-            render(convexity = 4) board_grid_tile(ix, iy, 9, 9);
-        }
+    for (ix = [0 : 8], iy = [0 : 8]) {
+        board_grid_tile(ix, iy, 9, 9, "#264653");
     }
 
     // 2. Classic 3x3 interior box dividers (region_bar_3x; outer perimeter is a solid wall)
