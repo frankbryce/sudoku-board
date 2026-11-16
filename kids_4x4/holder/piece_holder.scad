@@ -1,17 +1,12 @@
 // ============================================================================
-// 4x4 Kids' Sudoku: Piece Holder / Carry Case (3 design options)
-// Holds 4 colors x (4 main pieces + 16 pencil-mark pegs), separated by color
-// AND by piece type, with a lid so nothing falls out when carried.
+// 4x4 Kids' Sudoku: Piece Holder with Upside-Down Board as the Lid (3 options)
+// Holds 4 colors x (4 main pieces + 16 pencil-mark pegs) + region bars,
+// with the monolithic 4x4 board (145.6 x 145.6 mm) flipped upside down as
+// the flat-topped lid!
 //
-// Re-uses the REAL piece geometry from ../../src/color_sudoku_board.scad, so
-// every pocket is sized from the same parameters as the pieces themselves.
-//
-//   option A = "Tackle Box"   : 4 color rows, main pockets + coved peg scoop bin,
-//                                sliding lid with click detent
-//   option B = "Color Wheel"  : round; mains stand in rim slots, 4 dished peg
-//                                wedges in the middle, quarter-turn twist lid
-//   option C = "Park & Count" : every piece has its own home (4x4 peg holes like
-//                                the board + main pockets), snap-on lid
+//   option A = "Standing Slots + Coved Peg Bins" (single-layer, 152.6 x 152.6 mm)
+//   option B = "Two-Tier Stacker" (flat 4x4 mains + lift-out peg/bar tray)
+//   option C = "Park & Count" (standing mains + 4x4 peg holes + region-bar caddy)
 //
 //   openscad -o out.png -D 'option="A"' -D 'part="open"' piece_holder.scad
 //   openscad -o base.stl -D 'option="A"' -D 'part="base"' piece_holder.scad
@@ -25,18 +20,19 @@ render_mode = "none";
 
 /* [Selection] */
 option = "A"; // ["A", "B", "C"]
-part   = "open"; // ["open", "closed", "base", "lid"]
+part   = "open"; // ["open", "closed", "base", "tray", "lid"]
 
 /* [Colors] */
 // Blue, Red, Tan, Green (same Sharpie palette as the workbook)
 COLORS = ["#0178d4", "#db2134", "#eab47f", "#22ab7e"];
 HOLDER = "#F4F2EC";
-LIDC   = "#D9E3EC";
+TRAYC  = "#E6ECEF";
+BOARDC = "#D9E3EC";
 
 $fn = 48;
 
 // ---------------------------------------------------------------------------
-// Piece envelope (derived from the board file)
+// Piece & Board envelope (derived from color_sudoku_board.scad)
 // ---------------------------------------------------------------------------
 main_w = tile_base_w;             // 28.4 mm square plinth
 main_h = main_tile_height + 0.8;  // 16.8 mm incl. optional raised label
@@ -44,6 +40,18 @@ peg_d  = peg_circum_d;            // 6.28 mm across octagon corners
 peg_f  = peg_eff_flat_d;          // 5.8 mm across flats
 peg_l  = peg_height + 0.6;        // 16.6 mm incl. optional raised label
 pad_h  = 0.6;                     // raised paint-marker color pads
+
+board_span = 4 * cell_pitch;                    // 140.0 mm
+board_w    = board_span + 2 * divider_hw;       // 145.6 mm
+board_border_top_z = slot_floor_z + bar_tongue_h + bar_bevel_h + region_bar_crown_height; // 15.83 mm
+
+// Common outer box dimensions (board_4x4 nests upside-down inside the top rim)
+box_clr  = 0.3;                                 // per-side clearance around board
+box_wall = 3.2;                                 // outer collar wall thickness
+box_ix   = board_w + 2 * box_clr;               // 146.2 mm (collar opening)
+box_ox   = box_ix + 2 * box_wall;               // 152.6 mm (fits 180x180 bed)
+ledge_w  = 5.4;                                 // supports board's raised border
+inner_w  = box_ix - 2 * ledge_w;                // 135.4 mm clear interior width
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -61,8 +69,7 @@ module lying_peg(c) {
     translate([-peg_l / 2, 0, peg_f / 2]) rotate([0, 90, 0]) pencil_peg(c);
 }
 
-// Fill that turns the bottom edges of a box-shaped bin into smooth coves,
-// so fingers can sweep pegs up the curved wall instead of digging in corners.
+// Fill that turns the bottom edges of a box-shaped bin into smooth coves
 module cove_fill(l, w, r) {
     difference() {
         cube([l, w, r]);
@@ -74,303 +81,280 @@ module cove_fill(l, w, r) {
 }
 function cove_lift(d, r) = d >= r ? 0 : r - sqrt(r * r - (r - d) * (r - d));
 
-// ============================================================================
-// OPTION A: "Tackle Box" (172 x 133 x 25 mm) with sliding lid
-// ============================================================================
-A_wall  = 3.2;              // side walls carry the lid grooves
-A_floor = 2.0;
-A_div   = 2.0;              // full-height color divider
-A_cell  = main_w + 1.8;     // main pocket (0.9 mm per side)
-A_rib   = 1.6;              // low rib between main pockets (counting aid)
-A_rib_h = 5.0;
-A_bin   = 38.0;             // peg scoop bin length
-A_cove  = 6.0;              // cove radius in peg bins
-A_ix    = 4 * A_cell + 3 * A_rib + A_div + A_bin;
-A_iy    = 4 * A_cell + 3 * A_div;
-A_ih    = main_h + pad_h + 0.6;     // divider height above floor
-A_lid_t = 2.2;
-A_gap   = 0.4;              // lid underside to divider tops (pegs can't hop)
-A_gd    = 1.6;              // lid groove depth into walls
-A_lip   = 1.6;
-A_gz    = A_floor + A_ih + A_gap;   // lid bottom face
-A_oh    = A_gz + A_lid_t + 0.3 + A_lip;
-A_ox    = A_ix + 2 * A_wall;
-A_oy    = A_iy + 2 * A_wall;
-A_bin_x = A_wall + 4 * A_cell + 3 * A_rib + A_div;
-function A_row_y(i)  = A_wall + i * (A_cell + A_div);
-function A_cell_x(j) = A_wall + j * (A_cell + A_rib);
-
-module A_base() {
-    color(HOLDER) difference() {
-        rbox(A_ox, A_oy, A_oh, 4);
-        translate([A_wall, A_wall, A_floor]) cube([A_ix, A_iy, A_oh]);
-        // lid groove on 3 sides, open at +X end
-        translate([A_wall - A_gd, A_wall - A_gd, A_gz])
-            cube([A_ix + A_wall + A_gd + 1, A_iy + 2 * A_gd, A_lid_t + 0.3]);
-        // +X end wall stops at the groove so the lid slides in over it
-        translate([A_wall + A_ix - 1, A_wall, A_gz]) cube([A_wall + 2, A_iy, A_oh]);
-        // click-detent dimple across the end wall top
-        translate([A_ox - A_wall / 2, A_wall + 12, A_gz])
-            rotate([-90, 0, 0]) cylinder(r = 0.7, h = A_iy - 24, $fn = 16);
-    }
-    color(HOLDER) {
-        for (i = [1:3]) translate([A_wall, A_row_y(i) - A_div, 0]) cube([A_ix, A_div, A_floor + A_ih]);
-        translate([A_bin_x - A_div, A_wall, 0]) cube([A_div, A_iy, A_floor + A_ih]);
-        for (i = [0:3], j = [1:3])
-            translate([A_cell_x(j) - A_rib, A_row_y(i), 0]) cube([A_rib, A_cell, A_floor + A_rib_h]);
-        for (i = [0:3]) translate([A_bin_x, A_row_y(i), A_floor - 0.01]) cove_fill(A_bin, A_cell, A_cove);
-    }
-    // paint pads: "put the blue piece on the blue spot"
-    for (i = [0:3], j = [0:3])
-        translate([A_cell_x(j) + A_cell / 2, A_row_y(i) + A_cell / 2, A_floor - 0.01])
-            color_pad(18, 18, COLORS[i]);
-    // pad on the inside of the end wall of each peg bin
-    for (i = [0:3])
-        translate([A_wall + A_ix + 0.01, A_row_y(i) + A_cell / 2, A_floor + A_cove + (A_ih - A_cove) / 2])
-            rotate([0, -90, 0]) color_pad(A_ih - A_cove - 3, A_cell - 8, COLORS[i], 2);
-    // matching pads on the outside of the end wall (visible with lid on)
-    for (i = [0:3])
-        translate([A_ox - 0.01, A_row_y(i) + A_cell / 2, A_gz / 2])
-            rotate([0, 90, 0]) color_pad(A_gz - 6, A_cell - 6, COLORS[i], 2);
+// Upside-down board_4x4 positioned to nest into a holder with ledge at z = ledge_z
+module board_lid(ledge_z) {
+    lid_top_z = ledge_z + board_border_top_z;
+    color(BOARDC)
+        translate([box_wall + box_clr + divider_hw,
+                   box_wall + box_clr + board_w - divider_hw,
+                   lid_top_z])
+        rotate([180, 0, 0])
+            monolithic_board(4);
 }
 
-module A_lid() {
-    lx = A_ix + A_wall + A_gd - 0.3;
-    ly = A_iy + 2 * A_gd - 0.6;
-    t  = A_lid_t;
-    translate([A_wall - A_gd + 0.3, A_wall - A_gd + 0.3, A_gz + 0.15]) {
-        color(LIDC) {
-            cube([lx, ly, t]);
-            // thumb grip ridges at the pull end
-            for (k = [0:4]) translate([lx - 6 - k * 3.2, ly / 2 - 30, t - 0.01]) cube([1.4, 60, 1.0]);
-            // click detent bump (drops into the end-wall dimple)
-            translate([lx - A_wall / 2 - 0.3 + 0.3, 12 + A_gd - 0.3, 0.01])
-                rotate([-90, 0, 0]) difference() {
-                    cylinder(r = 0.55, h = ly - 24 - 2 * A_gd, $fn = 16);
-                    translate([-1, -2, -1]) cube([2, 2, ly]);
-                }
+// Outer shell with recessed top collar for the upside-down board_4x4 + finger-lift notches
+module holder_shell(ledge_z) {
+    total_h = ledge_z + board_border_top_z;
+    color(HOLDER) difference() {
+        rbox(box_ox, box_ox, total_h, 5);
+        // Main interior cavity (clear of the board's raised border)
+        translate([box_wall + ledge_w, box_wall + ledge_w, 2.0])
+            rbox(inner_w, inner_w, total_h, 2.5);
+        // Upper collar pocket for the 145.6 x 145.6 mm board
+        translate([box_wall, box_wall, ledge_z])
+            rbox(box_ix, box_ix, board_border_top_z + 1, 3.0);
+        // Finger-lift thumb scoops on left and right edges of the collar
+        for (x = [0, box_ox]) {
+            translate([x, box_ox / 2, total_h])
+                scale([0.45, 1, 0.55]) sphere(r = 16);
         }
-        // color dots on the lid, one over each row
+    }
+}
+
+// ============================================================================
+// OPTION A: "Standing Slots + Coved Peg Bins" (152.6 x 152.6 x 46.8 mm)
+//   4 color rows: 4 main pieces stand on edge (easy pinch) + coved peg scoop bin
+// ============================================================================
+A_floor   = 2.0;
+A_ledge_z = A_floor + main_w + 0.6;             // 31.0 mm (clears standing mains)
+A_div     = 1.8;
+A_row_w   = (inner_w - 3 * A_div) / 4;          // 32.5 mm per row
+A_slot_w  = main_h + 0.8;                       // 17.6 mm (main on edge)
+A_rib     = 1.4;
+A_slot_l  = main_w + 1.0;                       // 29.4 mm
+A_slot_h  = 21.0;                               // mains stick up 7.4 mm to pinch
+A_bin_x0  = box_wall + ledge_w + 4 * A_slot_w + 3 * A_rib + A_div; // 74.6 + 1.8 = 76.4
+A_bin_l   = inner_w - (4 * A_slot_w + 3 * A_rib + A_div);          // 59.0 mm
+A_cove    = 6.0;
+function A_row_y(i)  = box_wall + ledge_w + i * (A_row_w + A_div);
+function A_slot_x(j) = box_wall + ledge_w + j * (A_slot_w + A_rib);
+
+module A_base() {
+    holder_shell(A_ledge_z);
+    color(HOLDER) {
+        // Row dividers
+        for (i = [1:3])
+            translate([box_wall + ledge_w, A_row_y(i) - A_div, A_floor - 0.01])
+                cube([inner_w, A_div, A_slot_h]);
+        // Divider between main slots and peg scoop bin
+        translate([A_bin_x0 - A_div, box_wall + ledge_w, A_floor - 0.01])
+            cube([A_div, inner_w, A_slot_h]);
+        // Thin ribs between the 4 main slots
+        for (i = [0:3], j = [1:3])
+            translate([A_slot_x(j) - A_rib, A_row_y(i), A_floor - 0.01])
+                cube([A_rib, A_row_w, A_slot_h]);
+        // Coved floor in each peg bin
         for (i = [0:3])
-            translate([14, A_row_y(i) - (A_wall - A_gd + 0.3) + A_cell / 2, t - 0.01])
-                color(COLORS[i]) cylinder(d = 14, h = pad_h);
+            translate([A_bin_x0, A_row_y(i), A_floor - 0.01])
+                cove_fill(A_bin_l, A_row_w, A_cove);
+    }
+    // Color pads in peg bins & along left inner wall
+    for (i = [0:3]) {
+        translate([A_bin_x0 + A_bin_l / 2, A_row_y(i) + A_row_w / 2, A_floor - 0.01])
+            color_pad(36, 16, COLORS[i]);
+        for (j = [0:3])
+            translate([A_slot_x(j) + A_slot_w / 2, A_row_y(i) + A_row_w / 2, A_floor - 0.01])
+                color_pad(10, 18, COLORS[i], 2);
     }
 }
 
 module A_pieces() {
     for (i = [0:3]) {
         for (j = [0:3])
-            translate([A_cell_x(j) + A_cell / 2, A_row_y(i) + A_cell / 2, A_floor + pad_h])
-                main_piece(COLORS[i]);
+            translate([A_slot_x(j) + A_slot_w / 2, A_row_y(i) + A_row_w / 2, A_floor + pad_h + main_w / 2])
+                rotate([0, 90, 0]) translate([0, 0, -main_h / 2]) main_piece(COLORS[i]);
         // 16 loose pegs per bin, two layers
         for (k = [0:1], a = [0:1], b = [0:3]) {
-            px = A_bin + 0; py = A_cell;
-            lx = 1.6 + a * (peg_l + 1.2) + peg_l / 2 + k * 1.5;
-            ly = py / 2 + (b - 1.5) * 6.4 + k * 1.6;
-            d  = min(ly - peg_d / 2, py - ly - peg_d / 2);
-            translate([A_bin_x + lx, A_row_y(i) + ly,
+            lx = 6.0 + a * (peg_l + 3.0) + peg_l / 2 + k * 1.5;
+            ly = A_row_w / 2 + (b - 1.5) * 6.4 + k * 1.2;
+            d  = min(ly - peg_d / 2, A_row_w - ly - peg_d / 2);
+            translate([A_bin_x0 + lx, A_row_y(i) + ly,
                        A_floor + k * (peg_f + 0.2) + cove_lift(max(0, d), A_cove)])
-                rotate([0, 0, (k == 0 ? 0 : 1) * (a == 0 ? 6 : -5) + (b - 1.5) * 1.5])
+                rotate([0, 0, (k == 0 ? 0 : 1) * (a == 0 ? 5 : -4) + (b - 1.5) * 1.5])
                     lying_peg(COLORS[i]);
         }
     }
 }
 
 // ============================================================================
-// OPTION B: "Color Wheel" (dia 169 x 34 mm) with quarter-turn twist lid
+// OPTION B: "Two-Tier Stacker" (152.6 x 152.6 x 45.6 mm)
+//   Bottom tier: 4x4 flat main-piece pockets (16.8 mm tall)
+//   Lift-out upper tray: 4 coved peg bins + dedicated region-bar slots
 // ============================================================================
-B_floor  = 2.0;
-B_Rb     = 48.4;               // central peg bowl radius
-B_R1     = 50.0;               // inner end of main-piece slots
-B_slot_l = main_w + 1.0;       // radial
-B_slot_w = main_h + 0.8;       // tangential (piece stands on edge)
-B_R2     = B_R1 + B_slot_l;
-B_Ro     = B_R2 + 2.6;         // outer wall
-B_H      = B_floor + 22;       // wall top: mains stick up 6.4 mm to pinch
-B_top    = B_floor + 0.4 + main_w + 0.8; // lid ceiling
-B_dishR  = 45;
-B_dishC  = 4 * B_Rb / (3 * PI) * sqrt(2); // wedge centroid distance
-B_fill   = B_floor + 12;
-B_lug_z0 = B_H - 8;
-B_lug_h  = 3.0;
-B_lug_w  = 10;
-B_turn   = 24;                 // lock rotation (deg)
-function B_ang(q, k) = 90 * q + 11.25 + 22.5 * k;
-function B_dish_z(d) = B_floor + B_dishR - sqrt(B_dishR * B_dishR - d * d);
+B_floor   = 2.0;
+B_pocket  = main_w + 1.0;                       // 29.4 mm
+B_pg      = (inner_w - 4 * B_pocket) / 3;       // 5.93 mm gap between pockets
+B_main_h  = main_h + pad_h + 0.6;               // 18.0 mm tier height
+B_tray_z  = B_floor + B_main_h;                 // 20.0 mm tray seat
+B_tray_h  = 9.6;                                // tray height
+B_ledge_z = B_tray_z + B_tray_h + 0.2;          // 29.8 mm
+B_tray_clr = 0.4;
+B_tray_w  = inner_w - 2 * B_tray_clr;           // 134.6 mm
+B_bar_w   = 18.0;                               // right strip for region bars
+B_peg_w   = B_tray_w - B_bar_w - 2.0;           // 114.6 mm for 4 peg bins
+B_bin_w   = (B_peg_w - 3 * 2.0) / 4;            // 27.15 mm per color bin
+B_bin_l   = B_tray_w - 4.0;                     // 130.6 mm long
+function B_cell_xy(idx) = box_wall + ledge_w + idx * (B_pocket + B_pg);
 
 module B_base() {
-    color(HOLDER) difference() {
-        cylinder(r = B_Ro, h = B_H, $fn = 180);
-        translate([0, 0, B_floor]) cylinder(r = B_Rb, h = B_H, $fn = 160);
-        for (q = [0:3], k = [0:3])
-            rotate(B_ang(q, k)) translate([B_R1, -B_slot_w / 2, B_floor]) cube([B_slot_l, B_slot_w, B_H]);
-    }
+    holder_shell(B_ledge_z);
     color(HOLDER) {
-        // color dividers (cross)
-        for (a = [0, 90]) rotate(a) translate([-B_Rb - 0.1, -1, 0]) cube([2 * B_Rb + 0.2, 2, B_H]);
-        // dished floor in each peg wedge: pegs slide to the middle of the wedge
-        difference() {
-            cylinder(r = B_Rb + 0.05, h = B_fill, $fn = 160);
-            for (q = [0:3]) rotate(90 * q + 45)
-                translate([B_dishC, 0, B_floor + B_dishR]) sphere(B_dishR, $fn = 96);
+        // 4x4 grid dividers for flat main pieces (only up to B_tray_z - 0.2)
+        for (i = [1:3]) {
+            translate([box_wall + ledge_w, B_cell_xy(i) - B_pg, B_floor - 0.01])
+                cube([inner_w, B_pg, B_main_h]);
+            translate([B_cell_xy(i) - B_pg, box_wall + ledge_w, B_floor - 0.01])
+                cube([B_pg, inner_w, B_main_h]);
         }
-        // bayonet lugs
-        for (a = [0, 120, 240]) rotate(a)
-            translate([B_Ro - 0.5, -B_lug_w / 2, B_lug_z0]) cube([2.1, B_lug_w, B_lug_h]);
     }
-    // color bands around the outside + spots at the bottom of each peg dish
-    for (q = [0:3]) {
-        rotate(90 * q + 2) color(COLORS[q])
-            rotate_extrude(angle = 86, $fn = 180) translate([B_Ro - 0.01, 3]) square([pad_h, 8]);
-        rotate(90 * q + 45) translate([B_dishC, 0, B_floor - 0.3]) color(COLORS[q]) cylinder(d = 14, h = 0.9);
-    }
+    for (i = [0:3], j = [0:3])
+        translate([B_cell_xy(j) + B_pocket / 2, B_cell_xy(i) + B_pocket / 2, B_floor - 0.01])
+            color_pad(18, 18, COLORS[i]);
 }
 
-module B_lid(turned = 0) {
-    ri = B_Ro + 0.35; ro = ri + 2.4; zb = B_H - 10; t = 2.4;
-    rotate(turned) {
-        color(LIDC) difference() {
-            translate([0, 0, zb]) cylinder(r = ro, h = B_top + t - zb, $fn = 180);
-            translate([0, 0, zb - 1]) cylinder(r = ri, h = B_top - zb + 1, $fn = 180);
-            for (a = [0, 120, 240]) rotate(a) {
-                // vertical entry
-                translate([ri - 1, -(B_lug_w / 2 + 0.5), zb - 1])
-                    cube([5, B_lug_w + 1, B_lug_z0 + B_lug_h + 0.4 - zb + 1]);
-                // horizontal locking run
-                rotate(-9) translate([0, 0, B_lug_z0 - 0.3])
-                    rotate_extrude(angle = B_turn + 18, $fn = 180)
-                        translate([ri - 1, 0]) square([5, B_lug_h + 0.7]);
-            }
+module B_tray() {
+    x0 = box_wall + ledge_w + B_tray_clr;
+    y0 = box_wall + ledge_w + B_tray_clr;
+    translate([x0, y0, B_tray_z]) {
+        color(TRAYC) difference() {
+            rbox(B_tray_w, B_tray_w, B_tray_h, 2.2);
+            // 4 color peg bins
+            for (i = [0:3])
+                translate([2.0 + i * (B_bin_w + 2.0), 2.0, 1.4])
+                    cube([B_bin_w, B_bin_l, B_tray_h]);
+            // Region-bar storage trough on the right
+            translate([2.0 + B_peg_w + 2.0, 2.0, 1.4])
+                cube([B_bar_w - 4.0, B_bin_l, B_tray_h]);
+            // Finger-lift notches on front & back of tray
+            for (y = [0, B_tray_w])
+                translate([B_tray_w / 2, y, B_tray_h])
+                    scale([1, 0.45, 0.6]) sphere(r = 12);
         }
-        color(LIDC) {
-            // underside ribs seal the peg bowl and the 4 wedges
-            difference() {
-                translate([0, 0, B_H + 0.4]) cylinder(r = 49.8, h = B_top - B_H, $fn = 160);
-                translate([0, 0, B_H]) cylinder(r = 48.6, h = B_top, $fn = 160);
-            }
-            for (a = [0, 90]) rotate(a) translate([-48.6, -0.8, B_H + 0.4]) cube([97.2, 1.6, B_top - B_H]);
-            // grip knurls on the skirt
-            for (a = [0:10:359]) rotate(a + 5) translate([ro - 0.4, -0.8, zb + 1]) cube([1.2, 1.6, B_top + t - zb - 2]);
-        }
-        // quarter color pads on the top (match the wedges underneath)
-        for (q = [0:3]) rotate(90 * q + 4) color(COLORS[q]) translate([0, 0, B_top + t - 0.01])
-            rotate_extrude(angle = 82, $fn = 120) translate([20, 0]) square([50, pad_h]);
+        // Color pads at bottom of each peg bin
+        for (i = [0:3])
+            translate([2.0 + i * (B_bin_w + 2.0) + B_bin_w / 2, B_tray_w / 2, 1.39])
+                color_pad(14, 40, COLORS[i]);
     }
 }
 
 module B_pieces() {
-    for (q = [0:3]) {
-        for (k = [0:3])
-            rotate(B_ang(q, k)) translate([B_R1 + B_slot_l / 2, 0, B_floor + 0.4 + main_w / 2])
-                rotate([90, 0, 0]) translate([0, 0, -main_h / 2]) main_piece(COLORS[q]);
-        // 16 loose pegs in the dish
-        rotate(90 * q + 45) translate([B_dishC, 0, 0])
-            for (k = [0:1], a = [0:1], b = [0:3]) {
-                x = (b - 1.5) * 6.5 + k * 2.0;
-                y = (a - 0.5) * (peg_l + 1.0) + k * 2.5;
-                translate([x, y, B_dish_z(sqrt(x * x + y * y)) + k * (peg_f + 0.2)])
-                    rotate([0, 0, 90 + (k == 0 ? 0 : (a == 0 ? 10 : -8))]) lying_peg(COLORS[q]);
-            }
+    // 16 flat main pieces in bottom tier
+    for (i = [0:3], j = [0:3])
+        translate([B_cell_xy(j) + B_pocket / 2, B_cell_xy(i) + B_pocket / 2, B_floor + pad_h])
+            main_piece(COLORS[i]);
+    // 64 pegs in upper tray bins + 4 region bars in the right trough
+    x0 = box_wall + ledge_w + B_tray_clr;
+    y0 = box_wall + ledge_w + B_tray_clr;
+    for (i = [0:3]) {
+        bx = x0 + 2.0 + i * (B_bin_w + 2.0) + B_bin_w / 2;
+        for (k = [0:1], a = [0:3], b = [0:1]) {
+            translate([bx + (b - 0.5) * 7.5 + k * 1.2,
+                       y0 + 18 + a * (peg_l + 6.0) + k * 2.0,
+                       B_tray_z + 1.4 + pad_h + k * (peg_f + 0.2)])
+                rotate([0, 0, 90 + (k == 0 ? 3 : -4)]) lying_peg(COLORS[i]);
+        }
     }
+    // Sample region bars in the right trough
+    translate([x0 + 2.0 + B_peg_w + 2.0 + 4.5, y0 + 28, B_tray_z + 1.4])
+        rotate([0, 0, 90]) region_bar(1, "#264653");
+    translate([x0 + 2.0 + B_peg_w + 2.0 + 10.5, y0 + 55, B_tray_z + 1.4])
+        rotate([0, 0, 90]) region_bar(2, "#264653");
 }
 
 // ============================================================================
-// OPTION C: "Park & Count" (174 x 165 x 23 mm) with snug friction-fit lid
+// OPTION C: "Park & Count" (152.6 x 152.6 x 46.8 mm)
+//   Single-layer: standing main slots + 4x4 upright peg holes + region-bar caddy
 // ============================================================================
-C_deck    = 8.0;            // deck top
-C_pocket  = main_w + 1.0;   // same 0.5 mm clearance as a board cell
-C_pdepth  = 4.5 + pad_h;    // same wall engagement as the board (+ paint pad)
-C_pg      = 2.0;            // gap between main pockets
-C_pitch   = 9.5;            // peg hole pitch
-C_hole    = peg_d + 0.6;
-C_hdepth  = peg_socket_depth; // same 6.2 mm as the board
-C_grid    = 3 * C_pitch + C_hole;
-C_m       = 4.8;            // edge margin (leaves room for colored ring around mains)
-C_gap     = 5.0;            // between pockets and peg grid
-C_row     = 40.0;           // row pitch
-C_main_w  = 4 * C_pocket + 3 * C_pg;
-C_ox      = C_m + C_main_w + C_gap + C_grid + C_m;
-C_oy      = C_m + 3 * C_row + C_grid + C_m;
-C_neck_z  = 3.0;            // lid skirt comes down to here
-C_inset   = 2.2;            // neck inset (lid skirt thickness + clearance)
-C_lid_clr = 0.15;           // per-side friction-fit clearance (snug, no snap)
-C_ceil    = C_deck + 13.0;  // lid ceiling
-C_lid_t   = 2.2;
-function C_row_y(i)    = C_m + (3 - i) * C_row + C_grid / 2; // row center, blue at the back
-function C_pocket_x(j) = C_m + C_pocket / 2 + j * (C_pocket + C_pg);
-C_grid_x0 = C_m + C_main_w + C_gap;
-function C_hole_xy(i, a, b) = [C_grid_x0 + C_hole / 2 + a * C_pitch, C_row_y(i) - C_grid / 2 + C_hole / 2 + b * C_pitch];
+C_floor   = 2.0;
+C_ledge_z = C_floor + main_w + 0.6;             // 31.0 mm
+C_div     = 1.6;
+C_row_w   = (inner_w - 3 * C_div) / 4;          // 32.65 mm per row
+C_slot_w  = main_h + 0.6;                       // 17.4 mm
+C_rib     = 1.3;
+C_slot_h  = 21.0;
+C_slots_w = 4 * C_slot_w + 3 * C_rib;           // 73.5 mm
+C_pitch   = 8.4;                                // 4x4 peg hole pitch (1.52 mm walls)
+C_hole    = peg_d + 0.6;                        // 6.88 mm
+C_grid    = 3 * C_pitch + C_hole;               // 32.08 mm (fits 32.65 mm row!)
+C_hdepth  = peg_socket_depth;                   // 6.2 mm
+C_deck_h  = 11.0;                               // peg deck height (pegs stick up 10.4 mm)
+C_grid_x0 = box_wall + ledge_w + C_slots_w + 2.2;
+C_bar_x0  = C_grid_x0 + C_grid + 2.2;           // ~25.4 mm wide caddy on right
+C_bar_w   = (box_wall + ledge_w + inner_w) - C_bar_x0;
+function C_row_y(i)  = box_wall + ledge_w + i * (C_row_w + C_div);
+function C_slot_x(j) = box_wall + ledge_w + j * (C_slot_w + C_rib);
+function C_hole_xy(i, a, b) = [
+    C_grid_x0 + (C_row_w - C_grid) / 2 + C_hole / 2 + a * C_pitch,
+    C_row_y(i) + (C_row_w - C_grid) / 2 + C_hole / 2 + b * C_pitch
+];
 
 module C_base() {
-    color(HOLDER) difference() {
+    difference() {
         union() {
-            rbox(C_ox, C_oy, C_neck_z, 4);
-            // Neck with slight top bevel for smooth lid seating
-            translate([C_inset, C_inset, 0]) rbox(C_ox - 2 * C_inset, C_oy - 2 * C_inset, C_deck - 0.4, 2);
-            hull() {
-                translate([C_inset, C_inset, C_deck - 0.41])
-                    rbox(C_ox - 2 * C_inset, C_oy - 2 * C_inset, 0.01, 2);
-                translate([C_inset + 0.3, C_inset + 0.3, C_deck - 0.01])
-                    rbox(C_ox - 2 * (C_inset + 0.3), C_oy - 2 * (C_inset + 0.3), 0.01, 1.8);
+            holder_shell(C_ledge_z);
+            color(HOLDER) {
+                // Row dividers
+                for (i = [1:3])
+                    translate([box_wall + ledge_w, C_row_y(i) - C_div, C_floor - 0.01])
+                        cube([C_slots_w + 2.2 + C_grid, C_div, C_slot_h]);
+                // Divider between main slots and peg deck
+                translate([C_grid_x0 - 2.2, box_wall + ledge_w, C_floor - 0.01])
+                    cube([2.2, inner_w, C_slot_h]);
+                // Divider between peg deck and region-bar caddy
+                translate([C_bar_x0 - 2.2, box_wall + ledge_w, C_floor - 0.01])
+                    cube([2.2, inner_w, C_slot_h]);
+                // Thin ribs between the 4 main slots
+                for (i = [0:3], j = [1:3])
+                    translate([C_slot_x(j) - C_rib, C_row_y(i), C_floor - 0.01])
+                        cube([C_rib, C_row_w, C_slot_h]);
+                // Solid peg decks for each color row
+                for (i = [0:3])
+                    translate([C_grid_x0, C_row_y(i), C_floor - 0.01])
+                        cube([C_grid + 0.6, C_row_w, C_deck_h - C_floor]);
+                // Region-bar caddy divider ribs (3 lanes)
+                for (k = [1:2])
+                    translate([C_bar_x0 + k * (C_bar_w / 3) - 0.7, box_wall + ledge_w, C_floor - 0.01])
+                        cube([1.4, inner_w, 12.0]);
             }
         }
-        // main pockets
-        for (i = [0:3], j = [0:3])
-            translate([C_pocket_x(j), C_row_y(i), C_deck - C_pdepth])
-                linear_extrude(C_pdepth + 1) rounded_rect_2d(C_pocket, C_pocket, 2.6);
-        // peg holes with lead-in chamfer
-        for (i = [0:3], a = [0:3], b = [0:3]) translate(concat(C_hole_xy(i, a, b), [0])) {
-            translate([0, 0, C_deck - C_hdepth]) cylinder(d = C_hole, h = C_hdepth + 1);
-            translate([0, 0, C_deck - 0.8]) cylinder(d1 = C_hole, d2 = C_hole + 1.8, h = 0.81);
-        }
-        // thumb scoop under the lid edge (front)
-        intersection() {
-            translate([C_ox / 2, 0, C_neck_z]) scale([1, 0.45, 0.4]) sphere(14);
-            translate([0, -1, -1]) cube([C_ox, C_oy, C_neck_z + 1]);
-        }
+        // Drill 4x4 peg holes in each color deck
+        for (i = [0:3], a = [0:3], b = [0:3])
+            translate(concat(C_hole_xy(i, a, b), [0])) {
+                translate([0, 0, C_deck_h - C_hdepth])
+                    cylinder(d = C_hole, h = C_hdepth + 1);
+                translate([0, 0, C_deck_h - 0.8])
+                    cylinder(d1 = C_hole, d2 = C_hole + 1.6, h = 0.81);
+            }
     }
+    // Color pads in main slots & colored rim around each peg deck
     for (i = [0:3]) {
-        for (j = [0:3]) translate([C_pocket_x(j), C_row_y(i), C_deck - C_pdepth - 0.01])
-            color_pad(18, 18, COLORS[i]);
-        // colored "home" frame around each main-piece row
-        translate([C_m + C_main_w / 2, C_row_y(i), C_deck - 0.01]) color(COLORS[i])
-            linear_extrude(pad_h) difference() {
-                rounded_rect_2d(C_main_w + 3.6, C_pocket + 3.6, 3);
-                rounded_rect_2d(C_main_w + 1.2, C_pocket + 1.2, 2);
-            }
-        // colored "home" frame around each peg grid
-        translate([C_grid_x0 + C_grid / 2, C_row_y(i), C_deck - 0.01]) color(COLORS[i])
-            linear_extrude(pad_h) difference() {
-                rounded_rect_2d(C_grid + 3.6, C_grid + 3.6, 3);
-                rounded_rect_2d(C_grid + 1.2, C_grid + 1.2, 2);
+        for (j = [0:3])
+            translate([C_slot_x(j) + C_slot_w / 2, C_row_y(i) + C_row_w / 2, C_floor - 0.01])
+                color_pad(10, 18, COLORS[i], 2);
+        translate([C_grid_x0 + C_row_w / 2, C_row_y(i) + C_row_w / 2, C_deck_h - 0.01])
+            color(COLORS[i]) linear_extrude(pad_h) difference() {
+                rounded_rect_2d(C_grid + 0.2, C_grid + 0.2, 2);
+                rounded_rect_2d(C_grid - 1.6, C_grid - 1.6, 1.5);
             }
     }
 }
 
-module C_lid() {
-    zb = C_neck_z + 0.2;
-    color(LIDC) difference() {
-        translate([0, 0, zb]) rbox(C_ox, C_oy, C_ceil + C_lid_t - zb, 4);
-        translate([C_inset - C_lid_clr, C_inset - C_lid_clr, zb - 1])
-            rbox(C_ox - 2 * (C_inset - C_lid_clr), C_oy - 2 * (C_inset - C_lid_clr), C_ceil - zb + 1, 2.2);
-    }
-    for (i = [0:3]) translate([C_ox / 2, C_row_y(i), C_ceil + C_lid_t - 0.01])
-        color_pad(C_ox - 30, 10, COLORS[i], 5);
-}
-
-module C_pieces(missing = true) {
+module C_pieces() {
     for (i = [0:3]) {
-        for (j = [0:3]) if (!(missing && i == 3 && j == 3))
-            translate([C_pocket_x(j), C_row_y(i), C_deck - C_pdepth + pad_h]) main_piece(COLORS[i]);
-        for (a = [0:3], b = [0:3]) if (!(missing && i == 3 && (a + b * 4) >= 11))
-            translate(concat(C_hole_xy(i, a, b), [C_deck - C_hdepth])) pencil_peg(COLORS[i]);
+        for (j = [0:3])
+            translate([C_slot_x(j) + C_slot_w / 2, C_row_y(i) + C_row_w / 2, C_floor + pad_h + main_w / 2])
+                rotate([0, 90, 0]) translate([0, 0, -main_h / 2]) main_piece(COLORS[i]);
+        for (a = [0:3], b = [0:3])
+            translate(concat(C_hole_xy(i, a, b), [C_deck_h - C_hdepth]))
+                pencil_peg(COLORS[i]);
     }
-    // the "missing" green pieces waiting on the table in front of the case
-    if (missing) {
-        translate([C_ox - 30, -28, 0]) main_piece(COLORS[3]);
-        for (k = [0:4]) translate([C_ox - 75 + k * 9, -22 - (k % 2) * 8, 0])
-            rotate([0, 0, 20 * k]) lying_peg(COLORS[3]);
-    }
+    // Sample region bars in the right caddy
+    translate([C_bar_x0 + C_bar_w / 6, box_wall + ledge_w + 26, C_floor])
+        rotate([0, 0, 90]) region_bar(1, "#264653");
+    translate([C_bar_x0 + C_bar_w / 2, box_wall + ledge_w + 46, C_floor])
+        rotate([0, 0, 90]) region_bar(2, "#264653");
+    translate([C_bar_x0 + 5 * C_bar_w / 6, box_wall + ledge_w + 66, C_floor])
+        rotate([0, 0, 90]) region_bar(3, "#264653");
 }
 
 // ============================================================================
@@ -379,18 +363,19 @@ module C_pieces(missing = true) {
 module show(opt, prt) {
     if (opt == "A") {
         if (prt == "base") A_base();
-        else if (prt == "lid") translate([0, 0, -(A_gz + 0.15)]) A_lid();
-        else if (prt == "closed") { A_base(); A_lid(); }
+        else if (prt == "lid") board_lid(A_ledge_z);
+        else if (prt == "closed") { A_base(); board_lid(A_ledge_z); }
         else { A_base(); A_pieces(); }
     } else if (opt == "B") {
         if (prt == "base") B_base();
-        else if (prt == "lid") translate([0, 0, B_top + 2.4]) rotate([180, 0, 0]) B_lid();
-        else if (prt == "closed") { B_base(); B_lid(-B_turn); }
-        else { B_base(); B_pieces(); }
+        else if (prt == "tray") translate([0, 0, -B_tray_z]) B_tray();
+        else if (prt == "lid") board_lid(B_ledge_z);
+        else if (prt == "closed") { B_base(); B_tray(); board_lid(B_ledge_z); }
+        else { B_base(); B_tray(); B_pieces(); }
     } else if (opt == "C") {
         if (prt == "base") C_base();
-        else if (prt == "lid") translate([0, 0, C_ceil + C_lid_t]) rotate([180, 0, 0]) C_lid();
-        else if (prt == "closed") { C_base(); C_lid(); }
+        else if (prt == "lid") board_lid(C_ledge_z);
+        else if (prt == "closed") { C_base(); board_lid(C_ledge_z); }
         else { C_base(); C_pieces(); }
     }
 }
