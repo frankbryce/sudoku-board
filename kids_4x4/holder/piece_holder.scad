@@ -288,16 +288,19 @@ module A_pieces() {
 // ============================================================================
 B_seat       = 33.0;                   // board border seat Z (fits 2-stacked flat main pieces: 32.0 mm)
 B_div_h      = B_seat + H_seal_up;     // 35.8 mm divider top
-B_cross_w    = 9.8;                    // central cross channel width (holds 2 parallel rows of bars, 3 layers deep)
+B_cross_x_w  = 9.8;                    // Y-arm width (holds 1x bars; preserves 29.0 mm main-piece wells)
+B_cross_y_w  = 18.0;                   // long center X-corridor width (finger-wide! holds 2x & 3x bars)
 B_div_t      = 1.6;
-B_q_min      = B_cross_w / 2 + B_div_t;// 6.50 mm from center axes
-B_q_span     = H_in_hw - B_q_min;      // 59.40 x 59.40 mm clear inside each quadrant
+B_qx_min     = B_cross_x_w / 2 + B_div_t; // 6.50 mm from Y-axis
+B_qy_min     = B_cross_y_w / 2 + B_div_t; // 10.60 mm from X-axis
+B_q_span     = H_in_hw - B_qx_min;     // 59.40 mm clear X-span inside each quadrant
+B_qy_span    = H_in_hw - B_qy_min;     // 55.30 mm clear Y-span inside each quadrant
 B_well_rib   = 1.4;                    // divider rib between the 2 flat main-piece stacks
 B_well_w     = (B_q_span - B_well_rib) / 2; // 29.00 x 29.00 mm flat main-piece well (28.4 mm tile + 0.6 mm clr)
-B_bin_dy     = B_q_span - B_well_w - B_div_t; // 28.80 mm wide peg bin along Y
-B_peg_floor  = 8.0;                    // peg floor at z = H_floor + 8.0 = 10.0 mm (exposes bottom tile's crown!)
-B_cove_r     = 5.0;
-B_finger_w   = 21.0;                   // 21.0 mm wide through-wall thumb & index-finger pinch windows!
+B_bin_dy     = B_qy_span - B_well_w - B_div_t; // 24.70 mm wide peg bin along Y
+B_peg_floor  = 8.0;                    // peg floor at z = H_floor + 8.0 = 10.0 mm
+B_cove_r     = 4.5;
+B_finger_w   = 21.0;                   // 21.0 mm wide through-wall thumb pinch windows
 
 // Quadrant signs: 0=TL (Blue), 1=TR (Red), 2=BL (Tan), 3=BR (Green)
 B_qx = [-1,  1, -1,  1];
@@ -309,26 +312,26 @@ module B_base() {
             union() {
                 holder_outer_shell(B_seat);
 
-                // Central cross walls forming the 4 quadrants + central bar vault
+                // Central cross walls forming the 4 quadrants + finger-wide central bar vault
                 for (s = [-1, 1]) {
-                    cbox(s * (B_cross_w / 2 + B_div_t / 2) - B_div_t / 2, -H_in_hw, H_floor - eps,
+                    cbox(s * (B_cross_x_w / 2 + B_div_t / 2) - B_div_t / 2, -H_in_hw, H_floor - eps,
                          B_div_t, 2 * H_in_hw, B_div_h - H_floor);
-                    cbox(-H_in_hw, s * (B_cross_w / 2 + B_div_t / 2) - B_div_t / 2, H_floor - eps,
+                    cbox(-H_in_hw, s * (B_cross_y_w / 2 + B_div_t / 2) - B_div_t / 2, H_floor - eps,
                          2 * H_in_hw, B_div_t, B_div_h - H_floor);
-                    // Low stop-tabs at y = ±(B_cross_w/2 + B_div_t) in the Y-arms so 1x bars in the
-                    // North & South arms never slide into the full-length X-corridor (where 2x & 3x bars sit)
-                    cbox(-B_cross_w / 2, s * (B_cross_w / 2 + 0.4) - 0.6, H_floor - eps,
-                         B_cross_w, 1.2, 22.0);
+                    // Low stop-tabs at y = ±(B_cross_y_w/2 + 0.4) in the Y-arms so 1x bars in the
+                    // North & South arms never slide into the 18 mm X-corridor
+                    cbox(-B_cross_x_w / 2, s * (B_cross_y_w / 2 + 0.4) - 0.6, H_floor - eps,
+                         B_cross_x_w, 1.2, 22.0);
                 }
 
                 // Inside each of the 4 quadrants:
                 for (q = [0 : 3]) {
                     sx = B_qx[q];
                     sy = B_qy[q];
-                    x0 = sx > 0 ? B_q_min : -H_in_hw;
+                    x0 = sx > 0 ? B_qx_min : -H_in_hw;
                     y_well0 = sy > 0 ? (H_in_hw - B_well_w) : -H_in_hw;
                     y_div0  = sy > 0 ? (y_well0 - B_div_t)  : (y_well0 + B_well_w);
-                    y_bin0  = sy > 0 ? B_q_min              : (y_div0 + B_div_t);
+                    y_bin0  = sy > 0 ? B_qy_min             : (y_div0 + B_div_t);
 
                     // Divider between the 2 flat main wells and the peg scoop dish (stops at B_seat)
                     cbox(x0, y_div0, H_floor - eps, B_q_span, B_div_t, B_seat - H_floor);
@@ -342,26 +345,21 @@ module B_base() {
                 }
             }
 
-            // Central X-corridor clear-through cut (keeps the full 131.8 mm X-corridor open
-            // for 3x [104.5 mm] and 2x [69.5 mm] region bars!)
-            cbox(-H_in_hw - 1, -B_cross_w / 2, H_floor, 2 * H_in_hw + 2, B_cross_w, B_div_h);
+            // Finger-wide (18 mm) Central X-corridor clear-through cut
+            // (holds 3x [104.5 mm] and 2x [69.5 mm] region bars with room for fingers!)
+            cbox(-H_in_hw - 1, -B_cross_y_w / 2, H_floor, 2 * H_in_hw + 2, B_cross_y_w, B_div_h);
 
-            // Y-arm clear-through cuts in North & South arms (each 59.4 mm long -> fits 1x [34.5 mm] bars!)
+            // Y-arm clear-through cuts in North & South arms (each 55.3 mm long -> fits 1x [34.5 mm] bars!)
             for (sy = [-1, 1]) {
-                y_arm0 = sy > 0 ? (B_cross_w / 2 + 1.2) : -H_in_hw;
-                cbox(-B_cross_w / 2, y_arm0, H_floor, B_cross_w, H_in_hw - B_cross_w / 2 - 1.2, B_div_h);
+                y_arm0 = sy > 0 ? (B_cross_y_w / 2 + 1.2) : -H_in_hw;
+                cbox(-B_cross_x_w / 2, y_arm0, H_floor, B_cross_x_w, H_in_hw - B_cross_y_w / 2 - 1.2, B_div_h);
             }
 
-            // Wide 21 mm Through-Wall Thumb & Index-Finger Pinch Windows on every main-piece stack:
-            // - Outer North/South wall has a 21 mm wide U-window down to z = H_floor + 7.5 mm (exposing
-            //   both the top and bottom main pieces from the outside of the box for your thumb!)
-            // - Inner peg-bin divider wall has a matching 21 mm wide U-window down to the peg-dish floor
-            //   (z = H_floor + B_peg_floor = 10.0 mm) so your index finger reaches in from the wide peg
-            //   dish to pinch either tile directly!
+            // Wide 21 mm Through-Wall Thumb Pinch Windows on every main-piece stack:
             for (q = [0 : 3]) {
                 sx = B_qx[q];
                 sy = B_qy[q];
-                x0 = sx > 0 ? B_q_min : -H_in_hw;
+                x0 = sx > 0 ? B_qx_min : -H_in_hw;
                 x_rib = x0 + B_well_w + B_well_rib / 2;
                 y_well_c = sy > 0 ? (H_in_hw - B_well_w / 2) : (-H_in_hw + B_well_w / 2);
                 y_div_c  = sy > 0 ? (H_in_hw - B_well_w - B_div_t / 2) : (-H_in_hw + B_well_w + B_div_t / 2);
@@ -396,9 +394,9 @@ module B_base() {
     for (q = [0 : 3]) {
         sx = B_qx[q];
         sy = B_qy[q];
-        x0 = sx > 0 ? B_q_min : -H_in_hw;
+        x0 = sx > 0 ? B_qx_min : -H_in_hw;
         y_well_c = sy > 0 ? (H_in_hw - B_well_w / 2) : (-H_in_hw + B_well_w / 2);
-        y_bin0   = sy > 0 ? B_q_min : (-H_in_hw + B_well_w + B_div_t);
+        y_bin0   = sy > 0 ? B_qy_min : (-H_in_hw + B_well_w + B_div_t);
 
         for (w = [0, 1]) {
             xw = x0 + B_well_w / 2 + w * (B_well_w + B_well_rib);
@@ -406,7 +404,7 @@ module B_base() {
                 color_pad(18, 18, COLORS[q], 3);
         }
         translate([x0 + B_q_span / 2, y_bin0 + B_bin_dy / 2, H_floor + B_peg_floor - eps])
-            color_pad(B_q_span - 18, B_bin_dy - 14, COLORS[q], 3);
+            color_pad(B_q_span - 18, B_bin_dy - 12, COLORS[q], 3);
     }
 }
 
@@ -414,9 +412,9 @@ module B_pieces() {
     for (q = [0 : 3]) {
         sx = B_qx[q];
         sy = B_qy[q];
-        x0 = sx > 0 ? B_q_min : -H_in_hw;
+        x0 = sx > 0 ? B_qx_min : -H_in_hw;
         y_well_c = sy > 0 ? (H_in_hw - B_well_w / 2) : (-H_in_hw + B_well_w / 2);
-        y_bin0   = sy > 0 ? B_q_min : (-H_in_hw + B_well_w + B_div_t);
+        y_bin0   = sy > 0 ? B_qy_min : (-H_in_hw + B_well_w + B_div_t);
 
         // 4 flat main pieces per quadrant (2 side-by-side stacks of 2)
         for (w = [0, 1], layer = [0, 1]) {
@@ -425,32 +423,32 @@ module B_pieces() {
                 main_piece(COLORS[q]);
         }
 
-        // 16 loose pegs in each quadrant's coved scoop dish
-        for (k = [0 : 1], a = [0 : 1], b = [0 : 3]) {
-            lx = 10.5 + a * (peg_l + 4.5) + peg_l / 2 + k * 1.5;
-            ly = B_bin_dy / 2 + (b - 1.5) * 6.0;
+        // 16 loose pegs in each quadrant's coved scoop dish (3 rows x 2 cols, 3 layers)
+        for (k = [0 : 2], a = [0 : 1], b = [0 : 2]) if (!(k == 2 && b == 2)) {
+            lx = 10.5 + a * (peg_l + 4.5) + peg_l / 2 + k * 1.2;
+            ly = B_bin_dy / 2 + (b - 1.0) * 6.4;
             d  = min(ly - peg_d / 2, B_bin_dy - ly - peg_d / 2);
             translate([x0 + lx, y_bin0 + ly,
                        H_floor + B_peg_floor + k * (peg_f + 0.2) + cove_lift(max(0, d), B_cove_r)])
-                rotate([0, 0, (k == 0 ? 1 : -1) * 5])
+                rotate([0, 0, (k % 2 == 0 ? 1 : -1) * 4])
                     lying_peg(COLORS[q]);
         }
     }
 
     // Central Cross Vault loaded with ALL 3 Region Border Lengths side-by-side:
-    // 1) Long 3x region bars (104.5 mm, navy-slate) in the South lane of the full-length X-corridor
+    // 1) Long 3x region bars (104.5 mm, navy-slate) in the South lane of the 18 mm X-corridor
     for (layer = [0 : 2]) {
-        translate([0, -2.3, H_floor + layer * 10.5])
+        translate([0, -4.5, H_floor + layer * 10.5])
             region_bar(3, BAR_3C);
     }
-    // 2) Medium 2x region bars (69.5 mm, steel-grey) in the North lane of the full-length X-corridor
+    // 2) Medium 2x region bars (69.5 mm, steel-grey) in the North lane of the 18 mm X-corridor
     for (layer = [0 : 2]) {
-        translate([0, +2.3, H_floor + layer * 10.5])
+        translate([0, +4.5, H_floor + layer * 10.5])
             region_bar(2, BAR_2C);
     }
     // 3) Short 1x jigsaw bars (34.5 mm, charcoal) in the North and South Y-arms (6 per arm = 12 total)
     for (sy = [-1, 1], col = [-1, 1], layer = [0 : 2]) {
-        translate([col * 2.3, sy * 36.0, H_floor + layer * 10.5])
+        translate([col * 2.3, sy * 38.0, H_floor + layer * 10.5])
             rotate([0, 0, 90])
                 region_bar(1, BAR_C);
     }
