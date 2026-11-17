@@ -379,19 +379,13 @@ module B_base() {
                     xw = x0 + B_well_w / 2 + w * (B_well_w + B_well_rib);
 
                     // 1) Through-wall THUMB WINDOW in the outer North/South wall (down to z = H_floor + 7.5 mm)
+                    //    (Peg-bin divider wall stays 100% solid so all 4 sides of each peg dish keep pegs contained!)
                     hull() {
                         translate([xw, y_out_c, H_floor + 7.5 + B_finger_w / 2])
                             rotate([90, 0, 0]) cylinder(d = B_finger_w, h = (H_out_hw - H_in_hw) + 6, center = true, $fn = 36);
                         translate([xw, y_out_c, B_div_h + 12])
                             rotate([90, 0, 0]) cylinder(d = B_finger_w, h = (H_out_hw - H_in_hw) + 6, center = true, $fn = 36);
                     }
-
-                    // 2) Matching INDEX-FINGER WINDOW through the peg-bin divider wall & cove
-                    //    (flat bottom at z = H_floor + B_peg_floor = 10.0 mm, flush with the peg-dish floor!)
-                    z_cut0 = H_floor + B_peg_floor;
-                    translate([xw, y_div_c - sy * 2.5, z_cut0])
-                        linear_extrude(height = B_div_h - z_cut0 + 2)
-                            rounded_rect_2d(B_finger_w, B_div_t + 8.0, 2.5);
                 }
             }
             board_grid_bar_clearance_cuts(B_seat);
