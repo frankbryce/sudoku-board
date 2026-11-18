@@ -33,8 +33,8 @@ center_mark_mode = "2x2"; // ["2x2", "3x2"]
 /* [Board & Grid Dimensions — Compact 2/3 Scale (~35 mm Pitch)] */
 // Center-to-center cell pitch (35 mm -> ~315 mm 9x9 board, ~2/3 of 50 mm original)
 cell_pitch = 35.0;
-// Base floor thickness (8.0 mm gives 8x bending stiffness & carries 6.2 mm deep anti-tip sockets!)
-base_thickness = 8.0;
+// Base floor thickness (9.0 mm gives high stiffness & carries 7.4 mm deep anti-tip sockets!)
+base_thickness = 9.0;
 // Height of cell divider walls above the cell floor (holds 3.8 mm tile plinth securely)
 wall_height = 4.5;
 
@@ -58,12 +58,14 @@ main_tile_height = 16.0;
 // Depth of framed central candidate zone recess on cell floor
 center_zone_recess_depth = 0.5;
 
-// Across-flats width of non-rolling octagonal pencil-mark peg
-peg_flat_diameter = 5.8;
-// Total height of pencil-mark peg (6.2 mm buried in socket + 9.8 mm proud grip)
-peg_height = 16.0;
-// Depth of corner pencil-mark sockets into the 8.0 mm base (leaves 1.8 mm = 9 solid layers underneath)
-peg_socket_depth = 6.2;
+// Number of facets on non-rolling circularish pencil-mark peg (12-gon: non-rolling + minimal play in figure-8 overlap)
+peg_sides = 12;
+// Across-flats width of non-rolling dodecagonal pencil-mark peg (+34% wider, +75% cross-section area vs 5.8 mm)
+peg_flat_diameter = 7.8;
+// Total height of pencil-mark peg (7.4 mm buried in socket + 10.6 mm proud grip, 6.1 mm above cell walls)
+peg_height = 18.0;
+// Depth of corner pencil-mark sockets into the 9.0 mm base (leaves 1.6 mm = 8 solid layers underneath)
+peg_socket_depth = 7.4;
 
 /* [FDM Clearances & Tolerances (mm)] */
 // Per-side XY clearance on Montessori spring-slotted jigsaw tabs (easy kid pull-apart)
@@ -72,8 +74,8 @@ dovetail_clearance = 0.25;
 region_bar_clearance = 0.18;
 // Per-side clearance of main tile's self-centering base plinth inside cell walls
 tile_wall_clearance = 0.50;
-// Radial clearance around octagonal peg corners inside round socket (loose gravity lift, <5.6 deg tilt)
-peg_radial_clearance = 0.25;
+// Radial clearance around peg corners inside round socket (snug gravity-drop slip fit, <2.7 deg tilt)
+peg_radial_clearance = 0.14;
 // First-layer elephant-foot bevel inset on z=0 mating edges
 elephant_foot_bevel = 0.40;
 
@@ -97,17 +99,18 @@ tile_base_w = cell_open_w - 2 * tile_wall_clearance; // 28.4 mm default
 tile_crown_w = min(main_tile_crown_width, tile_base_w); // 25.8 mm default
 tile_waist_w = tile_crown_w - 4.4; // 21.4 mm -> 2.2 mm 45-deg finger-hook lip per side
 
-// Circumscribed diameter across corners of an octagon with given flat-to-flat width
+// Circumscribed diameter across corners of a regular peg_sides-gon with given flat-to-flat width
 peg_eff_flat_d = (center_mark_mode == "3x2") ? min(peg_flat_diameter, 5.4) : peg_flat_diameter;
-peg_circum_d = peg_eff_flat_d / cos(22.5);
+peg_circum_d = peg_eff_flat_d / cos(180 / peg_sides);
 peg_socket_d = peg_circum_d + 2 * peg_radial_clearance;
 
 // Framed central CTC candidate zone dimensions
-center_zone_x = (center_mark_mode == "3x2") ? 21.6 : 16.8;
-center_zone_y = (center_mark_mode == "3x2") ? 15.6 : 16.8;
+center_zone_x = (center_mark_mode == "3x2") ? 21.6 : 19.0;
+center_zone_y = (center_mark_mode == "3x2") ? 15.6 : 19.0;
+center_zone_r = (center_mark_mode == "3x2") ? 3.5 : 7.0;
 
-// Corner pencil-mark offset from cell center
-corner_mark_offset = cell_open_w / 2 - peg_socket_d / 2 - 1.15; // ~10.16 mm
+// Corner pencil-mark offset from cell center (slight 0.83 mm figure-8 overlap with 2x2 center holes)
+corner_mark_offset = cell_open_w / 2 - peg_socket_d / 2 - 0.45; // ~10.07 mm in 2x2 mode
 
 // Montessori Vaulted Spring-Clip Jigsaw Dovetail parameters
 dovetail_depth = 4.6;
@@ -142,11 +145,17 @@ module rounded_rect_2d(w, h, r) {
         square([w - 2 * cr, h - 2 * cr], center = true);
 }
 
-// Regular octagon 2D with specified flat-to-flat width
+// Regular peg_sides-gon (12-sided dodecagon) 2D with specified flat-to-flat width
+module peg_profile_2d(flat_d) {
+    half_step = 180 / peg_sides;
+    circum_r = (flat_d / 2) / cos(half_step);
+    rotate([0, 0, half_step])
+        circle(r = circum_r, $fn = peg_sides);
+}
+
+// Backwards-compatible alias for downstream showcase files
 module octagon_2d(flat_d) {
-    circum_r = (flat_d / 2) / cos(22.5);
-    rotate([0, 0, 22.5])
-        circle(r = circum_r, $fn = 8);
+    peg_profile_2d(flat_d);
 }
 
 // Trapezoidal dovetail 2D profile extending from y = -overlap to y = depth
@@ -256,27 +265,29 @@ module female_dovetail_cut_from_north() {
     }
 }
 
-// Deep blind cylindrical peg socket with 0.60 mm 45-degree funnel entry chamfer
-// Leaves >4.5 mm of straight vertical bore wall so sqrt(D^2 + L^2) > D_socket (non-tipping!)
+// Deep blind cylindrical peg socket with compact 0.35 mm 45-degree funnel entry chamfer
+// Maximizes straight vertical bore engagement (6.2-6.7 mm) for crisp, zero-wiggle seating!
 module peg_socket_cut(z_top, floor_z) {
-    funnel = 0.60;
+    funnel = 0.35;
     translate([0, 0, floor_z])
         cylinder(d = peg_socket_d, h = (z_top - floor_z) + eps);
     translate([0, 0, z_top - funnel])
         cylinder(d1 = peg_socket_d, d2 = peg_socket_d + 2 * funnel, h = funnel + eps);
 }
 
-// Subtle engraved L-chevron around each corner socket (CTC Snyder visual cue)
+// Subtle engraved L-chevron around each corner socket (only when floor margin >= 0.8 mm)
 module corner_chevron_cut(sx, sy, z_top) {
-    arm = 3.6;
-    th = 0.9;
-    depth = 0.35;
-    r_out = peg_socket_d / 2 + 0.7;
-    translate([sx * (corner_mark_offset + r_out), sy * (corner_mark_offset + r_out), z_top - depth]) {
-        translate([sx > 0 ? -arm : 0, sy > 0 ? -th : 0, 0])
-            cube([arm, th, depth + eps]);
-        translate([sx > 0 ? -th : 0, sy > 0 ? -arm : 0, 0])
-            cube([th, arm, depth + eps]);
+    if ((cell_open_w / 2 - (corner_mark_offset + peg_socket_d / 2)) >= 0.8) {
+        arm = 3.6;
+        th = 0.9;
+        depth = 0.35;
+        r_out = peg_socket_d / 2 + 0.7;
+        translate([sx * (corner_mark_offset + r_out), sy * (corner_mark_offset + r_out), z_top - depth]) {
+            translate([sx > 0 ? -arm : 0, sy > 0 ? -th : 0, 0])
+                cube([arm, th, depth + eps]);
+            translate([sx > 0 ? -th : 0, sy > 0 ? -arm : 0, 0])
+                cube([th, arm, depth + eps]);
+        }
     }
 }
 
@@ -291,13 +302,13 @@ function central_mark_coords() =
         [-6.8,  3.7], [0,  3.7], [6.8,  3.7]
       ]
     : [
-        [-4.4, -4.4], [ 4.4, -4.4],
-        [-4.4,  4.4], [ 4.4,  4.4]
+        [-4.75, -4.75], [ 4.75, -4.75],
+        [-4.75,  4.75], [ 4.75,  4.75]
       ];
 
 module cell_interior_cuts(cx, cy) {
-    zone_floor_z = base_thickness - center_zone_recess_depth; // 7.5 mm
-    peg_floor_z = base_thickness - peg_socket_depth;          // 1.8 mm solid bottom!
+    zone_floor_z = base_thickness - center_zone_recess_depth; // 8.5 mm
+    peg_floor_z = base_thickness - peg_socket_depth;          // 1.6 mm solid bottom!
 
     translate([cx, cy, 0]) {
         // 1. Carve open cell interior down to base_thickness (with 0.5 mm wall top bevel)
@@ -313,23 +324,23 @@ module cell_interior_cuts(cx, cy) {
                     rounded_rect_2d(cell_open_w + 1.0, cell_open_w + 1.0, 3.1);
         }
 
-        // 2. Framed Central CTC Candidate Zone
+        // 2. Framed Central CTC Candidate Zone (squircle edge meets the corner/center overlap cusp cleanly)
         hull() {
             translate([0, 0, zone_floor_z])
                 linear_extrude(height = center_zone_recess_depth - 0.25)
-                    rounded_rect_2d(center_zone_x, center_zone_y, 3.5);
+                    rounded_rect_2d(center_zone_x, center_zone_y, center_zone_r);
             translate([0, 0, base_thickness + eps])
                 linear_extrude(height = eps)
-                    rounded_rect_2d(center_zone_x + 0.5, center_zone_y + 0.5, 3.8);
+                    rounded_rect_2d(center_zone_x + 0.5, center_zone_y + 0.5, center_zone_r + 0.3);
         }
 
-        // 3. Deep Central Pencil-Mark Sockets (5.7 mm deep below zone floor)
+        // 3. Deep Central Pencil-Mark Sockets (6.9 mm deep below zone floor)
         for (pt = central_mark_coords()) {
             translate([pt[0], pt[1], 0])
                 peg_socket_cut(z_top = zone_floor_z, floor_z = peg_floor_z);
         }
 
-        // 4. Deep Corner Pencil-Mark Sockets (6.2 mm deep below cell floor) + Snyder Ticks
+        // 4. Deep Corner Pencil-Mark Sockets (7.4 mm deep below cell floor; slight 0.83 mm figure-8 overlap with center)
         for (sx = [-1, 1], sy = [-1, 1]) {
             translate([sx * corner_mark_offset, sy * corner_mark_offset, 0])
                 peg_socket_cut(z_top = base_thickness, floor_z = peg_floor_z);
@@ -877,7 +888,7 @@ module main_piece(paint_color = undef, label = "") {
 }
 
 // ============================================================================
-// Universal Non-Rolling Anti-Tip Pencil-Mark Peg (16.0 mm tall; 5.7-6.2 mm seated)
+// Universal Non-Rolling Anti-Tip Pencil-Mark Peg (18.0 mm tall; 6.9-7.4 mm seated)
 // ============================================================================
 
 module pencil_peg(paint_color = undef, label = "") {
@@ -886,28 +897,29 @@ module pencil_peg(paint_color = undef, label = "") {
     label_h = 0.60;
 
     // Deep circumferential rubber-band retention notch in the upper finger-grip zone
-    // (0.95 mm radial depth x 2.60 mm tall, well above the 6.2 mm board socket!)
-    rb_z_bot = peg_height - paint_cap_h - 3.70; // 11.50 mm
+    // (0.95 mm radial depth x 2.60 mm tall, well above the 7.4 mm board socket!)
+    rb_z_bot = peg_height - paint_cap_h - 3.70; // 13.50 mm
     rb_chamf = 0.75;
     rb_flat_h = 1.10;
-    rb_inner_d = peg_eff_flat_d - 1.90;         // 3.90 mm across flats at root
+    rb_inner_d = peg_eff_flat_d - 1.90;         // 5.90 mm across flats at root
 
     difference() {
         union() {
-            // Lower white octagonal shaft up to (peg_height - paint_cap_h)
+            // Lower white 12-sided shaft up to (peg_height - paint_cap_h)
+            // Compact 0.40 mm bottom chamfer maximizes straight-wall socket engagement!
             color(paint_color == undef ? undef : "#F5F5F2")
                 hull() {
                     linear_extrude(height = eps)
-                        octagon_2d(peg_eff_flat_d - 0.9);
-                    translate([0, 0, 0.55])
-                        linear_extrude(height = peg_height - paint_cap_h - 0.55)
-                            octagon_2d(peg_eff_flat_d);
+                        peg_profile_2d(peg_eff_flat_d - 0.7);
+                    translate([0, 0, 0.40])
+                        linear_extrude(height = peg_height - paint_cap_h - 0.40)
+                            peg_profile_2d(peg_eff_flat_d);
                 }
-            // Raised flat octagonal paint cap on top (0.8 mm proud above white shaft)
+            // Raised flat 12-sided paint cap on top (0.8 mm proud above white shaft)
             color(paint_color)
                 translate([0, 0, peg_height - paint_cap_h - eps])
                     linear_extrude(height = paint_cap_h + eps)
-                        octagon_2d(cap_flat_d);
+                        peg_profile_2d(cap_flat_d);
             // Optional raised character on top of the paint cap
             color(paint_color)
                 translate([0, 0, peg_height - eps])
@@ -922,23 +934,23 @@ module pencil_peg(paint_color = undef, label = "") {
             hull() {
                 translate([0, 0, rb_z_bot - eps])
                     linear_extrude(height = eps)
-                        octagon_2d(peg_eff_flat_d);
+                        peg_profile_2d(peg_eff_flat_d);
                 translate([0, 0, rb_z_bot + rb_chamf])
                     linear_extrude(height = eps)
-                        octagon_2d(rb_inner_d);
+                        peg_profile_2d(rb_inner_d);
             }
             // Flat rubber-band seating root
             translate([0, 0, rb_z_bot + rb_chamf - eps])
                 linear_extrude(height = rb_flat_h + 2 * eps)
-                    octagon_2d(rb_inner_d);
+                    peg_profile_2d(rb_inner_d);
             // Upper 45-deg retention bevel
             hull() {
                 translate([0, 0, rb_z_bot + rb_chamf + rb_flat_h])
                     linear_extrude(height = eps)
-                        octagon_2d(rb_inner_d);
+                        peg_profile_2d(rb_inner_d);
                 translate([0, 0, rb_z_bot + rb_flat_h + 2 * rb_chamf + eps])
                     linear_extrude(height = eps)
-                        octagon_2d(peg_eff_flat_d);
+                        peg_profile_2d(peg_eff_flat_d);
             }
         }
     }

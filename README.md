@@ -9,13 +9,13 @@ Parametric 3D-printable modular Color Sudoku board (~35 mm cell pitch, ~315 × 3
 
 - **Outward Male Nubbins on Bottom & Right, Inward Female Sockets on Top & Left:**
   - Each Male tab has a **1.5 mm center flex slot** + a **gentle mid-height Z-detent ridge** (`Z = 2.5 mm`) with generous `0.25 mm` XY clearance so kids can easily click tiles together and pull them apart without wedging.
-  - Each Female socket has a **45° self-centering vaulted ceiling** and a **1.55 mm solid roof** underneath the cell floor (`Z = 6.45` to `8.0 mm`). When you pick the board up from the bottom, the vaulted roof + Z-detent + `8.0 mm` base hold the board flat without tiles dropping through.
+  - Each Female socket has a **45° self-centering vaulted ceiling** and a **2.55 mm solid roof** underneath the cell floor (`Z = 6.45` to `9.0 mm`). When you pick the board up from the bottom, the vaulted roof + Z-detent + `9.0 mm` base hold the board flat without tiles dropping through.
 - **Raised Flat Paint Surfaces:** `main_piece`, `pencil_peg`, and `region_bar_*` have raised flat top pads proud above the white body so you can paint the top surface cleanly with paint markers.
 
 ## STL Files (`stl/`)
 
 - **One-Piece 4×4 Board (`stl/board_4x4.stl`)**:
-  - Single-print monolithic 4×4 board (`145.6 × 145.6 × 12.5 mm` — prints in one piece on a Bambu Lab A1 Mini `180 × 180 mm` bed).
+  - Single-print monolithic 4×4 board (`145.6 × 145.6 × 13.5 mm` deck, `16.83 mm` including raised border — prints in one piece on a Bambu Lab A1 Mini `180 × 180 mm` bed).
   - Features a solid raised perimeter barrier wall (`2.85 mm` solid outer wall behind each interior slot end) so interior `region_bar_2x` and `region_bar_1x` (Jigsaw) dividers drop right in and can never slide out, with all 4 outer sides completely smooth and flush for a tray.
 - **Modular 1×1 Board Tiles — Flush Outer Perimeter & Captured Interior Slots** (for an $M \times N$ grid; 9×9 / 4×4 counts shown):
   - `tile_center.stl` — Interior tile with Bottom + Right region slots & tabs, Top + Left sockets (`(M-2)×(N-2)` = **49×** for 9×9, **4×** for 4×4)

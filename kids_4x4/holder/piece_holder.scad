@@ -276,31 +276,56 @@ module A_pieces() {
 }
 
 // ============================================================================
-// OPTION B: "Four-Quadrant Flat Tray" (145.6 x 145.6 x 33.5 mm base; Flush Board = Lid)
+// OPTION B: "Four-Quadrant Flat Tray" (145.6 x 145.6 x 33.0 mm base; Flush Board = Lid)
 // - 100% Flush with the 145.6 x 145.6 mm upside-down 4x4 board!
 // - 4 Corner Color Quadrants matching the 4 boxes of the 4x4 board
 // - Main pieces lie FLAT (face-up!) in 2 side-by-side 2-deep square wells per quadrant
-// - Wide 22 mm Finger-Pinch Slots on BOTH sides of every main-piece stack (down to
-//   the bottom piece!) so adult or kid fingers pull out both tiles effortlessly!
+//   with generous clearance (29.2 x 29.6 mm for 28.4 mm plinth) so tiles never bind!
+// - TRUE 180-deg OPPOSITE-SIDE Finger Pinch Access on EVERY main-piece stack:
+//     * Outer North/South wall: wide 22.0 mm through-wall thumb U-window
+//     * Inner peg-bin divider wall: matching 18.5 x 8.0 mm SOLID watertight curved
+//       finger alcove (ZERO holes in the peg bin! All 4 walls stay 100% solid up to
+//       B_seat so pencil-mark pegs can never escape!)
 // - Full-length 131.8 mm Central Cross Vault holds:
-//     * 3x Region Bars (104.5 mm) & 2x Region Bars (69.5 mm) along the X-corridor
+//     * 3x Region Bars (104.5 mm) & 2x Region Bars (69.5 mm) along the 18 mm X-corridor
 //     * 12x 1x Jigsaw Bars (34.5 mm) in the North & South Y-arms!
 // ============================================================================
 B_seat       = 33.0;                   // board border seat Z (fits 2-stacked flat main pieces: 32.0 mm)
 B_div_h      = B_seat + H_seal_up;     // 35.8 mm divider top
-B_cross_x_w  = 9.8;                    // Y-arm width (holds 1x bars; preserves 29.0 mm main-piece wells)
+B_cross_x_w  = 9.4;                    // Y-arm width (holds 2 parallel 4.0 mm 1x bars + 1.4 mm clr)
 B_cross_y_w  = 18.0;                   // long center X-corridor width (finger-wide! holds 2x & 3x bars)
 B_div_t      = 1.6;
-B_qx_min     = B_cross_x_w / 2 + B_div_t; // 6.50 mm from Y-axis
+B_qx_min     = B_cross_x_w / 2 + B_div_t; // 6.30 mm from Y-axis
 B_qy_min     = B_cross_y_w / 2 + B_div_t; // 10.60 mm from X-axis
-B_q_span     = H_in_hw - B_qx_min;     // 59.40 mm clear X-span inside each quadrant
+B_q_span     = H_in_hw - B_qx_min;     // 59.60 mm clear X-span inside each quadrant
 B_qy_span    = H_in_hw - B_qy_min;     // 55.30 mm clear Y-span inside each quadrant
-B_well_rib   = 1.4;                    // divider rib between the 2 flat main-piece stacks
-B_well_w     = (B_q_span - B_well_rib) / 2; // 29.00 x 29.00 mm flat main-piece well (28.4 mm tile + 0.6 mm clr)
-B_bin_dy     = B_qy_span - B_well_w - B_div_t; // 24.70 mm wide peg bin along Y
-B_peg_floor  = 8.0;                    // peg floor at z = H_floor + 8.0 = 10.0 mm
-B_cove_r     = 4.5;
-B_finger_w   = 21.0;                   // 21.0 mm wide through-wall thumb pinch windows
+B_well_rib   = 1.2;                    // divider rib between the 2 flat main-piece stacks
+B_well_w     = (B_q_span - B_well_rib) / 2; // 29.20 mm X-width (28.4 mm tile + 0.80 mm clr)
+B_well_dy    = 29.60;                  // 29.60 mm Y-depth (28.4 mm tile + 1.20 mm clr -> zero binding!)
+B_bin_dy     = B_qy_span - B_well_dy - B_div_t; // 24.10 mm peg bin Y-depth
+B_peg_floor  = 2.0;                    // peg floor at z = H_floor + 2.0 = 4.0 mm (29.0 mm deep for bigger pegs!)
+B_cove_r     = 3.5;
+B_finger_w   = 22.0;                   // 22.0 mm wide outer through-wall thumb U-window
+B_alcove_w   = 18.5;                   // 18.5 mm wide solid opposite-side index-finger alcove (<24 mm plinth edge)
+B_alcove_d   = 8.0;                    // 8.0 mm pocket depth (+1.9 mm crown / +4.1 mm waist -> 9.9-12.1 mm finger gap!)
+
+// 2D inner shape of a rounded U-shaped finger alcove extending in +Y from y = 0 to y = d
+module B_alcove_inner_2d(w, d) {
+    r = min(d - 0.05, w / 2 - 0.05);
+    hull() {
+        translate([-(w / 2 - r), d - r]) circle(r = r, $fn = 36);
+        translate([ (w / 2 - r), d - r]) circle(r = r, $fn = 36);
+        translate([-w / 2, 0]) square([w, 0.2]);
+    }
+}
+
+// 2D solid outer shell of the finger alcove (exact uniform wall_t wall thickness, clipped to y >= 0)
+module B_alcove_outer_2d(w, d, wall_t) {
+    intersection() {
+        offset(r = wall_t, $fn = 36) B_alcove_inner_2d(w, d);
+        translate([-(w / 2 + wall_t + 1), 0]) square([w + 2 * wall_t + 2, d + wall_t + 2]);
+    }
+}
 
 // Quadrant signs: 0=TL (Blue), 1=TR (Red), 2=BL (Tan), 3=BR (Green)
 B_qx = [-1,  1, -1,  1];
@@ -329,19 +354,31 @@ module B_base() {
                     sx = B_qx[q];
                     sy = B_qy[q];
                     x0 = sx > 0 ? B_qx_min : -H_in_hw;
-                    y_well0 = sy > 0 ? (H_in_hw - B_well_w) : -H_in_hw;
-                    y_div0  = sy > 0 ? (y_well0 - B_div_t)  : (y_well0 + B_well_w);
-                    y_bin0  = sy > 0 ? B_qy_min             : (y_div0 + B_div_t);
+                    y_well0     = sy > 0 ? (H_in_hw - B_well_dy) : -H_in_hw;
+                    y_wall_well = sy > 0 ? y_well0               : (y_well0 + B_well_dy);
+                    y_div0      = sy > 0 ? (y_well0 - B_div_t)   : (y_well0 + B_well_dy);
+                    y_bin0      = sy > 0 ? B_qy_min              : (y_div0 + B_div_t);
 
-                    // Divider between the 2 flat main wells and the peg scoop dish (stops at B_seat)
-                    cbox(x0, y_div0, H_floor - eps, B_q_span, B_div_t, B_seat - H_floor);
-                    // Rib between the 2 side-by-side flat main wells (stops below B_seat)
-                    cbox(x0 + B_well_w, y_well0, H_floor - eps, B_well_rib, B_well_w, B_seat - H_floor - 1.0);
-
-                    // Elevated coved floor in the peg scoop dish (at z = H_floor + 8.0 mm)
+                    // Elevated coved floor in the peg scoop dish (at z = H_floor + B_peg_floor)
                     cbox(x0, y_bin0, H_floor - eps, B_q_span, B_bin_dy, B_peg_floor + 0.1);
                     translate([x0, y_bin0, H_floor + B_peg_floor])
                         cove_fill(B_q_span, B_bin_dy, B_cove_r);
+
+                    // Solid divider between the 2 flat main wells and the peg scoop dish (stops at B_seat)
+                    cbox(x0, y_div0, H_floor - eps, B_q_span, B_div_t, B_seat - H_floor);
+
+                    // Solid watertight outer shells for the 2 opposite-side finger alcoves
+                    // (protrude smoothly into the peg bin with ZERO holes and ZERO overhangs!)
+                    for (w = [0, 1]) {
+                        xw = x0 + B_well_w / 2 + w * (B_well_w + B_well_rib);
+                        translate([xw, y_wall_well, H_floor - eps])
+                            rotate([0, 0, sy > 0 ? 180 : 0])
+                                linear_extrude(height = B_seat - H_floor + eps)
+                                    B_alcove_outer_2d(B_alcove_w, B_alcove_d, B_div_t);
+                    }
+
+                    // Rib between the 2 side-by-side flat main wells (stops below B_seat)
+                    cbox(x0 + B_well_w, y_well0, H_floor - eps, B_well_rib, B_well_dy, B_seat - H_floor - 1.0);
                 }
             }
 
@@ -355,19 +392,20 @@ module B_base() {
                 cbox(-B_cross_x_w / 2, y_arm0, H_floor, B_cross_x_w, H_in_hw - B_cross_y_w / 2 - 1.2, B_div_h);
             }
 
-            // Wide 21 mm Through-Wall Thumb Pinch Windows on every main-piece stack:
+            // TRUE 180-deg OPPOSITE-SIDE Finger Pinch Access on every main-piece stack:
             for (q = [0 : 3]) {
                 sx = B_qx[q];
                 sy = B_qy[q];
                 x0 = sx > 0 ? B_qx_min : -H_in_hw;
                 x_rib = x0 + B_well_w + B_well_rib / 2;
-                y_well_c = sy > 0 ? (H_in_hw - B_well_w / 2) : (-H_in_hw + B_well_w / 2);
-                y_div_c  = sy > 0 ? (H_in_hw - B_well_w - B_div_t / 2) : (-H_in_hw + B_well_w + B_div_t / 2);
-                y_out_c  = sy > 0 ? ((H_in_hw + H_out_hw) / 2) : (-(H_in_hw + H_out_hw) / 2);
+                y_well0     = sy > 0 ? (H_in_hw - B_well_dy) : -H_in_hw;
+                y_wall_well = sy > 0 ? y_well0               : (y_well0 + B_well_dy);
+                y_well_c    = sy > 0 ? (H_in_hw - B_well_dy / 2) : (-H_in_hw + B_well_dy / 2);
+                y_out_c     = sy > 0 ? ((H_in_hw + H_out_hw) / 2) : (-(H_in_hw + H_out_hw) / 2);
 
                 // Low U-window between the two side-by-side wells
                 hull() {
-                    translate([x_rib, y_well_c, H_floor + 8.0 + B_finger_w / 2])
+                    translate([x_rib, y_well_c, H_floor + 6.5 + B_finger_w / 2])
                         rotate([0, 90, 0]) cylinder(d = B_finger_w, h = B_well_rib + 4, center = true, $fn = 32);
                     translate([x_rib, y_well_c, B_div_h + 10])
                         rotate([0, 90, 0]) cylinder(d = B_finger_w, h = B_well_rib + 4, center = true, $fn = 32);
@@ -376,14 +414,26 @@ module B_base() {
                 for (w = [0, 1]) {
                     xw = x0 + B_well_w / 2 + w * (B_well_w + B_well_rib);
 
-                    // 1) Through-wall THUMB WINDOW in the outer North/South wall (down to z = H_floor + 7.5 mm)
-                    //    (Peg-bin divider wall stays 100% solid so all 4 sides of each peg dish keep pegs contained!)
+                    // 1) Outer side: Through-wall 22 mm THUMB WINDOW in the outer North/South wall
+                    //    (down to z = H_floor + 6.5 mm, exposing both top & bottom main-piece waists!)
                     hull() {
-                        translate([xw, y_out_c, H_floor + 7.5 + B_finger_w / 2])
+                        translate([xw, y_out_c, H_floor + 6.5 + B_finger_w / 2])
                             rotate([90, 0, 0]) cylinder(d = B_finger_w, h = (H_out_hw - H_in_hw) + 6, center = true, $fn = 36);
                         translate([xw, y_out_c, B_div_h + 12])
                             rotate([90, 0, 0]) cylinder(d = B_finger_w, h = (H_out_hw - H_in_hw) + 6, center = true, $fn = 36);
                     }
+
+                    // 2) Opposite (inner) side: 18.5 x 8.0 mm SOLID-BACKED INDEX-FINGER ALCOVE
+                    //    Cuts only the inside of the alcove down to z = H_floor + 4.5 mm (leaving the
+                    //    square plinth seat intact below z = 6.5 mm and leaving a 100% solid 1.6 mm
+                    //    watertight wall keeping all pencil-mark pegs sealed inside the peg bin!)
+                    translate([xw, y_wall_well, H_floor + 4.5])
+                        rotate([0, 0, sy > 0 ? 180 : 0])
+                            linear_extrude(height = B_seat + 4)
+                                union() {
+                                    B_alcove_inner_2d(B_alcove_w, B_alcove_d);
+                                    translate([-B_alcove_w / 2, -1.0]) square([B_alcove_w, 1.2]);
+                                }
                 }
             }
             board_grid_bar_clearance_cuts(B_seat);
@@ -395,16 +445,18 @@ module B_base() {
         sx = B_qx[q];
         sy = B_qy[q];
         x0 = sx > 0 ? B_qx_min : -H_in_hw;
-        y_well_c = sy > 0 ? (H_in_hw - B_well_w / 2) : (-H_in_hw + B_well_w / 2);
-        y_bin0   = sy > 0 ? B_qy_min : (-H_in_hw + B_well_w + B_div_t);
+        y_well_c = sy > 0 ? (H_in_hw - B_well_dy / 2) : (-H_in_hw + B_well_dy / 2);
+        // Place peg-bin color pad centered in the clear front lane (in front of the two solid alcoves)
+        bin_clear_dy = B_bin_dy - B_alcove_d;
+        y_pad_c = sy > 0 ? (B_qy_min + bin_clear_dy / 2) : (-(B_qy_min + bin_clear_dy / 2));
 
         for (w = [0, 1]) {
             xw = x0 + B_well_w / 2 + w * (B_well_w + B_well_rib);
             translate([xw, y_well_c, H_floor - eps])
                 color_pad(18, 18, COLORS[q], 3);
         }
-        translate([x0 + B_q_span / 2, y_bin0 + B_bin_dy / 2, H_floor + B_peg_floor - eps])
-            color_pad(B_q_span - 18, B_bin_dy - 12, COLORS[q], 3);
+        translate([x0 + B_q_span / 2, y_pad_c, H_floor + B_peg_floor - eps])
+            color_pad(B_q_span - 18, bin_clear_dy - 7.5, COLORS[q], 2.5);
     }
 }
 
@@ -413,8 +465,8 @@ module B_pieces() {
         sx = B_qx[q];
         sy = B_qy[q];
         x0 = sx > 0 ? B_qx_min : -H_in_hw;
-        y_well_c = sy > 0 ? (H_in_hw - B_well_w / 2) : (-H_in_hw + B_well_w / 2);
-        y_bin0   = sy > 0 ? B_qy_min : (-H_in_hw + B_well_w + B_div_t);
+        y_well_c = sy > 0 ? (H_in_hw - B_well_dy / 2) : (-H_in_hw + B_well_dy / 2);
+        y_bin0   = sy > 0 ? B_qy_min : (-H_in_hw + B_well_dy + B_div_t);
 
         // 4 flat main pieces per quadrant (2 side-by-side stacks of 2)
         for (w = [0, 1], layer = [0, 1]) {
@@ -423,14 +475,17 @@ module B_pieces() {
                 main_piece(COLORS[q]);
         }
 
-        // 16 loose pegs in each quadrant's coved scoop dish (3 rows x 2 cols, 3 layers)
-        for (k = [0 : 2], a = [0 : 1], b = [0 : 2]) if (!(k == 2 && b == 2)) {
-            lx = 10.5 + a * (peg_l + 4.5) + peg_l / 2 + k * 1.2;
-            ly = B_bin_dy / 2 + (b - 1.0) * 6.4;
-            d  = min(ly - peg_d / 2, B_bin_dy - ly - peg_d / 2);
-            translate([x0 + lx, y_bin0 + ly,
-                       H_floor + B_peg_floor + k * (peg_f + 0.2) + cove_lift(max(0, d), B_cove_r)])
-                rotate([0, 0, (k % 2 == 0 ? 1 : -1) * 4])
+        // 16 bigger loose pegs (7.8 x 18.0 mm) in each quadrant's coved scoop dish
+        // (3 cols x 2 rows x 3 layers = 18 slots -> 16 pegs fit cleanly in front of the solid alcoves!)
+        bin_clear_dy = B_bin_dy - B_alcove_d;
+        y_lane_c = sy > 0 ? (B_qy_min + bin_clear_dy / 2) : (-(B_qy_min + bin_clear_dy / 2));
+        for (k = [0 : 2], a = [0 : 2], b = [0 : 1]) if (!(k == 2 && a == 2)) {
+            lx = 1.6 + a * (peg_l + 0.5) + peg_l / 2;
+            ly = y_lane_c + (b - 0.5) * (peg_f + 0.25);
+            d_edge = min(abs(ly - (sy > 0 ? B_qy_min : -B_qy_min)) - peg_d / 2, 10);
+            translate([x0 + lx, ly,
+                       H_floor + B_peg_floor + k * (peg_f + 0.25) + cove_lift(max(0, d_edge), B_cove_r)])
+                rotate([0, 0, (k % 2 == 0 ? 1 : -1) * 2])
                     lying_peg(COLORS[q]);
         }
     }
@@ -448,7 +503,7 @@ module B_pieces() {
     }
     // 3) Short 1x jigsaw bars (34.5 mm, charcoal) in the North and South Y-arms (6 per arm = 12 total)
     for (sy = [-1, 1], col = [-1, 1], layer = [0 : 2]) {
-        translate([col * 2.3, sy * 38.0, H_floor + layer * 10.5])
+        translate([col * 2.2, sy * 38.0, H_floor + layer * 10.5])
             rotate([0, 0, 90])
                 region_bar(1, BAR_C);
     }
@@ -614,11 +669,11 @@ module rubber_band_showcase() {
     translate([12, -26, 0]) {
         pencil_peg(COLORS[1], "2");
         color("#E07A5F")
-            translate([0, 0, 12.15])
+            translate([0, 0, peg_height - 3.85])
                 linear_extrude(height = 1.3)
                     difference() {
-                        octagon_2d(peg_eff_flat_d + 0.5);
-                        octagon_2d(peg_eff_flat_d - 1.8);
+                        peg_profile_2d(peg_eff_flat_d + 0.5);
+                        peg_profile_2d(peg_eff_flat_d - 1.8);
                     }
     }
 }
