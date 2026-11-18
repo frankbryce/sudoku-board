@@ -32,7 +32,7 @@ STLS := \
 
 all: $(STLS)
 
-renders: renders/finished_board_9x9.png renders/finished_board_closeup.png
+renders: renders/finished_board_9x9.png renders/finished_board_closeup.png renders/finished_board_4x4.png renders/holder_option_b_lid_lifting.png
 
 renders/finished_board_9x9.png: $(SCAD)
 	@mkdir -p $(dir $@)
@@ -41,6 +41,14 @@ renders/finished_board_9x9.png: $(SCAD)
 renders/finished_board_closeup.png: $(SCAD)
 	@mkdir -p $(dir $@)
 	$(OPENSCAD) -o $@ --imgsize=1600,1200 --autocenter --viewall --projection=p -D 'render_mode="assembly_preview"' -D 'center_mark_mode="$(CENTER_MARK_MODE)"' $<
+
+renders/finished_board_4x4.png: $(SCAD)
+	@mkdir -p $(dir $@)
+	$(OPENSCAD) -o $@ --imgsize=1600,1200 --autocenter --viewall --camera=0,0,0,46,0,22,0 --projection=p --colorscheme=Tomorrow -D 'render_mode="board_4x4_preview"' -D 'center_mark_mode="$(CENTER_MARK_MODE)"' $<
+
+renders/holder_option_b_lid_lifting.png: $(HOLDER_SCAD) $(SCAD)
+	@mkdir -p $(dir $@)
+	$(OPENSCAD) -o $@ --imgsize=1600,1200 --autocenter --viewall --camera=0,0,0,58,0,28,0 --projection=p --colorscheme=Tomorrow -D 'option="B"' -D 'part="lid_lifting"' $<
 
 stl/piece_holder.stl: $(HOLDER_SCAD) $(SCAD)
 	@mkdir -p $(dir $@)

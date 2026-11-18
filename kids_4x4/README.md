@@ -1,6 +1,9 @@
 # 4x4 Kids' Sudoku: Puzzles, Printable Workbook & Board Build Guide
 
-A self-contained add-on for the modular sudoku board in this repo, set up as a **4x4** board for kids.
+![4×4 Kids' Jigsaw Sudoku Board](../renders/finished_board_4x4.png)
+![4×4 Piece Holder — Option B Flush Board-as-Lid](../renders/holder_option_b_lid_lifting.png)
+
+A self-contained add-on for the modular sudoku board in this repo, set up as a **4x4** board for kids. The board render above previews a mid-game **Jigsaw Sudoku** (Level 7) featuring a **Blue + Green Center-Mark Naked Pair** in Column 2 (`R2C2` & `R3C2`, Levels 3 & 6) and a **Red Snyder Pointing Pair** in Column 3 (`R3C3` & `R4C3`, Levels 4 & 5), alongside the Option B flush board-as-lid carry case.
 
 * **`sudoku4/`**: pure-Python (stdlib only) puzzle generator, technique grader and PDF renderer
 * **`puzzles/puzzles.json`**: the generated set: **10 levels (9 × 12 + 60 = 168 puzzles)**

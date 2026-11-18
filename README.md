@@ -1,9 +1,23 @@
 # Modular Color Sudoku System — Montessori Jigsaw 1×1 Edition
 
+![4×4 Kids' Jigsaw Sudoku Board](renders/finished_board_4x4.png)
+![4×4 Piece Holder — Option B Flush Board-as-Lid](renders/holder_option_b_lid_lifting.png)
+
+Parametric 3D-printable modular Color Sudoku board (~35 mm cell pitch, `145.6 × 145.6 mm` for the one-piece 4×4 kids' board, ~`320.6 × 320.6 mm` for a full 9×9) designed for **Bambu Studio / Bambu Lab A1 Mini** in White PLA / PLA Matte.
+
+## 4×4 Kids' Sudoku & Workbook Highlights (`kids_4x4/`)
+
+The 4×4 render above introduces the core puzzle ideas from the printable [4×4 Kids' Sudoku Workbook](kids_4x4/README.md) on the one-piece board (`stl/board_4x4.stl`) paired with the flush board-as-lid carry tray (`stl/piece_holder.stl`):
+
+- **Jigsaw Regions (Level 7):** 12 short `1x` region bars drop into the interior grid slots to form four T-shaped regions framed by the board's permanent raised border.
+- **Center-Mark Naked Pair (Levels 3 & 6):** In Column 2, the two middle cells (`R2C2` and `R3C2`) each hold a **Blue + Green** center-peg pair — locking Blue and Green into those two cells and eliminating Green from `R4C2` (leaving **Tan**).
+- **Snyder Notation Pointing Pair (Levels 4 & 5):** In the bottom-right Jigsaw region, **Red** can only go in `R3C3` or `R4C3` (shown with top-right corner pegs). Because both sit in Column 3, they point straight up the column to eliminate Red from `R2C3` (leaving **Blue**).
+- **Flush Board-as-Lid Carry Case (Option B):** Flip the 4×4 board upside down to close the four-quadrant tray flush (`145.6 × 145.6 mm`), keeping all 16 main pieces, 64 pencil-mark pegs, and `1x`/`2x`/`3x` region bars organized inside.
+
+## Full 9×9 Modular Board & Close-Up Detail
+
 ![Full 9×9 Finished Board](renders/finished_board_9x9.png)
 ![Close-Up Detail](renders/finished_board_closeup.png)
-
-Parametric 3D-printable modular Color Sudoku board (~35 mm cell pitch, ~315 × 315 mm for a full 9×9) designed for **Bambu Studio / Bambu Lab A1 Mini** in White PLA / PLA Matte.
 
 ## Montessori Jigsaw Connection (Easy Kid Assembly + Holds Flat When Lifted)
 
@@ -14,9 +28,10 @@ Parametric 3D-printable modular Color Sudoku board (~35 mm cell pitch, ~315 × 3
 
 ## STL Files (`stl/`)
 
-- **One-Piece 4×4 Board (`stl/board_4x4.stl`)**:
+- **One-Piece 4×4 Board (`stl/board_4x4.stl`) & Carry Case (`stl/piece_holder.stl`)**:
   - Single-print monolithic 4×4 board (`145.6 × 145.6 × 13.5 mm` deck, `16.83 mm` including raised border — prints in one piece on a Bambu Lab A1 Mini `180 × 180 mm` bed).
   - Features a solid raised perimeter barrier wall (`2.85 mm` solid outer wall behind each interior slot end) so interior `region_bar_2x` and `region_bar_1x` (Jigsaw) dividers drop right in and can never slide out, with all 4 outer sides completely smooth and flush for a tray.
+  - Matching Option B four-quadrant carry tray (`stl/piece_holder.stl`) that uses the upside-down 4×4 board as a flush lid and stores all 16 main pieces, 64 pencil-mark pegs, and `1x`/`2x`/`3x` region bars.
 - **Modular 1×1 Board Tiles — Flush Outer Perimeter & Captured Interior Slots** (for an $M \times N$ grid; 9×9 / 4×4 counts shown):
   - `tile_center.stl` — Interior tile with Bottom + Right region slots & tabs, Top + Left sockets (`(M-2)×(N-2)` = **49×** for 9×9, **4×** for 4×4)
   - `tile_edge_n.stl` — Top edge with flush solid North barrier wall (`M-2` = **7×** for 9×9, **2×** for 4×4)

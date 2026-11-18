@@ -22,7 +22,7 @@
 
 /* [Render Selection] */
 // Select which part to preview / export:
-render_mode = "assembly_preview"; // ["assembly_preview", "full_board_preview", "board_4x4", "tile_center", "tile_edge_n", "tile_edge_s", "tile_edge_w", "tile_edge_e", "tile_corner_nw", "tile_corner_ne", "tile_corner_sw", "tile_corner_se", "main_piece", "pencil_peg", "region_bar_1x", "region_bar_2x", "region_bar_3x"]
+render_mode = "assembly_preview"; // ["assembly_preview", "full_board_preview", "board_4x4_preview", "board_4x4", "tile_center", "tile_edge_n", "tile_edge_s", "tile_edge_w", "tile_edge_e", "tile_corner_nw", "tile_corner_ne", "tile_corner_sw", "tile_corner_se", "main_piece", "pencil_peg", "region_bar_1x", "region_bar_2x", "region_bar_3x"]
 
 // Optional raised character on main_piece / pencil_peg ("" = blank, "1"-"9", "A"-"I")
 piece_label = ""; // ["", "1", "2", "3", "4", "5", "6", "7", "8", "9", "A", "B", "C", "D", "E", "F", "G", "H", "I"]
@@ -1119,6 +1119,92 @@ module full_board_preview() {
         pencil_peg(sudoku_colors[8]);
 }
 
+// Complete 4x4 Kids' Jigsaw Sudoku Showcase Preview (Monolithic Board + 4 Sharpie Colors)
+// Demonstrates Jigsaw T-tetromino regions, a Center-Mark Naked Pair, and a Snyder Pointing Pair:
+//   - Jigsaw regions: 4-fold symmetric T-tetromino pinwheel (12x region_bar_1x)
+//   - Placed pieces (1=Blue, 2=Red, 3=Tan, 4=Green): R1C2=Red, R1C4=Green, R2C4=Tan, R3C1=Tan, R4C4=Blue
+//   - Center-Mark Naked Pair: R2C2 & R3C2 both hold {Blue, Green} center pegs (eliminates Green from R4C2 -> Tan!)
+//   - Snyder Pointing Pair: R3C3 & R4C3 in bottom-right region hold Red corner pegs in Col 3 (eliminates Red from R2C3 -> Blue!)
+module board_4x4_preview() {
+    // 4 Sharpie Creative Marker piece colors matching the kids_4x4 workbook & piece holder:
+    // 1 = Blue, 2 = Red, 3 = Tan, 4 = Green
+    kids_colors = ["#0178d4", "#db2134", "#eab47f", "#22ab7e"];
+    bar_c = "#22272E";
+    peg_floor_z = base_thickness - peg_socket_depth;
+
+    // Fixed book peg positions (1=TL, 2=TR, 3=BL, 4=BR)
+    center_pos = [
+        [-4.75,  4.75], // 1 = Blue  (TL)
+        [ 4.75,  4.75], // 2 = Red   (TR)
+        [-4.75, -4.75], // 3 = Tan   (BL)
+        [ 4.75, -4.75]  // 4 = Green (BR)
+    ];
+    corner_pos = [
+        [-corner_mark_offset,  corner_mark_offset], // 1 = Blue  (TL)
+        [ corner_mark_offset,  corner_mark_offset], // 2 = Red   (TR)
+        [-corner_mark_offset, -corner_mark_offset], // 3 = Tan   (BL)
+        [ corner_mark_offset, -corner_mark_offset]  // 4 = Green (BR)
+    ];
+
+    // 1. One-piece 4x4 monolithic board with permanent dark outer border & mitered notches
+    monolithic_board(4, bar_c);
+
+    // 2. 4-fold symmetric T-tetromino Jigsaw regions (row 0 = top / North)
+    regions = [
+        [0, 0, 0, 1],
+        [2, 0, 1, 1],
+        [2, 2, 3, 1],
+        [2, 3, 3, 3]
+    ];
+
+    // Place 12x 1-cell region bars on every interior boundary between different regions
+    for (r = [0 : 3], c = [0 : 2]) {
+        if (regions[r][c] != regions[r][c + 1]) {
+            translate([(c + 1) * cell_pitch, (3 - r + 0.5) * cell_pitch, slot_floor_z])
+                rotate([0, 0, 90])
+                    region_bar(1, bar_c);
+        }
+    }
+    for (r = [0 : 2], c = [0 : 3]) {
+        if (regions[r][c] != regions[r + 1][c]) {
+            translate([(c + 0.5) * cell_pitch, (3 - r) * cell_pitch, slot_floor_z])
+                region_bar(1, bar_c);
+        }
+    }
+
+    // 3. Uniquely solvable mid-game smattering of main pieces (row 0 = top)
+    givens = [
+        [0, 2, 0, 4],
+        [0, 0, 0, 3],
+        [3, 0, 0, 0],
+        [0, 0, 0, 1]
+    ];
+    for (r = [0 : 3], c = [0 : 3]) {
+        v = givens[r][c];
+        if (v > 0) {
+            translate([(c + 0.5) * cell_pitch, (3 - r + 0.5) * cell_pitch, base_thickness])
+                main_piece(kids_colors[v - 1]);
+        }
+    }
+
+    // 4. Center-Mark Naked Pair in Column 2: R2C2 (r=1,c=1) & R3C2 (r=2,c=1) both hold {Blue (1), Green (4)}
+    for (r = [1, 2], d = [1, 4]) {
+        translate([(1 + 0.5) * cell_pitch + center_pos[d - 1][0],
+                   (3 - r + 0.5) * cell_pitch + center_pos[d - 1][1],
+                   peg_floor_z])
+            pencil_peg(kids_colors[d - 1]);
+    }
+
+    // 5. Snyder Notation Pointing Pair in bottom-right Jigsaw region:
+    //    R3C3 (r=2,c=2) & R4C3 (r=3,c=2) both hold Red (2) corner pegs in Column 3
+    for (r = [2, 3]) {
+        translate([(2 + 0.5) * cell_pitch + corner_pos[1][0],
+                   (3 - r + 0.5) * cell_pitch + corner_pos[1][1],
+                   peg_floor_z])
+            pencil_peg(kids_colors[1]);
+    }
+}
+
 // ============================================================================
 // Top-Level Dispatcher
 // ============================================================================
@@ -1127,6 +1213,8 @@ if (render_mode == "assembly_preview") {
     assembly_preview();
 } else if (render_mode == "full_board_preview") {
     full_board_preview();
+} else if (render_mode == "board_4x4_preview") {
+    board_4x4_preview();
 } else if (render_mode == "board_4x4") {
     monolithic_board(4);
 } else if (render_mode == "tile_center" || render_mode == "tile_2slot") {
