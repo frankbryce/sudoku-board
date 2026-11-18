@@ -29,7 +29,7 @@ The 4×4 render above introduces the core puzzle ideas from the printable [4×4 
 ## STL Files (`stl/`)
 
 - **One-Piece 4×4 Board (`stl/board_4x4.stl`) & Carry Case (`stl/piece_holder.stl`)**:
-  - Single-print monolithic 4×4 board (`145.6 × 145.6 × 13.5 mm` deck, `16.83 mm` including raised border — prints in one piece on a Bambu Lab A1 Mini `180 × 180 mm` bed).
+  - Single-print monolithic 4×4 board (`145.6 × 145.6 × 13.5 mm` deck, `16.75 mm` including raised border — prints in one piece on a Bambu Lab A1 Mini `180 × 180 mm` bed).
   - Features a solid raised perimeter barrier wall (`2.85 mm` solid outer wall behind each interior slot end) so interior `region_bar_2x` and `region_bar_1x` (Jigsaw) dividers drop right in and can never slide out, with all 4 outer sides completely smooth and flush for a tray.
   - Matching Option B four-quadrant carry tray (`stl/piece_holder.stl`) that uses the upside-down 4×4 board as a flush lid and stores all 16 main pieces, 64 pencil-mark pegs, and `1x`/`2x`/`3x` region bars.
 - **Modular 1×1 Board Tiles — Flush Outer Perimeter & Captured Interior Slots** (for an $M \times N$ grid; 9×9 / 4×4 counts shown):

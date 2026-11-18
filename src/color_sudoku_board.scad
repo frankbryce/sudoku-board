@@ -41,7 +41,7 @@ wall_height = 4.5;
 /* [Deep Anti-Tip Region Line Slot & Bar Dimensions (mm)] */
 // Width of monolithic grid-line groove for changeable region bars
 region_slot_width = 3.0;
-// Depth of region-line groove (7.0 mm -> <3.1 deg wobble; geometrically impossible to tip sideways!)
+// Depth of region-line groove (7.0 mm with 6.50 mm straight engagement -> <0.9 deg wobble at snug ribs!)
 region_slot_depth = 7.0;
 // Thickness of solid wall flanking each side of a region-line groove
 slot_wall_thickness = 1.3;
@@ -70,8 +70,10 @@ peg_socket_depth = 7.4;
 /* [FDM Clearances & Tolerances (mm)] */
 // Per-side XY clearance on Montessori spring-slotted jigsaw tabs (easy kid pull-apart)
 dovetail_clearance = 0.25;
-// Per-side clearance on region-line bars inside deep slots (smooth zero-bind slip fit)
-region_bar_clearance = 0.18;
+// Per-side clearance on region-line bar tongue body inside deep slots (tight low-wiggle fit: 2.80 mm in 3.00 mm slot)
+region_bar_clearance = 0.10;
+// Per-side protrusion of localized vertical snug ribs on bar tongue (2.92 mm across ribs -> 0.04 mm/side crest clearance)
+region_bar_snug_rib = 0.06;
 // Per-side clearance of main tile's self-centering base plinth inside cell walls
 tile_wall_clearance = 0.50;
 // Radial clearance around peg corners inside round socket (snug gravity-drop slip fit, <2.7 deg tilt)
@@ -86,13 +88,13 @@ $fn = 48;
 // Derived Geometric Constants (Do Not Edit Directly)
 // ============================================================================
 eps = 0.02;
-total_plate_h = base_thickness + wall_height; // 12.5 mm (~0.5 inch rigid board)
+total_plate_h = base_thickness + wall_height; // 13.5 mm rigid board
 
 // Half-width of a complete monolithic divider assembly (slot + 2 walls)
-divider_hw = region_slot_width / 2 + slot_wall_thickness; // 3.2 mm default
+divider_hw = region_slot_width / 2 + slot_wall_thickness; // 2.8 mm default
 
 // Open interior width of every cell
-cell_open_w = cell_pitch - 2 * divider_hw; // 43.6 mm default
+cell_open_w = cell_pitch - 2 * divider_hw; // 29.4 mm default
 
 // Self-centering base plinth of main_piece (drops inside cell_open_w walls)
 tile_base_w = cell_open_w - 2 * tile_wall_clearance; // 28.4 mm default
@@ -123,7 +125,7 @@ dovetail_detent_r = 0.26;   // gentle click protrusion (flexes into center slot)
 dovetail_slot_w = 1.50;     // center flex slot in male tab for easy kid assembly
 
 // Region bar derived dimensions
-slot_floor_z = total_plate_h - region_slot_depth; // 5.5 mm solid floor underneath!
+slot_floor_z = total_plate_h - region_slot_depth; // 6.5 mm solid floor underneath!
 bar_tongue_w = region_slot_width - 2 * region_bar_clearance;
 bar_tongue_h = region_slot_depth + 0.25; // keeps crown 0.25 mm clear above wall posts
 bar_bevel_h = (region_bar_crown_width - bar_tongue_w) / 2; // 45-deg print-safe slope
@@ -132,8 +134,8 @@ bar_bevel_h = (region_bar_crown_width - bar_tongue_w) / 2; // 45-deg print-safe 
 border_paint_ridge_h = 0.70;
 border_paint_ridge_w = region_bar_crown_width - 1.1; // 2.9 mm flat paint ridge
 border_shoulder_h = (bar_tongue_h - region_slot_depth) + bar_bevel_h + (region_bar_crown_height - border_paint_ridge_h);
-border_total_h = border_shoulder_h + border_paint_ridge_h; // 3.33 mm above total_plate_h
-board_total_h = total_plate_h + border_total_h;           // 15.83 mm total height with border
+border_total_h = border_shoulder_h + border_paint_ridge_h; // 3.25 mm above total_plate_h
+board_total_h = total_plate_h + border_total_h;           // 16.75 mm total height with border
 
 // ============================================================================
 // 2D / 3D Helper Primitives
@@ -349,10 +351,10 @@ module cell_interior_cuts(cx, cy) {
     }
 }
 
-// Deep Monolithic Region-Line Groove along X or Y (7.0 mm deep)
+// Deep Monolithic Region-Line Groove along X or Y (7.0 mm deep, compact 0.25 mm guide chamfer)
 module region_slot_x(y_pos, x_start, x_end) {
     len_x = x_end - x_start;
-    chamf = 0.45;
+    chamf = 0.25;
     translate([x_start, y_pos - region_slot_width / 2, slot_floor_z])
         cube([len_x, region_slot_width, region_slot_depth + eps]);
     hull() {
@@ -365,7 +367,7 @@ module region_slot_x(y_pos, x_start, x_end) {
 
 module region_slot_y(x_pos, y_start, y_end) {
     len_y = y_end - y_start;
-    chamf = 0.45;
+    chamf = 0.25;
     translate([x_pos - region_slot_width / 2, y_start, slot_floor_z])
         cube([region_slot_width, len_y, region_slot_depth + eps]);
     hull() {
@@ -380,17 +382,18 @@ module region_slot_y(x_pos, y_start, y_end) {
 // so perpendicular region_bar_1x / 2x / 3x crowns seat flush into the border.
 // Centered at (0, 0) on the perimeter grid line; bar enters from +Y toward y = 0.
 module border_bar_notch() {
-    nw = region_bar_crown_width / 2 + region_bar_clearance; // 2.18 mm half-width
+    nw = region_bar_crown_width / 2 + max(region_bar_clearance, 0.12); // 2.12 mm half-width
+    apex_y = -0.05; // slight apex relief so 0.4 mm nozzle inside-corner radius never pinches miter tip
     reach = divider_hw + 0.6;
 
     translate([0, 0, total_plate_h - 0.05])
         linear_extrude(height = border_total_h + 0.25)
             polygon([
-                [0,   0],
-                [ nw, nw],
+                [0,   apex_y],
+                [ nw, apex_y + nw],
                 [ nw, reach],
                 [-nw, reach],
-                [-nw, nw]
+                [-nw, apex_y + nw]
             ]);
 }
 
@@ -645,7 +648,7 @@ module monolithic_border_notches(n_cells) {
 
 // Monolithic single-piece N x N board with flush solid outer walls, permanent raised black-paint
 // border, and 45-degree mitered border notches where interior region bars meet the outer edge
-// (For n_cells = 4: 145.6 x 145.6 x 15.83 mm — prints in one piece on a 180x180 mm A1 Mini bed)
+// (For n_cells = 4: 145.6 x 145.6 x 16.75 mm — prints in one piece on a 180x180 mm A1 Mini bed)
 module monolithic_board(n_cells = 4, border_color = undef) {
     span = n_cells * cell_pitch;
     x0 = -divider_hw;
@@ -957,7 +960,7 @@ module pencil_peg(paint_color = undef, label = "") {
 }
 
 // ============================================================================
-// Deep-Tongue 45-Degree Mitered Region-Line Bar (7.25 mm Tongue -> Zero Side Tip!)
+// Deep-Tongue 45-Degree Mitered Region-Line Bar (7.25 mm Tongue + Snug Ribs)
 // ============================================================================
 
 module miter_pointed_bar_2d(length, width) {
@@ -974,21 +977,80 @@ module miter_pointed_bar_2d(length, width) {
     ]);
 }
 
+// 2D cross-section of a single through-tongue snug rib pair (smooth ramps, zero coplanar seams)
+module bar_snug_rib_2d(base_x, crest_x, half_w_inner, half_w_outer) {
+    polygon([
+        [-base_x  / 2, -half_w_inner],
+        [-crest_x / 2, -half_w_outer],
+        [ crest_x / 2, -half_w_outer],
+        [ base_x  / 2, -half_w_inner],
+        [ base_x  / 2,  half_w_inner],
+        [ crest_x / 2,  half_w_outer],
+        [-crest_x / 2,  half_w_outer],
+        [-base_x  / 2,  half_w_inner]
+    ]);
+}
+
+// Support-free vertical snug rib pair with gentle bottom lead-in ramp (z = 0.35 -> 1.15 mm),
+// full 5.40 mm straight bearing crest (z = 1.15 -> 6.55 mm), and hidden top taper (z = 7.10 mm).
+module bar_snug_rib() {
+    if (region_bar_snug_rib > 0) {
+        hw_core = bar_tongue_w / 2 - 0.10;
+        hw_flush = bar_tongue_w / 2 - 0.04;
+        hw_crest = bar_tongue_w / 2 + region_bar_snug_rib;
+        base_x = 3.2;
+        crest_x = 1.0;
+
+        hull() {
+            translate([0, 0, 0.35])
+                linear_extrude(height = eps)
+                    bar_snug_rib_2d(base_x, crest_x, hw_core, hw_flush);
+            translate([0, 0, 1.15])
+                linear_extrude(height = (region_slot_depth - 0.45) - 1.15)
+                    bar_snug_rib_2d(base_x, crest_x, hw_core, hw_crest);
+            translate([0, 0, bar_tongue_h - 0.15])
+                linear_extrude(height = eps)
+                    bar_snug_rib_2d(base_x, crest_x, hw_core, hw_flush);
+        }
+    }
+}
+
+// Rib X-centers inside solid straight cell-wall zones (clear of corner cutouts):
+//   1x: 2 pairs at +-9.5 mm (19 mm yaw span -> firm in zigzags!)
+//   2x: 2 pairs at +-25.0 mm (50 mm yaw span, same light kid pull-out force as 1x)
+//   3x: 3 pairs at -42.0, 0.0, +42.0 mm (one per cell, smooth pull-out)
+function bar_rib_positions(cells) =
+    (cells == 1) ? [-9.5, 9.5] :
+    (cells == 2) ? [-25.0, 25.0] :
+    [for (i = [0 : cells - 1])
+        let(cx = (i - (cells - 1) / 2) * cell_pitch)
+        (i == 0) ? (cx - 7.0) :
+        (i == cells - 1) ? (cx + 7.0) :
+        cx
+    ];
+
 module region_bar(cells = 1, paint_color = undef) {
-    vertex_tip_gap = 0.25;
+    vertex_tip_gap = 0.15;
     full_len = cells * cell_pitch - 2 * vertex_tip_gap;
+    bar_bot_chamf = 0.25; // compact bottom chamfer: wider bed footprint + 6.50 mm straight vertical engagement
     paint_ridge_h = 0.70;
     paint_ridge_w = region_bar_crown_width - 1.1;
 
     union() {
         color(paint_color == undef ? undef : "#F5F5F2") {
-            // Deep anti-tip tongue
-            hull() {
-                linear_extrude(height = eps)
-                    miter_pointed_bar_2d(full_len - 0.6, bar_tongue_w - 2 * elephant_foot_bevel);
-                translate([0, 0, elephant_foot_bevel])
-                    linear_extrude(height = bar_tongue_h - elephant_foot_bevel)
-                        miter_pointed_bar_2d(full_len, bar_tongue_w);
+            // Deep anti-tip tongue with localized vertical snug ribs
+            union() {
+                hull() {
+                    linear_extrude(height = eps)
+                        miter_pointed_bar_2d(full_len - 2 * bar_bot_chamf, bar_tongue_w - 2 * bar_bot_chamf);
+                    translate([0, 0, bar_bot_chamf])
+                        linear_extrude(height = bar_tongue_h - bar_bot_chamf)
+                            miter_pointed_bar_2d(full_len, bar_tongue_w);
+                }
+                for (rx = bar_rib_positions(cells)) {
+                    translate([rx, 0, 0])
+                        bar_snug_rib();
+                }
             }
             // White flared crown shoulder (0.7 mm below the raised paint ridge)
             hull() {

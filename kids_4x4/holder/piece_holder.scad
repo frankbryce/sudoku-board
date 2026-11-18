@@ -53,8 +53,8 @@ pad_h  = 0.6;                     // raised paint-marker color pads
 B_span   = 4 * cell_pitch;                // 140.0 mm grid span
 B_width  = B_span + 2 * divider_hw;       // 145.6 mm outer board width
 B_deck_h = total_plate_h;                 // 12.50 mm cell wall height
-B_bord_h = border_total_h;                // 3.33 mm raised permanent black border
-B_tot_h  = board_total_h;                 // 15.83 mm total board thickness
+B_bord_h = border_total_h;                // 3.25 mm raised permanent black border
+B_tot_h  = board_total_h;                 // 16.75 mm total board thickness
 
 // Flush Holder Outer Shell & Inner Locating Lip:
 // - Board outer wall is [-72.8, +72.8] (145.6 x 145.6 mm).
