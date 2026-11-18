@@ -1,0 +1,683 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DoDad Puzzles — Hands-On Math &amp; Logic Puzzles for Dads and Kids</title>
+  <meta name="description" content="Making it easier for Dads to spend quality time with their kids through hands-on math and logic puzzles. Free 3D-printable STLs and workbooks, plus shipped kits.">
+  <meta property="og:title" content="DoDad Puzzles — Hands-On Math &amp; Logic Puzzles">
+  <meta property="og:description" content="Free 3D-printable 4x4 Color Sudoku STLs, pencil-marking pegs, Jigsaw variants, and 168-puzzle workbooks—or save your time with ready-to-play sets.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://dodadpuzzles.com/">
+  <meta property="og:image" content="https://dodadpuzzles.com/assets/images/hero-4x4-set.jpg">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:creator" content="@RobotProctor">
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700;12..96,800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+  <script type="module" src="script.js"></script>
+</head>
+<body>
+  <a class="skip-link" href="#main-content">Skip to main content</a>
+
+  <header class="site-header">
+    <div class="header-inner">
+      <a class="site-logo" href="#top" aria-current="page">
+        <svg class="brand-mark" viewBox="0 0 64 64" width="34" height="34" aria-hidden="true">
+          <rect x="2" y="2" width="60" height="60" rx="14" fill="#1D2430"/>
+          <rect x="7" y="7" width="50" height="50" rx="9" fill="#FAF8F3"/>
+          <rect x="11" y="11" width="19" height="19" rx="4.5" fill="#1D6FE2"/>
+          <rect x="34" y="11" width="19" height="19" rx="4.5" fill="#E03B3B"/>
+          <rect x="11" y="34" width="19" height="19" rx="4.5" fill="#DF9B55"/>
+          <rect x="34" y="34" width="19" height="19" rx="4.5" fill="#159E6E"/>
+          <rect x="30.5" y="9" width="3" height="46" rx="1.5" fill="#1D2430"/>
+          <rect x="9" y="30.5" width="46" height="3" rx="1.5" fill="#1D2430"/>
+        </svg>
+        <span class="brand-text">
+          <span class="brand-name">DoDad Puzzles</span>
+          <span class="brand-tag">dodadpuzzles.com</span>
+        </span>
+      </a>
+
+      <nav class="site-nav" aria-label="Primary">
+        <button
+          class="menu-button"
+          type="button"
+          popovertarget="site-menu"
+          popovertargetaction="toggle"
+          aria-controls="site-menu"
+        >
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true">
+            <line x1="4" y1="6" x2="20" y2="6"/>
+            <line x1="4" y1="12" x2="20" y2="12"/>
+            <line x1="4" y1="18" x2="20" y2="18"/>
+          </svg>
+          <span>Menu</span>
+        </button>
+
+        <ul id="site-menu" class="site-menu" popover="auto">
+          <li><a href="#story">The Story</a></li>
+          <li><a href="#get-started">Free &amp; Shipped</a></li>
+          <li><a href="#growth">Ages 3 to 10+</a></li>
+          <li><a href="#gallery">Photos &amp; CAD</a></li>
+          <li><a href="#socials" class="nav-socials-pill">My Socials</a></li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+  <main id="main-content">
+    <!-- Hero Section -->
+    <section id="top" class="hero">
+      <div class="container hero-grid">
+        <div class="hero-copy">
+          <p class="eyebrow">
+            <span class="swatch-row" aria-hidden="true">
+              <span class="swatch swatch-blue"></span>
+              <span class="swatch swatch-red"></span>
+              <span class="swatch swatch-tan"></span>
+              <span class="swatch swatch-green"></span>
+            </span>
+            Hands-on math &amp; logic puzzles for Dads and kids
+          </p>
+          <h1>More quality time with your kiddos, one puzzle at a time.</h1>
+          <p class="hero-lead">
+            A tactile, 3D-printable <strong>4&times;4 Color Sudoku</strong> system built to grow right alongside your kids&mdash;with physical pencil-marking pegs, Jigsaw dividers, and a 168-puzzle workbook. Print every file free forever, or save your time and get a set shipped to your door.
+          </p>
+
+          <div class="hero-actions">
+            <a class="btn btn-primary" href="#get-started">
+              Download Free STLs &amp; PDFs
+            </a>
+            <button type="button" class="btn btn-secondary" id="open-shop-hero">
+              Order Shipped Set (Soon)
+            </button>
+          </div>
+
+          <div class="hero-socials-strip" aria-label="Quick social links">
+            <span class="strip-label">Find me on socials:</span>
+            <a class="social-chip" href="https://x.com/RobotProctor" target="_blank" rel="noopener noreferrer">
+              <svg viewBox="0 0 24 24" width="15" height="15" fill="currentColor" aria-hidden="true">
+                <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+              </svg>
+              <span>@RobotProctor on X</span>
+            </a>
+            <a class="social-chip" href="https://substack.com/@jcarp" target="_blank" rel="noopener noreferrer">
+              <svg viewBox="0 0 24 24" width="15" height="15" fill="currentColor" aria-hidden="true">
+                <path d="M22.539 8.242H1.46V5.406h21.08v2.836zM1.46 10.812V24L12 18.11 22.54 24V10.812H1.46zM22.54 0H1.46v2.836h21.08V0z"/>
+              </svg>
+              <span>@jcarp on Substack</span>
+            </a>
+          </div>
+        </div>
+
+        <figure class="hero-media">
+          <button
+            type="button"
+            class="photo-trigger"
+            data-lightbox-src="assets/images/hero-4x4-set.jpg"
+            data-lightbox-title="4x4 Color Sudoku Board, Flush Carry Case &amp; Printed Workbook"
+            data-lightbox-caption="The real 3D-printed 4x4 board, four-quadrant carry tray filled with painted tiles and pencil-mark pegs, and the printed 4x4 Color Sudoku workbook."
+            aria-label="Inspect full-size photo of the 4x4 Color Sudoku set and workbook"
+          >
+            <picture>
+              <source srcset="assets/images/hero-4x4-set.webp" type="image/webp">
+              <img
+                src="assets/images/hero-4x4-set.jpg"
+                alt="A 3D-printed white 4x4 Color Sudoku board standing upright behind its matching carry tray holding blue, red, tan, and green tiles and pencil-marking pegs, next to the printed 4x4 Color Sudoku workbook."
+                width="770"
+                height="748"
+                fetchpriority="high"
+              >
+            </picture>
+            <span class="zoom-badge" aria-hidden="true">Tap to inspect</span>
+          </button>
+          <figcaption>
+            The real 4&times;4 board, flush board-as-lid carry tray, pencil-marking pegs, and printed workbook.
+          </figcaption>
+        </figure>
+      </div>
+    </section>
+
+    <!-- Founder's Note & Origin Story -->
+    <section id="story" class="story-section">
+      <div class="container story-grid">
+        <article class="story-letter">
+          <p class="section-kicker">Why DoDad Puzzles exists</p>
+          <h2>From a homemade LEGO Sudoku board to a puzzle system built to grow</h2>
+
+          <div class="letter-body">
+            <p>
+              A bunch of parents complimented a Lego Sudoku set I made for my sons a few years ago. Inspired by this, I have now designed a more functional sudoku set that allows for more growth, including pencil marking, and jigsaw sudoku variants. A 4&times;4 board is the perfect size to get started with my 3 year old, and it&rsquo;s also the perfect size to teach more advanced concepts like x-wings to my 10 year old.
+            </p>
+            <p>
+              There are always free options if you would like to participate with DoDads, but there are always ways to spend money to save your time as well. You should spend that quality time with your kiddos, instead.
+            </p>
+            <p class="letter-closing">
+              I hope you enjoy using DoDad puzzles in your home. Please @ me on social media if you are enjoying it.
+            </p>
+          </div>
+
+          <div class="letter-signature">
+            <div class="sig-line">
+              <strong>&mdash; John (DoDad Puzzles)</strong>
+              <span class="sig-handles">
+                <a href="https://x.com/RobotProctor" target="_blank" rel="noopener noreferrer">@RobotProctor</a>
+                &middot;
+                <a href="https://substack.com/@jcarp" target="_blank" rel="noopener noreferrer">substack.com/@jcarp</a>
+              </span>
+            </div>
+          </div>
+        </article>
+
+        <figure class="origin-figure">
+          <button
+            type="button"
+            class="photo-trigger"
+            data-lightbox-src="assets/images/origin-lego-sudoku.jpg"
+            data-lightbox-title="Where It Started: The Original LEGO Sudoku Set"
+            data-lightbox-caption="Playing the original homemade LEGO Color Sudoku board and printed puzzle binder that started it all."
+            aria-label="Inspect full-size photo of the original LEGO Sudoku set"
+          >
+            <picture>
+              <source srcset="assets/images/origin-lego-sudoku.webp" type="image/webp">
+              <img
+                src="assets/images/origin-lego-sudoku.jpg"
+                alt="A young boy in a circuit-board shirt playing the original homemade 9x9 LEGO Color Sudoku board beside a LEGO piece box and printed puzzle binder."
+                width="786"
+                height="1024"
+                loading="lazy"
+              >
+            </picture>
+            <span class="zoom-badge" aria-hidden="true">Original LEGO prototype</span>
+          </button>
+          <figcaption>
+            Where it all started: the homemade LEGO Sudoku set that got other parents asking how to build one for their kids.
+          </figcaption>
+        </figure>
+      </div>
+    </section>
+
+    <!-- Two Paths: Free Downloads vs. Save Your Time -->
+    <section id="get-started" class="paths-section">
+      <div class="container">
+        <div class="section-header">
+          <p class="section-kicker">Two ways to play</p>
+          <h2>Always free to make. Ready to ship when you want your time back.</h2>
+          <p class="section-subtitle">
+            Every STL, 3MF print plate, and printable workbook is free and open source. Prefer to skip the printing and painting? Grab a finished set shipped straight to your house.
+          </p>
+        </div>
+
+        <div class="paths-grid">
+          <!-- Free Path -->
+          <article class="path-card path-free">
+            <div class="path-card-head">
+              <span class="path-badge badge-free">Free Forever &middot; DIY</span>
+              <h3>Download STLs &amp; Workbooks</h3>
+              <p>Print the board on your own 3D printer (fits a Bambu Lab A1 Mini) and print the workbooks at home on US Letter paper.</p>
+            </div>
+
+            <div class="path-card-body">
+              <div class="download-group">
+                <h4>3D Printable Files (STL &amp; 3MF)</h4>
+                <ul class="resource-list">
+                  <li>
+                    <a href="https://github.com/frankbryce/sudoku-board/raw/master/stl/board_holder_plusplus.3mf" target="_blank" rel="noopener noreferrer">
+                      <span class="res-title">4&times;4 Board + Carry Case Plate</span>
+                      <span class="res-meta">board_holder_plusplus.3mf</span>
+                    </a>
+                  </li>
+                  <li>
+                    <a href="https://github.com/frankbryce/sudoku-board/raw/master/stl/16pieces64pencilmarks.3mf" target="_blank" rel="noopener noreferrer">
+                      <span class="res-title">16 Tiles + 64 Pencil-Mark Pegs</span>
+                      <span class="res-meta">16pieces64pencilmarks.3mf</span>
+                    </a>
+                  </li>
+                  <li>
+                    <a href="https://github.com/frankbryce/sudoku-board/raw/master/stl/board_4x4.stl" target="_blank" rel="noopener noreferrer">
+                      <span class="res-title">One-Piece 4&times;4 Board + Flush Tray STLs</span>
+                      <span class="res-meta">board_4x4.stl</span>
+                    </a>
+                  </li>
+                  <li>
+                    <a href="https://github.com/frankbryce/sudoku-board/tree/master/stl" target="_blank" rel="noopener noreferrer">
+                      <span class="res-title">Browse All STLs (incl. Modular 9&times;9 &amp; Jigsaw Bars)</span>
+                      <span class="res-meta">github.com/frankbryce/sudoku-board/stl</span>
+                    </a>
+                  </li>
+                </ul>
+              </div>
+
+              <div class="download-group">
+                <h4>Printable Workbooks &amp; Instructions (PDF)</h4>
+                <ul class="resource-list">
+                  <li>
+                    <a href="https://github.com/frankbryce/sudoku-board/raw/master/kids_4x4/output/workbook_colors.pdf" target="_blank" rel="noopener noreferrer">
+                      <span class="res-title">4&times;4 Color Sudoku Workbook (168 Puzzles)</span>
+                      <span class="res-meta">workbook_colors.pdf</span>
+                    </a>
+                  </li>
+                  <li>
+                    <a href="https://github.com/frankbryce/sudoku-board/raw/master/kids_4x4/output/workbook_toddler_colors.pdf" target="_blank" rel="noopener noreferrer">
+                      <span class="res-title">Dad &amp; Me Edition (Ages 3&ndash;5, Wordless Guide)</span>
+                      <span class="res-meta">workbook_toddler_colors.pdf</span>
+                    </a>
+                  </li>
+                  <li>
+                    <a href="https://github.com/frankbryce/sudoku-board/raw/master/kids_4x4/output/workbook_visual_colors.pdf" target="_blank" rel="noopener noreferrer">
+                      <span class="res-title">Visual Edition (Storyboards &amp; Symbol-Only)</span>
+                      <span class="res-meta">workbook_visual_colors.pdf</span>
+                    </a>
+                  </li>
+                  <li>
+                    <a href="https://github.com/frankbryce/sudoku-board/tree/master/kids_4x4/output" target="_blank" rel="noopener noreferrer">
+                      <span class="res-title">Numbered Editions &amp; Answer Keys</span>
+                      <span class="res-meta">All 12 PDFs on GitHub</span>
+                    </a>
+                  </li>
+                  <li>
+                    <a href="https://github.com/frankbryce/sudoku-board/blob/master/kids_4x4/build/BUILD_INSTRUCTIONS.md" target="_blank" rel="noopener noreferrer">
+                      <span class="res-title">Step-by-Step LEGO-Style Build Instructions</span>
+                      <span class="res-meta">BUILD_INSTRUCTIONS.md</span>
+                    </a>
+                  </li>
+                </ul>
+              </div>
+            </div>
+
+            <div class="path-card-foot">
+              <a class="btn btn-primary btn-block" href="https://github.com/frankbryce/sudoku-board" target="_blank" rel="noopener noreferrer">
+                Open Full GitHub Repo
+              </a>
+            </div>
+          </article>
+
+          <!-- Shipped Path -->
+          <article class="path-card path-shop">
+            <div class="path-card-head">
+              <span class="path-badge badge-shop">Save Your Time &middot; Direct Ship</span>
+              <h3>Ready-to-Play Shipped Sets</h3>
+              <p>No 3D printer, no paint markers, no sorting pegs at midnight. Open the box and sit down with your kids right away.</p>
+            </div>
+
+            <div class="path-card-body">
+              <div class="kit-preview">
+                <picture>
+                  <source srcset="assets/images/render-carry-case.webp" type="image/webp">
+                  <img
+                    src="assets/images/render-carry-case.jpg"
+                    alt="CAD render of the 4x4 board lifting off its matching four-quadrant carry case holding painted tiles, pegs, and divider bars."
+                    width="1200"
+                    height="900"
+                    loading="lazy"
+                  >
+                </picture>
+              </div>
+
+              <div class="kit-contents">
+                <h4>What&rsquo;s planned for the 4&times;4 Starter Kit</h4>
+                <ul class="check-list">
+                  <li>One-piece 4&times;4 Sudoku board (<code>145.6 &times; 145.6 mm</code>) with captured divider slots</li>
+                  <li>Flush board-as-lid four-quadrant carry tray (flip the board over to pack it up)</li>
+                  <li>16 finished main color tiles (Blue, Red, Tan, Green) + 64 non-rolling pencil-mark pegs</li>
+                  <li>Full set of <code>1x</code>, <code>2x</code>, and <code>3x</code> region bars for standard &amp; Jigsaw layouts</li>
+                  <li>Printed 10-level workbook (168 puzzles) so you can start playing immediately</li>
+                </ul>
+              </div>
+
+              <p class="iteration-note">
+                <strong>Always improving:</strong> Physical sets ship with the latest design iteration, while every earlier revision stays archived forever in the public GitHub repo.
+              </p>
+            </div>
+
+            <div class="path-card-foot">
+              <button type="button" class="btn btn-dark btn-block" id="open-shop-card">
+                Join the First Batch / Get Notified
+              </button>
+            </div>
+          </article>
+        </div>
+
+        <!-- Open-Source Iteration History Callout -->
+        <aside class="history-callout" aria-label="Open-source version history">
+          <div class="history-copy">
+            <h3>Every iteration is open &amp; archived on GitHub</h3>
+            <p>
+              DoDad sets are continually refined&mdash;tighter divider fits, snugger pencil pegs, and better carry trays. Need a spare piece for an older print or curious how the design evolved? The entire commit history and OpenSCAD source are always available.
+            </p>
+          </div>
+          <a class="btn btn-outline" href="https://github.com/frankbryce/sudoku-board/commits/master" target="_blank" rel="noopener noreferrer">
+            View Full Version History
+          </a>
+        </aside>
+      </div>
+    </section>
+
+    <!-- 10-Level Growth Path -->
+    <section id="growth" class="growth-section">
+      <div class="container">
+        <div class="section-header">
+          <p class="section-kicker">One 4&times;4 board, years of growth</p>
+          <h2>Gentle enough for a 3-year-old. Deep enough for X-Wings at 10.</h2>
+          <p class="section-subtitle">
+            Each workbook level adds a single new logic idea across 168 graded puzzles&mdash;turning abstract pencil marks into physical pegs kids can touch, move, and reason through together.
+          </p>
+        </div>
+
+        <ol class="levels-grid">
+          <li class="level-card accent-blue">
+            <span class="level-range">Levels 1&ndash;2</span>
+            <h3>First Logic &amp; Singles</h3>
+            <p><strong>Hidden Singles &amp; Naked Singles.</strong> Start by matching 4 bright colors with zero reading required (including our wordless <em>Dad &amp; Me</em> toddler edition).</p>
+            <ul class="tag-list">
+              <li>Hidden Single</li>
+              <li>Naked Single</li>
+              <li>24 puzzles</li>
+            </ul>
+          </li>
+          <li class="level-card accent-green">
+            <span class="level-range">Levels 3&ndash;6</span>
+            <h3>Physical Pencil Marking</h3>
+            <p><strong>Center Marks, Snyder Notation, Pointing &amp; Naked Pairs.</strong> Non-rolling octagonal pegs drop into center and corner sockets so kids see eliminations happen right on the board.</p>
+            <ul class="tag-list">
+              <li>Center Marks</li>
+              <li>Snyder Notation</li>
+              <li>Pointing Pairs</li>
+              <li>Naked Pairs</li>
+            </ul>
+          </li>
+          <li class="level-card accent-tan">
+            <span class="level-range">Levels 7&ndash;8</span>
+            <h3>Variant Rules</h3>
+            <p><strong>Jigsaw &amp; Anti-Knight Sudoku.</strong> Drop <code>1x</code> divider bars into interior grid slots to reshape the board into irregular Jigsaw regions, or add chess-knight logic.</p>
+            <ul class="tag-list">
+              <li>Jigsaw Regions</li>
+              <li>Anti-Knight</li>
+              <li>24 puzzles</li>
+            </ul>
+          </li>
+          <li class="level-card accent-red">
+            <span class="level-range">Levels 9&ndash;10</span>
+            <h3>X-Wings &amp; All-Star</h3>
+            <p><strong>Optional X-Wing &amp; 60-Puzzle Challenge.</strong> Real tournament-level logic made approachable on a 4&times;4 board&mdash;plus modular tiles when they&rsquo;re ready to scale up to 9&times;9.</p>
+            <ul class="tag-list">
+              <li>X-Wing</li>
+              <li>All-Star (60 puzzles)</li>
+              <li>Scales to 9&times;9</li>
+            </ul>
+          </li>
+        </ol>
+      </div>
+    </section>
+
+    <!-- Gallery: Real Photos & CAD Renders -->
+    <section id="gallery" class="gallery-section">
+      <div class="container">
+        <div class="section-header">
+          <p class="section-kicker">Closer look at the design</p>
+          <h2>Built for small hands, painted cleanly, packed flat</h2>
+          <p class="section-subtitle">Click or tap any image to inspect the sockets, dividers, carry tray, and 9&times;9 modular expansion up close.</p>
+        </div>
+
+        <div class="gallery-grid">
+          <figure class="gallery-card">
+            <button
+              type="button"
+              class="photo-trigger"
+              data-lightbox-src="assets/images/render-board-4x4.jpg"
+              data-lightbox-title="4x4 Jigsaw Sudoku Mid-Game"
+              data-lightbox-caption="Irregular T-shaped Jigsaw regions formed with 1x divider bars, showing a Blue+Green center-mark Naked Pair and Red Snyder Pointing Pair."
+              aria-label="Inspect 4x4 Jigsaw Sudoku board render"
+            >
+              <picture>
+                <source srcset="assets/images/render-board-4x4.webp" type="image/webp">
+                <img
+                  src="assets/images/render-board-4x4.jpg"
+                  alt="3D render of the 4x4 board set up with Jigsaw divider bars, main colored tiles, center-mark pegs, and corner Snyder pegs."
+                  width="1200"
+                  height="900"
+                  loading="lazy"
+                >
+              </picture>
+            </button>
+            <figcaption>
+              <strong>4&times;4 Jigsaw &amp; Pencil Marks</strong>
+              <span>Center-mark Naked Pairs and corner Snyder pegs in action.</span>
+            </figcaption>
+          </figure>
+
+          <figure class="gallery-card">
+            <button
+              type="button"
+              class="photo-trigger"
+              data-lightbox-src="assets/images/render-carry-case.jpg"
+              data-lightbox-title="Flush Board-as-Lid Carry Case"
+              data-lightbox-caption="Flip the 4x4 board upside down to close the four-quadrant tray completely flush, storing all 16 tiles, 64 pegs, and region bars."
+              aria-label="Inspect flush board-as-lid carry case render"
+            >
+              <picture>
+                <source srcset="assets/images/render-carry-case.webp" type="image/webp">
+                <img
+                  src="assets/images/render-carry-case.jpg"
+                  alt="3D render of the 4x4 board lifting off the matching four-quadrant piece holder carry case."
+                  width="1200"
+                  height="900"
+                  loading="lazy"
+                >
+              </picture>
+            </button>
+            <figcaption>
+              <strong>Flush Board-as-Lid Case</strong>
+              <span>Holds all 16 tiles, 64 pegs, and divider bars in one tidy cube.</span>
+            </figcaption>
+          </figure>
+
+          <figure class="gallery-card">
+            <button
+              type="button"
+              class="photo-trigger"
+              data-lightbox-src="assets/images/render-board-9x9.jpg"
+              data-lightbox-title="Full 9x9 Modular Color Sudoku Board"
+              data-lightbox-caption="Click-together Montessori jigsaw 1x1 tiles let you build any M x N grid up to a full 9x9 board that holds flat when lifted."
+              aria-label="Inspect full 9x9 modular Sudoku board render"
+            >
+              <picture>
+                <source srcset="assets/images/render-board-9x9.webp" type="image/webp">
+                <img
+                  src="assets/images/render-board-9x9.jpg"
+                  alt="3D render of a full 9x9 modular Color Sudoku board assembled from interlocking 1x1 tiles."
+                  width="1200"
+                  height="900"
+                  loading="lazy"
+                >
+              </picture>
+            </button>
+            <figcaption>
+              <strong>Modular 9&times;9 Expansion</strong>
+              <span>Interlocking 1&times;1 Montessori tiles scale up when kids are ready.</span>
+            </figcaption>
+          </figure>
+
+          <figure class="gallery-card">
+            <button
+              type="button"
+              class="photo-trigger"
+              data-lightbox-src="assets/images/render-closeup.jpg"
+              data-lightbox-title="Raised Paint Pads &amp; Peg Sockets"
+              data-lightbox-caption="Raised flat pads sit proud above the white body so you can color every piece cleanly with acrylic paint markers."
+              aria-label="Inspect close-up render of raised paint pads and peg sockets"
+            >
+              <picture>
+                <source srcset="assets/images/render-closeup.webp" type="image/webp">
+                <img
+                  src="assets/images/render-closeup.jpg"
+                  alt="Close-up 3D render showing raised flat paint surfaces on tiles, octagonal candidate pegs, and interior peg sockets."
+                  width="1200"
+                  height="900"
+                  loading="lazy"
+                >
+              </picture>
+            </button>
+            <figcaption>
+              <strong>Clean Paint-Marker Tops</strong>
+              <span>Raised flat pads make single-extruder white PLA prints pop in color.</span>
+            </figcaption>
+          </figure>
+        </div>
+
+        <!-- Inline Disclosure FAQ (no JS needed) -->
+        <section class="faq-section" aria-labelledby="faq-heading">
+          <h3 id="faq-heading">Quick Maker &amp; Parent Questions</h3>
+          <div class="faq-list">
+            <details name="dodad-faq">
+              <summary>What 3D printer do I need to print the free 4&times;4 set?</summary>
+              <p>
+                The one-piece 4&times;4 board and flush carry tray are <code>145.6 &times; 145.6 mm</code>, designed to print cleanly in White PLA / PLA Matte on a Bambu Lab A1 Mini (<code>180 &times; 180 mm</code> bed) or any larger FDM printer. No multi-color AMS is required&mdash;just touch up the raised top pads with paint markers!
+              </p>
+            </details>
+            <details name="dodad-faq">
+              <summary>How should I print the free PDF workbooks?</summary>
+              <p>
+                Print any workbook PDF at <strong>100% / Actual Size</strong> on US Letter paper. Color printing looks great with the Blue, Red, Tan, and Green tiles, and each color also carries a distinct shape symbol so black-and-white prints work too.
+              </p>
+            </details>
+            <details name="dodad-faq">
+              <summary>Why are there center AND corner peg holes in every cell?</summary>
+              <p>
+                Real Sudoku solvers use two distinct types of pencil marks: <strong>center marks</strong> (&ldquo;this cell must be one of these colors&rdquo;) and <strong>corner / Snyder marks</strong> (&ldquo;this color goes in one of these cells inside this box&rdquo;). Dedicated sockets make advanced logic visual and hands-on for kids.
+              </p>
+            </details>
+          </div>
+        </section>
+      </div>
+    </section>
+
+    <!-- Prominent, Unmistakable Socials Hub -->
+    <section id="socials" class="socials-section" aria-labelledby="socials-heading">
+      <div class="container">
+        <div class="socials-shell">
+          <div class="socials-header">
+            <span class="socials-eyebrow">My Socials &mdash; Come Say Hi!</span>
+            <h2 id="socials-heading">Playing DoDad Puzzles at home? @ me on social media!</h2>
+            <p>
+              This is where I share new puzzle prototypes, print tweaks, dad-and-kid build stories, and announcements whenever ready-to-ship sets drop. Tag me&mdash;I&rsquo;d love to see your family&rsquo;s board on the table.
+            </p>
+          </div>
+
+          <div class="socials-cards">
+            <a class="social-card social-x" href="https://x.com/RobotProctor" target="_blank" rel="noopener noreferrer">
+              <div class="social-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" width="28" height="28" fill="currentColor">
+                  <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+                </svg>
+              </div>
+              <div class="social-meta">
+                <span class="social-platform">X (Twitter)</span>
+                <strong class="social-handle">@RobotProctor</strong>
+                <span class="social-url">x.com/RobotProctor</span>
+                <p>Tag me with your prints, puzzle wins, and questions.</p>
+              </div>
+              <span class="social-cta" aria-hidden="true">Follow &amp; @ me &rarr;</span>
+            </a>
+
+            <a class="social-card social-substack" href="https://substack.com/@jcarp" target="_blank" rel="noopener noreferrer">
+              <div class="social-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" width="28" height="28" fill="currentColor">
+                  <path d="M22.539 8.242H1.46V5.406h21.08v2.836zM1.46 10.812V24L12 18.11 22.54 24V10.812H1.46zM22.54 0H1.46v2.836h21.08V0z"/>
+                </svg>
+              </div>
+              <div class="social-meta">
+                <span class="social-platform">Substack</span>
+                <strong class="social-handle">@jcarp</strong>
+                <span class="social-url">substack.com/@jcarp</span>
+                <p>Longer build notes, math-with-kids ideas, and kit launch updates.</p>
+              </div>
+              <span class="social-cta" aria-hidden="true">Read &amp; Subscribe &rarr;</span>
+            </a>
+
+            <a class="social-card social-github" href="https://github.com/frankbryce/sudoku-board" target="_blank" rel="noopener noreferrer">
+              <div class="social-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" width="28" height="28" fill="currentColor">
+                  <path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/>
+                </svg>
+              </div>
+              <div class="social-meta">
+                <span class="social-platform">GitHub (Open Source)</span>
+                <strong class="social-handle">frankbryce/sudoku-board</strong>
+                <span class="social-url">github.com/frankbryce/sudoku-board</span>
+                <p>Free STLs, OpenSCAD source, printable PDFs, and full design history.</p>
+              </div>
+              <span class="social-cta" aria-hidden="true">Explore Files &rarr;</span>
+            </a>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container footer-inner">
+      <div class="footer-brand">
+        <strong>DoDad Puzzles</strong>
+        <span>Making it easier for Dads to spend quality time with their kids.</span>
+      </div>
+      <ul class="footer-links">
+        <li><a href="https://x.com/RobotProctor" target="_blank" rel="noopener noreferrer">X (@RobotProctor)</a></li>
+        <li><a href="https://substack.com/@jcarp" target="_blank" rel="noopener noreferrer">Substack (@jcarp)</a></li>
+        <li><a href="https://github.com/frankbryce/sudoku-board" target="_blank" rel="noopener noreferrer">GitHub Repo &amp; History</a></li>
+      </ul>
+    </div>
+  </footer>
+
+  <!-- Native Modal Dialog: Lightbox -->
+  <dialog id="lightbox-dialog" class="modal-dialog lightbox-dialog" closedby="any" aria-labelledby="lightbox-title">
+    <div class="modal-surface">
+      <div class="modal-header">
+        <h2 id="lightbox-title">Photo Preview</h2>
+        <form method="dialog">
+          <button type="submit" class="modal-close" autofocus aria-label="Close photo preview">&times;</button>
+        </form>
+      </div>
+      <div class="lightbox-body">
+        <img id="lightbox-img" alt="" width="1200" height="900">
+        <p id="lightbox-caption"></p>
+      </div>
+    </div>
+  </dialog>
+
+  <!-- Native Modal Dialog: Order / First Batch Info -->
+  <dialog id="shop-dialog" class="modal-dialog shop-dialog" closedby="any" aria-labelledby="shop-dialog-title">
+    <div class="modal-surface">
+      <div class="modal-header">
+        <h2 id="shop-dialog-title">Shipped DoDad Sets &mdash; Launching Soon</h2>
+        <form method="dialog">
+          <button type="submit" class="modal-close" autofocus aria-label="Close dialog">&times;</button>
+        </form>
+      </div>
+      <div class="shop-dialog-body">
+        <p>
+          I&rsquo;m putting the finishing touches on the first batch of ready-to-play 4&times;4 Color Sudoku kits (board, flush carry tray, colored tiles, pencil-marking pegs, Jigsaw dividers, and printed workbook) shipped straight to your door.
+        </p>
+        <p>
+          Want first dibs when checkout opens&mdash;or want to request a set now? Reach out directly on either of my socials:
+        </p>
+        <div class="dialog-actions">
+          <a class="btn btn-primary" href="https://substack.com/@jcarp" target="_blank" rel="noopener noreferrer">
+            Subscribe on Substack (@jcarp)
+          </a>
+          <a class="btn btn-secondary" href="https://x.com/RobotProctor" target="_blank" rel="noopener noreferrer">
+            Message @RobotProctor on X
+          </a>
+        </div>
+        <p class="dialog-footnote">
+          Have a 3D printer already? <a href="https://github.com/frankbryce/sudoku-board" target="_blank" rel="noopener noreferrer">Download every STL and PDF free on GitHub right now.</a>
+        </p>
+      </div>
+    </div>
+  </dialog>
+</body>
+</html>
+
