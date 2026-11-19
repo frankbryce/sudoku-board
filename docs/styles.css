@@ -1,41 +1,48 @@
 /* ==========================================================================
-   DoDad Puzzles — Warm Tactile Workshop Stylesheet
-   Palette derived directly from the physical 4x4 Color Sudoku tiles:
-   Blue (#1D6FE2), Red (#E03B3B), Tan (#DF9B55), Green (#159E6E) on PLA White.
+   DoDad Puzzles — Dark Slate Studio Stylesheet
+   Toned directly to the Option 3 dark studio banner (#0D151B -> #202931)
+   with physical 4x4 Color Sudoku tile accents: Blue, Red, Tan, Green.
    ========================================================================== */
 
 :root {
-  --bg: #FAF8F3;
-  --bg-soft: #F3EFE6;
-  --surface: #FFFFFF;
-  --surface-tint: #F7F4EC;
-  --ink: #1D2430;
-  --ink-muted: #4A5568;
-  --border: #E3DDD0;
-  --border-strong: #CFC7B7;
+  color-scheme: dark;
 
-  /* Physical 4x4 tile colors (contrast-tuned for text/UI) */
-  --tile-blue: #1B65C7;
-  --tile-blue-soft: #E9F2FD;
-  --tile-red: #D13434;
-  --tile-red-soft: #FDECEC;
-  --tile-tan: #C77E33;
+  --bg-deep: #0B1218;
+  --bg: #121A21;
+  --bg-soft: #17212A;
+  --surface: #1B2630;
+  --surface-tint: #22303C;
+  --ink: #F2F5F8;
+  --ink-muted: #A9B7C6;
+  --border: #2B3946;
+  --border-strong: #415568;
+
+  /* Physical 4x4 tile colors (contrast-tuned for dark slate backgrounds) */
+  --tile-blue: #58A6FF;
+  --tile-blue-solid: #1D6FE2;
+  --tile-blue-soft: rgba(88, 166, 255, 0.14);
+  --tile-red: #F05454;
+  --tile-red-soft: rgba(240, 84, 84, 0.14);
+  --tile-tan: #F0B46A;
   --tile-tan-swatch: #DF9B55;
-  --tile-tan-soft: #FCF3E8;
-  --tile-green: #12855C;
-  --tile-green-soft: #E7F7F0;
+  --tile-tan-soft: rgba(240, 180, 106, 0.15);
+  --tile-green: #2CC68F;
+  --tile-green-soft: rgba(44, 198, 143, 0.14);
 
   --radius-sm: 0.625rem;
   --radius-md: 1rem;
   --radius-lg: 1.5rem;
 
-  --shadow-tile: 0 2px 0 rgba(29, 36, 48, 0.08), 0 10px 26px -12px rgba(29, 36, 48, 0.14);
-  --shadow-lift: 0 4px 0 rgba(29, 36, 48, 0.1), 0 18px 36px -14px rgba(29, 36, 48, 0.2);
+  --shadow-tile: 0 2px 0 rgba(4, 8, 12, 0.45), 0 12px 28px -12px rgba(2, 6, 10, 0.65);
+  --shadow-lift: 0 4px 0 rgba(4, 8, 12, 0.55), 0 20px 40px -14px rgba(2, 6, 10, 0.8);
 
   --font-display: "Bricolage Grotesque", ui-rounded, "Segoe UI", system-ui, sans-serif;
   --font-body: "Plus Jakarta Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
 
   --container-max: 72rem;
+
+  accent-color: var(--tile-blue);
+  scrollbar-color: #5C7286 #121A21;
 }
 
 *,
@@ -116,12 +123,12 @@ code {
   inset-block-start: -4rem;
   z-index: 100;
   background: var(--ink);
-  color: #FFFFFF;
+  color: var(--bg-deep);
   padding-inline: 1rem;
   padding-block: 0.65rem;
   border-radius: var(--radius-sm);
   text-decoration: none;
-  font-weight: 600;
+  font-weight: 700;
 }
 
 .skip-link:focus {
@@ -141,9 +148,9 @@ code {
   position: sticky;
   inset-block-start: 0;
   z-index: 20;
-  background: color-mix(in srgb, var(--bg) 92%, transparent);
-  backdrop-filter: blur(10px);
-  border-block-end: 1px solid var(--border);
+  background: color-mix(in oklab, var(--bg-deep) 88%, transparent);
+  backdrop-filter: blur(12px);
+  border-block-end: 1px solid color-mix(in oklab, var(--border) 70%, transparent);
 }
 
 .site-header.is-measuring,
@@ -264,11 +271,12 @@ code {
 
 .site-menu a.nav-socials-pill {
   background: var(--ink);
-  color: #FFFFFF;
+  color: var(--bg-deep);
 }
 
 .site-menu a.nav-socials-pill:hover {
-  background: var(--tile-blue);
+  background: var(--tile-blue-solid);
+  color: #FFFFFF;
 }
 
 .site-header.is-wide .menu-button {
@@ -332,45 +340,47 @@ code {
 }
 
 .btn-primary {
-  background: var(--tile-blue);
+  background: var(--tile-blue-solid);
   color: #FFFFFF;
   box-shadow: 0 3px 0 #124891;
 }
 
 .btn-primary:hover {
-  background: #1555AC;
+  background: #287CF0;
 }
 
 .btn-secondary {
-  background: var(--surface);
+  background: var(--surface-tint);
   color: var(--ink);
   border-color: var(--border-strong);
-  box-shadow: 0 3px 0 var(--border);
+  box-shadow: 0 3px 0 #0A1016;
 }
 
 .btn-secondary:hover {
   border-color: var(--ink);
+  background: #2A3A49;
 }
 
 .btn-dark {
   background: var(--ink);
-  color: #FFFFFF;
-  box-shadow: 0 3px 0 #0D1117;
+  color: var(--bg-deep);
+  box-shadow: 0 3px 0 #95A7B8;
 }
 
 .btn-dark:hover {
-  background: #2C3648;
+  background: #FFFFFF;
 }
 
 .btn-outline {
   background: transparent;
   color: var(--ink);
-  border-color: var(--ink);
+  border-color: var(--border-strong);
 }
 
 .btn-outline:hover {
   background: var(--ink);
-  color: #FFFFFF;
+  color: var(--bg-deep);
+  border-color: var(--ink);
 }
 
 .btn-block {
@@ -403,11 +413,48 @@ code {
 }
 
 /* ==========================================================================
+   Top Studio Hero Banner (Seamless Dark Slate Blend)
+   ========================================================================== */
+
+.hero-banner {
+  position: relative;
+  overflow: clip;
+  background:
+    radial-gradient(ellipse 85% 90% at 50% 60%, #1C262F 0%, #111A21 58%, #0B1218 100%);
+  border-block-end: 1px solid color-mix(in oklab, var(--border) 60%, transparent);
+}
+
+.hero-banner-stage {
+  position: relative;
+  max-inline-size: 94rem;
+  margin-inline: auto;
+}
+
+.hero-banner-stage img {
+  inline-size: 100%;
+  block-size: auto;
+  aspect-ratio: 3 / 1;
+  object-fit: cover;
+  display: block;
+}
+
+/* Soft edge feathering so the banner melts into the dark slate canvas at every width */
+.hero-banner-stage::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    linear-gradient(to right, var(--bg-deep) 0%, transparent 7%, transparent 93%, var(--bg-deep) 100%),
+    linear-gradient(to bottom, rgba(11, 18, 24, 0.55) 0%, transparent 14%, transparent 78%, var(--bg) 100%);
+}
+
+/* ==========================================================================
    Hero Section
    ========================================================================== */
 
 .hero {
-  padding-block: clamp(2.25rem, 5vw, 4.25rem) clamp(3rem, 6vw, 4.75rem);
+  padding-block: clamp(2rem, 4.5vw, 3.5rem) clamp(3rem, 6vw, 4.75rem);
 }
 
 .hero-grid {
@@ -547,8 +594,9 @@ code {
   position: absolute;
   inset-inline-end: 0.85rem;
   inset-block-end: 0.85rem;
-  background: rgba(29, 36, 48, 0.86);
+  background: rgba(11, 18, 24, 0.88);
   color: #FFFFFF;
+  border: 1px solid rgba(255, 255, 255, 0.2);
   font-size: 0.78rem;
   font-weight: 700;
   padding-inline: 0.7rem;
@@ -703,12 +751,12 @@ code {
 
 .badge-free {
   background: var(--tile-green-soft);
-  color: var(--tile-green);
+  color: #5CE0AF;
 }
 
 .badge-shop {
   background: var(--tile-tan-soft);
-  color: #8F5417;
+  color: #F5C382;
 }
 
 .path-card-head h3 {
@@ -1052,8 +1100,9 @@ code {
 }
 
 .socials-shell {
-  background: var(--ink);
-  color: #F7F5EF;
+  background: var(--bg-deep);
+  color: #F2F5F8;
+  border: 1.5px solid var(--border-strong);
   border-radius: var(--radius-lg);
   padding: clamp(1.85rem, 4.5vw, 3.25rem);
   box-shadow: var(--shadow-lift);
@@ -1406,7 +1455,7 @@ dialog::backdrop {
 
 .modal-close:hover {
   background: var(--ink);
-  color: #FFFFFF;
+  color: var(--bg-deep);
   border-color: var(--ink);
 }
 
@@ -1453,6 +1502,10 @@ dialog::backdrop {
    ========================================================================== */
 
 @media (forced-colors: active) {
+  .hero-banner-stage::after {
+    display: none;
+  }
+
   .site-header,
   .path-card,
   .level-card,
