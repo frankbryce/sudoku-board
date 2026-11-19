@@ -10,10 +10,10 @@ export const SITE_CONFIG = Object.freeze({
   licenseName: "CC BY-NC-SA 4.0",
   licenseUrl: "https://github.com/frankbryce/sudoku-board/blob/master/LICENSE",
   socials: Object.freeze({
-    xHandle: "@RobotProctor",
-    xUrl: "https://x.com/RobotProctor",
-    substackHandle: "@jcarp",
-    substackUrl: "https://substack.com/@jcarp",
+    xHandle: "@dodadpuzzles",
+    xUrl: "https://x.com/dodadpuzzles",
+    substackHandle: "@dodadpuzzles",
+    substackUrl: "https://substack.com/@dodadpuzzles",
   }),
   mailingList: Object.freeze({
     endpoint:
