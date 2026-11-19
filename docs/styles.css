@@ -643,14 +643,14 @@ code {
    ========================================================================== */
 
 .paths-section {
-  padding-block: clamp(3.25rem, 6vw, 5rem);
+  padding-block: clamp(2.5rem, 5vw, 3.75rem);
 }
 
 .paths-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   grid-template-rows: auto 1fr auto;
-  gap: 1.75rem;
+  gap: 1.5rem;
 }
 
 @media (max-width: 56rem) {
@@ -669,9 +669,9 @@ code {
   background: var(--surface);
   border: 1.5px solid var(--border);
   border-radius: var(--radius-lg);
-  padding: clamp(1.45rem, 3vw, 2.2rem);
+  padding: clamp(1.25rem, 2.5vw, 1.75rem);
   box-shadow: var(--shadow-tile);
-  row-gap: 1.35rem;
+  row-gap: 1.1rem;
 }
 
 @media (max-width: 56rem) {
@@ -722,16 +722,16 @@ code {
 }
 
 .download-group + .download-group {
-  margin-block-start: 1.35rem;
+  margin-block-start: 1rem;
 }
 
 .download-group h4,
 .kit-contents h4 {
-  font-size: 0.92rem;
+  font-size: 0.85rem;
   text-transform: uppercase;
   letter-spacing: 0.06em;
   color: var(--ink-muted);
-  margin-block-end: 0.65rem;
+  margin-block-end: 0.5rem;
 }
 
 .resource-list {
@@ -739,15 +739,25 @@ code {
   margin: 0;
   padding: 0;
   display: grid;
-  gap: 0.5rem;
+  gap: 0.45rem;
+}
+
+.resource-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+@media (max-width: 34rem) {
+  .resource-grid {
+    grid-template-columns: 1fr;
+  }
 }
 
 .resource-list a {
   display: flex;
   flex-direction: column;
-  gap: 0.1rem;
-  padding-inline: 0.9rem;
-  padding-block: 0.65rem;
+  gap: 0.05rem;
+  padding-inline: 0.75rem;
+  padding-block: 0.5rem;
   background: var(--bg);
   border: 1px solid var(--border);
   border-radius: var(--radius-sm);
@@ -762,15 +772,26 @@ code {
 
 .res-title {
   font-weight: 700;
-  font-size: 0.94rem;
+  font-size: 0.88rem;
   color: var(--ink);
+  line-height: 1.3;
 }
 
 .res-meta {
-  font-size: 0.8rem;
+  font-size: 0.76rem;
   font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
   color: var(--tile-blue);
   word-break: break-word;
+}
+
+.repo-more-note {
+  margin-block: 1rem 0;
+  font-size: 0.88rem;
+  color: var(--ink-muted);
+}
+
+.repo-more-note a {
+  font-weight: 700;
 }
 
 .kit-preview {
@@ -778,12 +799,12 @@ code {
   border: 1px solid var(--border);
   background: #FFFFFF;
   overflow: clip;
-  margin-block-end: 1.25rem;
+  margin-block-end: 1rem;
 }
 
 .kit-preview img {
   inline-size: 100%;
-  aspect-ratio: 4 / 3;
+  aspect-ratio: 16 / 9;
   object-fit: cover;
 }
 
