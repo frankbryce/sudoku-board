@@ -70,10 +70,21 @@ function setupSheet() {
   bccSheet.setColumnWidth(2, 120);
   bccSheet.setColumnWidth(3, 520);
   bccSheet.getRange("C2:C4").setWrap(true);
+
+  // Ready-to-paste Gmail footer with universal unsubscribe link
+  bccSheet.getRange("A6:C6").setValues([
+    [
+      "Gmail Footer (Copy & Paste)",
+      "",
+      "You received this because you signed up for DoDad Puzzles updates. Unsubscribe anytime: https://dodadpuzzles.com/unsubscribe/  |  DoDad Puzzles LLC • Sewickley, PA 15143",
+    ],
+  ]);
+  bccSheet.getRange("A6").setFontWeight("bold");
+  bccSheet.getRange("C6").setWrap(true);
 }
 
 /**
- * Handles POST requests from the dodadpuzzles.com signup forms.
+ * Handles POST requests from the dodadpuzzles.com subscribe and unsubscribe forms.
  * Accepts both application/x-www-form-urlencoded (FormData/URLSearchParams)
  * and text/plain JSON payloads without triggering a CORS preflight.
  */
@@ -83,10 +94,14 @@ function doPost(e) {
     lock.waitLock(10000);
 
     const payload = parsePayload_(e);
+    const action = (payload.action || "subscribe").trim().toLowerCase();
 
-    // Honeypot check: silently accept to avoid tipping off bots, without saving.
+    // Honeypot check: silently accept to avoid tipping off bots, without modifying data.
     if (payload.website) {
-      return jsonResponse_({ ok: true, status: "subscribed" });
+      return jsonResponse_({
+        ok: true,
+        status: action === "unsubscribe" ? "unsubscribed" : "subscribed",
+      });
     }
 
     const email = (payload.email || "").trim().toLowerCase();
@@ -96,9 +111,6 @@ function doPost(e) {
         error: "Please enter a valid email address.",
       });
     }
-
-    const interests = normalizeInterests_(payload.interests);
-    const source = (payload.source || "website").trim().slice(0, 64);
 
     const ss = SpreadsheetApp.getActiveSpreadsheet();
     let subSheet = ss.getSheetByName(SUBSCRIBERS_SHEET);
@@ -110,7 +122,26 @@ function doPost(e) {
     const now = new Date();
     const lastRow = subSheet.getLastRow();
 
-    // Check if email already exists (deduplicate & merge interests)
+    // Handle unsubscribe requests
+    if (action === "unsubscribe") {
+      if (lastRow >= 2) {
+        const existingEmails = subSheet.getRange(2, 2, lastRow - 1, 1).getValues();
+        for (let i = 0; i < existingEmails.length; i++) {
+          const rowEmail = String(existingEmails[i][0] || "").trim().toLowerCase();
+          if (rowEmail === email) {
+            const rowNum = i + 2;
+            subSheet.getRange(rowNum, 1).setValue(now);
+            subSheet.getRange(rowNum, 5).setValue("unsubscribed");
+          }
+        }
+      }
+      return jsonResponse_({ ok: true, status: "unsubscribed" });
+    }
+
+    const interests = normalizeInterests_(payload.interests);
+    const source = (payload.source || "website").trim().slice(0, 64);
+
+    // Check if email already exists (deduplicate, merge interests, and re-activate)
     if (lastRow >= 2) {
       const existingRows = subSheet.getRange(2, 1, lastRow - 1, 5).getValues();
       for (let i = 0; i < existingRows.length; i++) {
@@ -135,7 +166,7 @@ function doPost(e) {
   } catch (err) {
     return jsonResponse_({
       ok: false,
-      error: "Could not save your signup right now. Please try again in a moment.",
+      error: "Could not process your request right now. Please try again in a moment.",
     });
   } finally {
     lock.releaseLock();
@@ -158,6 +189,7 @@ function parsePayload_(e) {
       (e.parameters && e.parameters.interests) ||
       (e.parameter.interests ? [e.parameter.interests] : []);
     return {
+      action: e.parameter.action || "subscribe",
       email: e.parameter.email || "",
       interests: interestsParam,
       source: e.parameter.source || "website",
@@ -192,3 +224,4 @@ function jsonResponse_(obj) {
     ContentService.MimeType.JSON
   );
 }
+

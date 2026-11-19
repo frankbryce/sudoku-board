@@ -30,7 +30,19 @@ This folder contains the tiny Google Apps Script ([`Code.gs`](Code.gs)) that con
 1. Open your Google Sheet and click the **`Gmail BCC`** tab.
 2. Click cell **`C2`** (All Active Subscribers), **`C3`** (Shipped 4×4 Kits), or **`C4`** (New Free Puzzles & STLs) and press **Ctrl+C / Cmd+C**.
 3. In Gmail, click **Compose**, put your own address in **To**, click **Bcc**, and press **Ctrl+V / Cmd+V**.
+4. Paste the ready-made unsubscribe footer (also saved in cell **`C6`** of the **`Gmail BCC`** tab) at the bottom of your email:
+   > You received this because you signed up for DoDad Puzzles updates. Unsubscribe anytime: https://dodadpuzzles.com/unsubscribe/ | DoDad Puzzles LLC • Sewickley, PA 15143
 
-## Unsubscribing Someone
+## How Unsubscribing Works
 
-In the **`Subscribers`** tab, change their `Status` column (column E) from `active` to `unsubscribed`. They will automatically drop out of the **`Gmail BCC`** cells while keeping a record so you don't accidentally re-add them.
+- **Self-serve (from your emails or the website):** Anyone can visit **https://dodadpuzzles.com/unsubscribe/** (linked from your email footer, the signup form, the site footer, and the Privacy Policy), enter their email, and click **Unsubscribe Me**.
+- **Automatic Sheet update:** `Code.gs` marks their `Status` column (column E) as `unsubscribed`, and they immediately drop out of all **`Gmail BCC`** cells.
+- **Manual fallback:** You can also change someone's `Status` from `active` to `unsubscribed` directly in the **`Subscribers`** tab.
+
+## Updating `Code.gs` Without Changing Your Web App URL
+
+Whenever `mailing-list/Code.gs` is updated:
+1. Paste the updated `Code.gs` into **Extensions → Apps Script** and click **Save**.
+2. Click **Deploy → Manage deployments** → click the **Edit (pencil)** icon on your active deployment.
+3. Under **Version**, choose **New version** and click **Deploy**. (This keeps the exact same `exec` URL in `docs/site-config.js`!)
+

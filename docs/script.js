@@ -255,9 +255,21 @@ if (mailingForms.length > 0) {
     statusEl.textContent = text;
   };
 
+  const prefillEmail = new URLSearchParams(window.location.search).get("email");
+
   for (const form of mailingForms) {
+    const formAction = (form.dataset.formAction || "subscribe").toLowerCase();
+    const isUnsubscribe = formAction === "unsubscribe";
+
     if (endpoint) {
       form.setAttribute("action", endpoint);
+    }
+
+    if (isUnsubscribe && prefillEmail) {
+      const emailInput = form.querySelector('input[type="email"]');
+      if (emailInput && !emailInput.value) {
+        emailInput.value = prefillEmail.trim();
+      }
     }
 
     const fields = form.querySelectorAll('input:not([type="hidden"]), select, textarea');
@@ -353,7 +365,7 @@ if (mailingForms.length > 0) {
       const originalBtnText = submitBtn ? submitBtn.textContent : "";
       if (submitBtn) {
         submitBtn.disabled = true;
-        submitBtn.textContent = "Saving...";
+        submitBtn.textContent = isUnsubscribe ? "Unsubscribing..." : "Saving...";
       }
       setStatus(statusEl, "", "");
 
@@ -379,12 +391,16 @@ if (mailingForms.length > 0) {
 
         if (!response.ok || result.ok === false) {
           throw new Error(
-            result.error || "Could not save your email right now. Please try again in a moment."
+            result.error ||
+              (isUnsubscribe
+                ? "Could not process your unsubscribe request right now. Please try again in a moment."
+                : "Could not save your email right now. Please try again in a moment.")
           );
         }
 
-        const message =
-          result.status === "updated"
+        const message = isUnsubscribe
+          ? "You've been unsubscribed and won't receive future DoDad Puzzles emails."
+          : result.status === "updated"
             ? "You're already on the list — we saved your updated preferences!"
             : "You're on the list! We'll email you when new DoDad Puzzles updates drop.";
 
@@ -396,7 +412,7 @@ if (mailingForms.length > 0) {
           "error",
           err instanceof Error && err.message
             ? err.message
-            : "Could not save your email right now. Please try again in a moment."
+            : "Could not complete your request right now. Please try again in a moment."
         );
       } finally {
         if (submitBtn) {

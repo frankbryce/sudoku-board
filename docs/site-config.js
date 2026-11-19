@@ -16,13 +16,13 @@ export const SITE_CONFIG = Object.freeze({
     substackUrl: "https://substack.com/@jcarp",
   }),
   mailingList: Object.freeze({
-    // Paste your deployed Google Apps Script Web App URL from mailing-list/README.md:
-    // e.g. "https://script.google.com/macros/s/AKfycb.../exec"
-    endpoint: "",
+    endpoint:
+      "https://script.google.com/macros/s/AKfycby3ayb-QOqDE5jUhjdDWmp92hDw2bMthSkSeexL27HwvHexD09CB1x3B_No2VqIR0v83w/exec",
   }),
   routes: Object.freeze({
     home: "/",
     privacy: "/privacy/",
     terms: "/terms/",
+    unsubscribe: "/unsubscribe/",
   }),
 });

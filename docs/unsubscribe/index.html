@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="color-scheme" content="dark">
+  <meta name="theme-color" content="#0D151B">
+  <title>Unsubscribe — DoDad Puzzles&trade;</title>
+  <meta name="description" content="Unsubscribe from the DoDad Puzzles™ mailing list (DoDad Puzzles LLC • Sewickley, PA 15143).">
+  <meta property="og:title" content="Unsubscribe — DoDad Puzzles&trade;">
+  <meta property="og:description" content="Unsubscribe from DoDad Puzzles™ email updates.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://dodadpuzzles.com/unsubscribe/">
+  <link rel="icon" type="image/svg+xml" href="../favicon.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700;12..96,800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../styles.css">
+  <script type="module" src="../script.js"></script>
+</head>
+<body>
+  <a class="skip-link" href="#main-content">Skip to main content</a>
+
+  <header class="site-header">
+    <div class="header-inner">
+      <a class="site-logo" href="../">
+        <svg class="brand-mark" viewBox="0 0 64 64" width="34" height="34" aria-hidden="true">
+          <rect x="2" y="2" width="60" height="60" rx="14" fill="#1D2430"/>
+          <rect x="7" y="7" width="50" height="50" rx="9" fill="#FAF8F3"/>
+          <rect x="11" y="11" width="19" height="19" rx="4.5" fill="#1D6FE2"/>
+          <rect x="34" y="11" width="19" height="19" rx="4.5" fill="#E03B3B"/>
+          <rect x="11" y="34" width="19" height="19" rx="4.5" fill="#DF9B55"/>
+          <rect x="34" y="34" width="19" height="19" rx="4.5" fill="#159E6E"/>
+          <rect x="30.5" y="9" width="3" height="46" rx="1.5" fill="#1D2430"/>
+          <rect x="9" y="30.5" width="46" height="3" rx="1.5" fill="#1D2430"/>
+        </svg>
+        <span class="brand-text">
+          <span class="brand-name">DoDad Puzzles&trade;</span>
+          <span class="brand-tag">dodadpuzzles.com</span>
+        </span>
+      </a>
+
+      <nav class="site-nav" aria-label="Primary">
+        <button
+          class="menu-button"
+          type="button"
+          popovertarget="site-menu"
+          popovertargetaction="toggle"
+          aria-controls="site-menu"
+        >
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true">
+            <line x1="4" y1="6" x2="20" y2="6"/>
+            <line x1="4" y1="12" x2="20" y2="12"/>
+            <line x1="4" y1="18" x2="20" y2="18"/>
+          </svg>
+          <span>Menu</span>
+        </button>
+
+        <ul id="site-menu" class="site-menu" popover="auto">
+          <li><a href="../#story">The Story</a></li>
+          <li><a href="../#get-started">Free &amp; Shipped</a></li>
+          <li><a href="../#growth">Ages 3 to 10+</a></li>
+          <li><a href="../#gallery">Photos &amp; CAD</a></li>
+          <li><a href="../#socials">Socials</a></li>
+          <li><a href="../#mailing-list" class="nav-socials-pill">Mailing List</a></li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+  <main id="main-content">
+    <section class="legal-section">
+      <div class="container">
+        <article class="legal-shell">
+          <header class="legal-header">
+            <p class="section-kicker">DoDad Puzzles&trade; Mailing List</p>
+            <h1 id="unsubscribe-heading">Unsubscribe from Email Updates</h1>
+            <p class="legal-meta">
+              Enter your email address below and we&rsquo;ll remove you from future DoDad Puzzles&trade; email updates right away.
+            </p>
+          </header>
+
+          <form
+            class="mailing-form"
+            data-mailing-form
+            data-form-action="unsubscribe"
+            method="POST"
+            aria-labelledby="unsubscribe-heading"
+          >
+            <input type="hidden" name="action" value="unsubscribe">
+            <input type="hidden" name="source" value="unsubscribe-page">
+
+            <!-- Honeypot spam trap hidden from keyboard & assistive tech -->
+            <div class="honeypot-field" aria-hidden="true">
+              <label for="unsub-website">Website</label>
+              <input
+                type="text"
+                id="unsub-website"
+                name="website"
+                tabindex="-1"
+                autocomplete="off"
+              >
+            </div>
+
+            <div class="form-field">
+              <label for="unsub-email">
+                Email address <span class="required-mark" aria-hidden="true">*</span>
+              </label>
+              <span id="unsub-email-hint" class="field-hint">Format: you@example.com</span>
+              <input
+                type="email"
+                id="unsub-email"
+                name="email"
+                required
+                autocomplete="email"
+                autocorrect="off"
+                autocapitalize="none"
+                spellcheck="false"
+                enterkeyhint="send"
+                aria-describedby="unsub-email-hint"
+                data-error="unsub-email-error"
+              >
+              <div id="unsub-email-error" class="form-error">
+                <span role="img" aria-label="Error">&#x2715;</span>
+                Enter an email address in the format you@example.com.
+              </div>
+            </div>
+
+            <div class="form-actions">
+              <button type="submit" class="btn btn-secondary">
+                Unsubscribe Me
+              </button>
+              <p class="form-privacy-note">
+                Changed your mind later? You can always rejoin on the <a href="../#mailing-list">DoDad Puzzles&trade; homepage</a>.
+              </p>
+            </div>
+
+            <div class="form-status" role="status" aria-live="polite"></div>
+          </form>
+
+          <div class="legal-back">
+            <a class="btn btn-outline" href="../">&larr; Back to DoDad Puzzles&trade;</a>
+            <a href="../privacy/">Privacy Policy &rarr;</a>
+          </div>
+        </article>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container footer-inner">
+      <div class="footer-brand">
+        <strong>DoDad Puzzles&trade;</strong>
+        <span class="footer-legal">DoDad Puzzles LLC &bull; Sewickley, PA 15143</span>
+        <span>Making it easier for Dads to spend quality time with their kids. Files licensed for personal, non-commercial use only (<a href="https://github.com/frankbryce/sudoku-board/blob/master/LICENSE" target="_blank" rel="noopener noreferrer">CC BY-NC-SA 4.0</a>).</span>
+      </div>
+      <ul class="footer-links">
+        <li><a href="../#mailing-list">Mailing List</a></li>
+        <li><a href="./" aria-current="page">Unsubscribe</a></li>
+        <li><a href="../privacy/">Privacy</a></li>
+        <li><a href="../terms/">Terms</a></li>
+        <li><a href="https://x.com/RobotProctor" target="_blank" rel="noopener noreferrer">X (@RobotProctor)</a></li>
+        <li><a href="https://substack.com/@jcarp" target="_blank" rel="noopener noreferrer">Substack (@jcarp)</a></li>
+        <li><a href="https://github.com/frankbryce/sudoku-board" target="_blank" rel="noopener noreferrer">GitHub Repo &amp; History</a></li>
+      </ul>
+    </div>
+  </footer>
+</body>
+</html>
