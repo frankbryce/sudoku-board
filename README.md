@@ -1,5 +1,7 @@
 # Modular Color Sudoku System — Montessori Jigsaw 1×1 Edition
 
+> **License — Personal Use Only (No Commercial Use):** All 3D models (STLs, 3MFs, OpenSCAD source), puzzle workbooks, and assets in this repository are licensed under [CC BY-NC-SA 4.0](LICENSE). You are welcome to download, print, and enjoy these for **personal, non-commercial use** at home. **Commercial use—including 3D-printing, manufacturing, reproducing, or selling physical sets, parts, or workbooks—is strictly prohibited.**
+
 ![4×4 Kids' Jigsaw Sudoku Board](renders/finished_board_4x4.png)
 ![4×4 Piece Holder — Option B Flush Board-as-Lid](renders/holder_option_b_lid_lifting.png)
 
@@ -56,3 +58,13 @@ The 4×4 render above introduces the core puzzle ideas from the printable [4×4 
 make all
 make renders
 ```
+
+## License
+
+Copyright © 2026 John Carpenter / DoDad Puzzles ([dodadpuzzles.com](https://dodadpuzzles.com)).
+
+This project—including all OpenSCAD source files, STL/3MF 3D models, puzzle generators, and printable PDF workbooks—is licensed under the **Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License ([CC BY-NC-SA 4.0](LICENSE))**.
+
+- **Allowed:** Downloading, 3D-printing, sharing, and adapting these files for **personal, non-commercial use** (e.g., making a set for your own family or classroom) with attribution.
+- **Not Allowed:** Any **commercial use** without explicit written permission—you may **not** 3D-print and sell physical boards, pieces, or workbooks, nor sell or redistribute the digital files commercially.
+
