@@ -1224,9 +1224,89 @@ code {
   font-size: 1.05rem;
 }
 
+.footer-brand .footer-legal {
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--ink);
+}
+
 .footer-brand span {
   font-size: 0.88rem;
   color: var(--ink-muted);
+}
+
+.footer-links a[aria-current="page"] {
+  color: var(--tile-blue);
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+}
+
+/* ==========================================================================
+   Legal Pages (/privacy & /terms)
+   ========================================================================== */
+
+.legal-section {
+  padding-block: clamp(2.5rem, 5vw, 4.25rem);
+}
+
+.legal-shell {
+  max-inline-size: 48rem;
+  margin-inline: auto;
+  background: var(--surface);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: clamp(1.5rem, 3.5vw, 2.75rem);
+  box-shadow: var(--shadow-tile);
+}
+
+.legal-header {
+  padding-block-end: 1.35rem;
+  margin-block-end: 1.75rem;
+  border-block-end: 1px solid var(--border);
+}
+
+.legal-header h1 {
+  font-size: clamp(1.9rem, 3.6vw, 2.6rem);
+  margin-block: 0.35rem 0.6rem;
+}
+
+.legal-meta {
+  margin: 0;
+  font-size: 0.92rem;
+  color: var(--ink-muted);
+}
+
+.legal-body h2 {
+  font-size: 1.25rem;
+  margin-block: 1.85rem 0.6rem;
+}
+
+.legal-body p,
+.legal-body li {
+  color: var(--ink-muted);
+  font-size: 0.98rem;
+  line-height: 1.7;
+}
+
+.legal-body strong {
+  color: var(--ink);
+}
+
+.legal-body ul {
+  padding-inline-start: 1.25rem;
+  margin-block: 0.5rem 1rem;
+  display: grid;
+  gap: 0.45rem;
+}
+
+.legal-back {
+  margin-block-start: 2rem;
+  padding-block-start: 1.25rem;
+  border-block-start: 1px solid var(--border);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.85rem 1.5rem;
+  align-items: center;
 }
 
 .footer-links {
@@ -1377,6 +1457,7 @@ dialog::backdrop {
   .path-card,
   .level-card,
   .story-letter,
+  .legal-shell,
   .socials-shell,
   .social-card,
   .modal-surface,

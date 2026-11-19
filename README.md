@@ -61,7 +61,7 @@ make renders
 
 ## License
 
-Copyright © 2026 John Carpenter / DoDad Puzzles ([dodadpuzzles.com](https://dodadpuzzles.com)).
+Copyright © 2026 DoDad Puzzles LLC (DoDad Puzzles™ — [dodadpuzzles.com](https://dodadpuzzles.com)).
 
 This project—including all OpenSCAD source files, STL/3MF 3D models, puzzle generators, and printable PDF workbooks—is licensed under the **Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License ([CC BY-NC-SA 4.0](LICENSE))**.
 
