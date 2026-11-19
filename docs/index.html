@@ -64,7 +64,8 @@
           <li><a href="#get-started">Free &amp; Shipped</a></li>
           <li><a href="#growth">Ages 3 to 10+</a></li>
           <li><a href="#gallery">Photos &amp; CAD</a></li>
-          <li><a href="#socials" class="nav-socials-pill">My Socials</a></li>
+          <li><a href="#socials">Socials</a></li>
+          <li><a href="#mailing-list" class="nav-socials-pill">Mailing List</a></li>
         </ul>
       </nav>
     </div>
@@ -115,8 +116,15 @@
             </button>
           </div>
 
-          <div class="hero-socials-strip" aria-label="Quick social links">
-            <span class="strip-label">Find me on socials:</span>
+          <div class="hero-socials-strip" aria-label="Mailing list and social links">
+            <span class="strip-label">Stay in the loop:</span>
+            <a class="social-chip social-chip-accent" href="#mailing-list">
+              <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <rect x="2" y="4" width="20" height="16" rx="2"/>
+                <path d="m22 7-10 7L2 7"/>
+              </svg>
+              <span>Join the Mailing List</span>
+            </a>
             <a class="social-chip" href="https://x.com/RobotProctor" target="_blank" rel="noopener noreferrer">
               <svg viewBox="0 0 24 24" width="15" height="15" fill="currentColor" aria-hidden="true">
                 <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
@@ -513,6 +521,101 @@
       </div>
     </section>
 
+    <!-- DoDad Puzzles Email Mailing List -->
+    <section id="mailing-list" class="mailing-section" aria-labelledby="mailing-list-heading">
+      <div class="container">
+        <div class="mailing-shell">
+          <div class="mailing-copy">
+            <span class="mailing-eyebrow">Email Updates &mdash; No Spam</span>
+            <h2 id="mailing-list-heading">Get notified about DoDad Puzzles</h2>
+            <p>
+              Join the mailing list for occasional email updates when ready-to-play shipped kits open, new free 3D-printable puzzles and workbooks drop, or the board design levels up. Sent directly from John&mdash;never sold or shared.
+            </p>
+          </div>
+
+          <form
+            class="mailing-form"
+            data-mailing-form
+            method="POST"
+            aria-labelledby="mailing-list-heading"
+          >
+            <input type="hidden" name="source" value="mailing-list">
+
+            <!-- Honeypot spam trap hidden from keyboard & assistive tech -->
+            <div class="honeypot-field" aria-hidden="true">
+              <label for="ml-website">Website</label>
+              <input
+                type="text"
+                id="ml-website"
+                name="website"
+                tabindex="-1"
+                autocomplete="off"
+              >
+            </div>
+
+            <div class="form-field">
+              <label for="ml-email">
+                Email address <span class="required-mark" aria-hidden="true">*</span>
+              </label>
+              <span id="ml-email-hint" class="field-hint">Format: you@example.com</span>
+              <input
+                type="email"
+                id="ml-email"
+                name="email"
+                required
+                autocomplete="email"
+                autocorrect="off"
+                autocapitalize="none"
+                spellcheck="false"
+                enterkeyhint="send"
+                aria-describedby="ml-email-hint"
+                data-error="ml-email-error"
+              >
+              <div id="ml-email-error" class="form-error">
+                <span role="img" aria-label="Error">&#x2715;</span>
+                Enter an email address in the format you@example.com.
+              </div>
+            </div>
+
+            <fieldset class="interest-group">
+              <legend>What would you like to hear about? <span class="optional-tag">(optional)</span></legend>
+              <div class="interest-options">
+                <label class="interest-option" for="ml-interest-kits">
+                  <input
+                    type="checkbox"
+                    id="ml-interest-kits"
+                    name="interests"
+                    value="shipped-kits"
+                  >
+                  <span>Ready-to-play shipped sets</span>
+                </label>
+                <label class="interest-option" for="ml-interest-free">
+                  <input
+                    type="checkbox"
+                    id="ml-interest-free"
+                    name="interests"
+                    value="free-puzzles"
+                  >
+                  <span>New free puzzles, workbooks &amp; STLs</span>
+                </label>
+              </div>
+            </fieldset>
+
+            <div class="form-actions">
+              <button type="submit" class="btn btn-primary">
+                Join the Mailing List
+              </button>
+              <p class="form-privacy-note">
+                Unsubscribe anytime by replying to any email. See our <a href="privacy/">Privacy Policy</a>.
+              </p>
+            </div>
+
+            <div class="form-status" role="status" aria-live="polite"></div>
+          </form>
+        </div>
+      </div>
+    </section>
+
     <!-- Prominent, Unmistakable Socials Hub -->
     <section id="socials" class="socials-section" aria-labelledby="socials-heading">
       <div class="container">
@@ -584,6 +687,7 @@
         <span>Making it easier for Dads to spend quality time with their kids. Files licensed for personal, non-commercial use only (<a href="https://github.com/frankbryce/sudoku-board/blob/master/LICENSE" target="_blank" rel="noopener noreferrer">CC BY-NC-SA 4.0</a>).</span>
       </div>
       <ul class="footer-links">
+        <li><a href="#mailing-list">Mailing List</a></li>
         <li><a href="privacy/">Privacy</a></li>
         <li><a href="terms/">Terms</a></li>
         <li><a href="https://x.com/RobotProctor" target="_blank" rel="noopener noreferrer">X (@RobotProctor)</a></li>
@@ -623,16 +727,91 @@
           I&rsquo;m putting the finishing touches on the first batch of ready-to-play 4&times;4 Color Sudoku kits (board, flush carry tray, colored tiles, pencil-marking pegs, Jigsaw dividers, and printed workbook) shipped straight to your door.
         </p>
         <p>
-          Want first dibs when checkout opens&mdash;or want to request a set now? Reach out directly on either of my socials:
+          Drop your email below to get first dibs when the first batch opens:
         </p>
-        <div class="dialog-actions">
-          <a class="btn btn-primary" href="https://substack.com/@jcarp" target="_blank" rel="noopener noreferrer">
-            Subscribe on Substack (@jcarp)
-          </a>
-          <a class="btn btn-secondary" href="https://x.com/RobotProctor" target="_blank" rel="noopener noreferrer">
-            Message @RobotProctor on X
-          </a>
+
+        <form
+          class="mailing-form mailing-form-compact"
+          data-mailing-form
+          method="POST"
+          aria-labelledby="shop-dialog-title"
+        >
+          <input type="hidden" name="source" value="shipped-modal">
+
+          <div class="honeypot-field" aria-hidden="true">
+            <label for="modal-website">Website</label>
+            <input
+              type="text"
+              id="modal-website"
+              name="website"
+              tabindex="-1"
+              autocomplete="off"
+            >
+          </div>
+
+          <div class="form-field">
+            <label for="modal-email">
+              Email address <span class="required-mark" aria-hidden="true">*</span>
+            </label>
+            <span id="modal-email-hint" class="field-hint">Format: you@example.com</span>
+            <input
+              type="email"
+              id="modal-email"
+              name="email"
+              required
+              autocomplete="email"
+              autocorrect="off"
+              autocapitalize="none"
+              spellcheck="false"
+              enterkeyhint="send"
+              aria-describedby="modal-email-hint"
+              data-error="modal-email-error"
+            >
+            <div id="modal-email-error" class="form-error">
+              <span role="img" aria-label="Error">&#x2715;</span>
+              Enter an email address in the format you@example.com.
+            </div>
+          </div>
+
+          <fieldset class="interest-group">
+            <legend>Notify me about <span class="optional-tag">(optional)</span></legend>
+            <div class="interest-options">
+              <label class="interest-option" for="modal-interest-kits">
+                <input
+                  type="checkbox"
+                  id="modal-interest-kits"
+                  name="interests"
+                  value="shipped-kits"
+                  checked
+                >
+                <span>Ready-to-play shipped sets</span>
+              </label>
+              <label class="interest-option" for="modal-interest-free">
+                <input
+                  type="checkbox"
+                  id="modal-interest-free"
+                  name="interests"
+                  value="free-puzzles"
+                >
+                <span>New free puzzles &amp; STLs</span>
+              </label>
+            </div>
+          </fieldset>
+
+          <button type="submit" class="btn btn-primary btn-block">
+            Notify Me When Sets Launch
+          </button>
+
+          <div class="form-status" role="status" aria-live="polite"></div>
+        </form>
+
+        <div class="dialog-socials">
+          <span>Or follow along on socials:</span>
+          <a href="https://x.com/RobotProctor" target="_blank" rel="noopener noreferrer">@RobotProctor on X</a>
+          &middot;
+          <a href="https://substack.com/@jcarp" target="_blank" rel="noopener noreferrer">@jcarp on Substack</a>
         </div>
+
         <p class="dialog-footnote">
           Have a 3D printer already? <a href="https://github.com/frankbryce/sudoku-board" target="_blank" rel="noopener noreferrer">Download every STL and PDF free on GitHub right now.</a>
         </p>

@@ -15,6 +15,11 @@ export const SITE_CONFIG = Object.freeze({
     substackHandle: "@jcarp",
     substackUrl: "https://substack.com/@jcarp",
   }),
+  mailingList: Object.freeze({
+    // Paste your deployed Google Apps Script Web App URL from mailing-list/README.md:
+    // e.g. "https://script.google.com/macros/s/AKfycb.../exec"
+    endpoint: "",
+  }),
   routes: Object.freeze({
     home: "/",
     privacy: "/privacy/",

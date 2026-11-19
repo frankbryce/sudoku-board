@@ -562,6 +562,17 @@ code {
   background: var(--tile-blue-soft);
 }
 
+.social-chip-accent {
+  border-color: var(--tile-blue);
+  background: var(--tile-blue-soft);
+  color: #FFFFFF;
+}
+
+.social-chip-accent:hover {
+  background: var(--tile-blue-solid);
+  border-color: var(--tile-blue);
+}
+
 .hero-media {
   margin: 0;
 }
@@ -1092,6 +1103,350 @@ code {
 }
 
 /* ==========================================================================
+   Mailing List Section & Accessible Signup Forms
+   ========================================================================== */
+
+.visually-hidden:where(:not(:focus-within, :active)) {
+  position: absolute !important;
+  clip-path: inset(50%) !important;
+  overflow: hidden !important;
+  width: 1px !important;
+  height: 1px !important;
+  margin: -1px !important;
+  padding: 0 !important;
+  border: 0 !important;
+  white-space: nowrap !important;
+}
+
+.honeypot-field {
+  position: absolute;
+  inset-inline-start: -9999px;
+  inline-size: 1px;
+  block-size: 1px;
+  overflow: hidden;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.mailing-section {
+  padding-block: clamp(2.5rem, 5vw, 4.25rem) clamp(1rem, 2.5vw, 2rem);
+}
+
+.mailing-shell {
+  background: var(--surface);
+  border: 1.5px solid var(--border-strong);
+  border-radius: var(--radius-lg);
+  padding: clamp(1.85rem, 4.5vw, 3.25rem);
+  box-shadow: var(--shadow-lift);
+  position: relative;
+  overflow: clip;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr);
+  gap: clamp(1.75rem, 4vw, 3.25rem);
+  align-items: start;
+}
+
+@media (max-width: 54rem) {
+  .mailing-shell {
+    grid-template-columns: 1fr;
+  }
+}
+
+.mailing-shell::before {
+  content: "";
+  position: absolute;
+  inset-block-start: 0;
+  inset-inline: 0;
+  block-size: 6px;
+  background: linear-gradient(
+    90deg,
+    var(--tile-blue) 0% 25%,
+    var(--tile-green) 25% 50%,
+    var(--tile-tan-swatch) 50% 75%,
+    var(--tile-red) 75% 100%
+  );
+}
+
+.mailing-eyebrow {
+  display: inline-block;
+  font-size: 0.8rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: #0B1218;
+  background: var(--tile-green);
+  padding-inline: 0.75rem;
+  padding-block: 0.28rem;
+  border-radius: 999px;
+  margin-block-end: 0.95rem;
+}
+
+.mailing-copy h2 {
+  font-size: clamp(1.65rem, 3.2vw, 2.35rem);
+  margin-block-end: 0.75rem;
+}
+
+.mailing-copy p {
+  color: var(--ink-muted);
+  font-size: 1.02rem;
+  margin-block-end: 0;
+}
+
+.mailing-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.15rem;
+}
+
+.mailing-form-compact {
+  gap: 0.95rem;
+  margin-block: 0.75rem 1rem;
+}
+
+.form-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.form-field label {
+  font-weight: 700;
+  font-size: 0.96rem;
+  color: var(--ink);
+}
+
+.required-mark {
+  color: var(--tile-red);
+}
+
+.field-hint {
+  display: block;
+  font-size: 0.84rem;
+  color: var(--ink-muted);
+}
+
+.form-field input[type="email"] {
+  font: inherit;
+  font-size: max(1rem, 1em);
+  line-height: 1.4;
+  min-block-size: 48px;
+  inline-size: 100%;
+  padding-inline: 0.9rem;
+  padding-block: 0.65rem;
+  color: var(--ink);
+  background: var(--bg-deep);
+  border: 1.5px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  transition: border-color 140ms ease, background-color 140ms ease;
+}
+
+@media (pointer: coarse) {
+  .form-field input[type="email"] {
+    min-block-size: 52px;
+  }
+}
+
+.form-field input[type="email"]:hover {
+  border-color: var(--ink-muted);
+}
+
+.form-field input[type="email"]:focus-visible {
+  outline: 3px solid var(--tile-blue);
+  outline-offset: 2px;
+  border-color: var(--tile-blue);
+}
+
+/* Validation feedback only after user interaction (:user-invalid / fallback) */
+.form-field input[type="email"]:is(:user-invalid, .user-invalid-fallback) {
+  border-color: var(--tile-red);
+  background-color: color-mix(in oklab, var(--tile-red) 12%, var(--bg-deep));
+}
+
+.form-field input[type="email"]:is(:user-valid, .user-valid-fallback) {
+  border-color: var(--tile-green);
+}
+
+.form-error {
+  display: none;
+  align-items: baseline;
+  gap: 0.4rem;
+  margin-block-start: 0.2rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #FF8C8C;
+}
+
+.form-field input[type="email"]:is(:user-invalid, .user-invalid-fallback) + .form-error {
+  display: flex;
+}
+
+.interest-group {
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.interest-group legend {
+  font-weight: 700;
+  font-size: 0.92rem;
+  color: var(--ink);
+  margin-block-end: 0.55rem;
+  padding: 0;
+}
+
+.optional-tag {
+  font-weight: 500;
+  color: var(--ink-muted);
+}
+
+.interest-options {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.interest-option {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.65rem;
+  min-block-size: 44px;
+  padding-inline: 0.75rem;
+  padding-block: 0.45rem;
+  border-radius: var(--radius-sm);
+  background: var(--bg-soft);
+  border: 1px solid var(--border);
+  color: var(--ink);
+  font-size: 0.94rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: border-color 140ms ease, background-color 140ms ease;
+}
+
+.interest-option:hover {
+  border-color: var(--border-strong);
+  background: var(--surface-tint);
+}
+
+.interest-option input[type="checkbox"] {
+  inline-size: 1.15rem;
+  block-size: 1.15rem;
+  margin: 0;
+  flex-shrink: 0;
+  accent-color: var(--tile-blue);
+  cursor: pointer;
+}
+
+/* Brand-consistent checkbox fallback for browsers without accent-color */
+@supports not (accent-color: #58A6FF) {
+  .interest-option {
+    position: relative;
+    padding-inline-start: 2.35rem;
+  }
+
+  .interest-option input[type="checkbox"] {
+    position: absolute;
+    clip-path: inset(50%);
+    overflow: hidden;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    padding: 0;
+    border: 0;
+    white-space: nowrap;
+  }
+
+  .interest-option input[type="checkbox"] + span::before {
+    content: "";
+    position: absolute;
+    inset-inline-start: 0.75rem;
+    inset-block-start: 50%;
+    transform: translateY(-50%);
+    inline-size: 1.15rem;
+    block-size: 1.15rem;
+    border: 2px solid var(--border-strong);
+    background: var(--bg-deep);
+    border-radius: 0.25rem;
+  }
+
+  .interest-option input[type="checkbox"]:focus-visible + span::before {
+    outline: 3px solid var(--tile-blue);
+    outline-offset: 2px;
+  }
+
+  .interest-option input[type="checkbox"]:checked + span::before {
+    background: var(--tile-blue-solid);
+    border-color: var(--tile-blue);
+  }
+
+  .interest-option input[type="checkbox"]:checked + span::after {
+    content: "\2713";
+    position: absolute;
+    inset-inline-start: 0.96rem;
+    inset-block-start: 50%;
+    transform: translateY(-50%);
+    color: #FFFFFF;
+    font-weight: 800;
+    font-size: 0.85rem;
+  }
+}
+
+.form-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.6rem;
+}
+
+.form-actions .btn {
+  min-block-size: 48px;
+}
+
+.mailing-form button[type="submit"]:disabled {
+  opacity: 0.7;
+  cursor: progress;
+}
+
+.form-privacy-note {
+  margin: 0;
+  font-size: 0.84rem;
+  color: var(--ink-muted);
+}
+
+.form-status {
+  font-size: 0.94rem;
+  font-weight: 600;
+  border-radius: var(--radius-sm);
+}
+
+.form-status:empty {
+  display: none;
+}
+
+.form-status.is-success {
+  padding-inline: 0.95rem;
+  padding-block: 0.75rem;
+  background: var(--tile-green-soft);
+  border: 1px solid var(--tile-green);
+  color: #D7FAEC;
+}
+
+.form-status.is-error {
+  padding-inline: 0.95rem;
+  padding-block: 0.75rem;
+  background: var(--tile-red-soft);
+  border: 1px solid var(--tile-red);
+  color: #FFD2D2;
+}
+
+.form-status.is-info {
+  padding-inline: 0.95rem;
+  padding-block: 0.75rem;
+  background: var(--tile-tan-soft);
+  border: 1px solid var(--tile-tan);
+  color: #FFE4BE;
+}
+
+/* ==========================================================================
    Obvious, Prominent Socials Section
    ========================================================================== */
 
@@ -1492,6 +1847,22 @@ dialog::backdrop {
   margin-block: 1.25rem;
 }
 
+.dialog-socials {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.35rem 0.5rem;
+  font-size: 0.88rem;
+  color: var(--ink-muted);
+  padding-block: 0.85rem;
+  margin-block-end: 0.75rem;
+  border-block: 1px solid var(--border);
+}
+
+.dialog-socials a {
+  font-weight: 600;
+}
+
 .dialog-footnote {
   font-size: 0.88rem;
   margin-block-end: 0 !important;
@@ -1511,6 +1882,7 @@ dialog::backdrop {
   .level-card,
   .story-letter,
   .legal-shell,
+  .mailing-shell,
   .socials-shell,
   .social-card,
   .modal-surface,
