@@ -646,8 +646,7 @@ def build_storyboard(example, level, use_colors=False, xwing_axis="row"):
         vals2[3] = 4
         unit = [2, 3, 6, 7]
         p1 = (demo, {"hl": {**{c: HL_UNIT for c in unit}, 14: HL_TARGET},
-                     "block_arrows": [(14, 2)],
-                     "corner_target": (7, 1)},
+                     "block_arrows": [(14, 2)]},
               f"1. {tok(1)} in 1 of 2 corners")
         p2 = (demo, {"hl": {**{c: HL_UNIT for c in unit}, 3: HL_BAD},
                      "values": vals2,

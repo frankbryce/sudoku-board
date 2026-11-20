@@ -553,7 +553,7 @@ def _first_step(p, techs, want, record=True, pred=None):
 
 
 def lesson_example(p, level, use_colors=False):
-    """Return (draw kwargs, caption) for the lesson diagram of `level`."""
+    """Return ([(step1_label, kw1), (step2_label, kw2)], caption) for the lesson diagram of `level`."""
     rcname = lambda i: f"row {G.rc(i)[0] + 1}, column {G.rc(i)[1] + 1}"
     tok = (lambda d: PIECE_PALETTE[d][2]) if use_colors else str
     noun = "color" if use_colors else "number"
@@ -570,11 +570,22 @@ def lesson_example(p, level, use_colors=False):
             "regions": list(G.STANDARD_REGIONS),
             "anti_knight": False, "colors": {}, "center_clues": {}, "corner_clues": [], "fog_lit": None,
         }
-        hl = {2: HL_BAD, 3: HL_BAD, 6: HL_BAD, 7: HL_TARGET, 0: HL_UNIT, 14: HL_UNIT}
-        cap = (f"The top-right box needs {tok(3)}. The {tok(3)} in row 1, column 1 blocks row 1 "
-               f"and the {tok(3)} in row 4, column 3 blocks column 3 (X), leaving only row 2, column 4!")
-        return {"_p": demo_p, "hl": hl, "block_arrows": [(0, 3), (14, 2)],
-                "cell_strikes": [2, 3, 6], "target": (7, 3)}, cap
+        step1 = {
+            "_p": demo_p,
+            "hl": {2: HL_BAD, 3: HL_BAD, 6: HL_BAD, 7: HL_UNIT, 0: HL_UNIT, 14: HL_UNIT},
+            "block_arrows": [(0, 3), (14, 2)],
+            "cell_strikes": [2, 3, 6],
+        }
+        step2 = {
+            "_p": demo_p,
+            "hl": {2: HL_BAD, 3: HL_BAD, 6: HL_BAD, 7: HL_TARGET, 0: HL_UNIT, 14: HL_UNIT},
+            "cell_strikes": [2, 3, 6],
+            "target": (7, 3),
+        }
+        cap = (f"1. The top-right box needs {tok(3)}. The {tok(3)} in row 1, column 1 blocks row 1 "
+               f"and the {tok(3)} in row 4, column 3 blocks column 3 (X).  "
+               f"2. Only row 2, column 4 (green) is left, so place {tok(3)} there!")
+        return [(f"Spot blocked cells for {tok(3)}", step1), (f"Place {tok(3)} in the last cell", step2)], cap
     if level == 2:
         demo_p = {
             "givens": [0, 0, 0, 0,
@@ -589,16 +600,24 @@ def lesson_example(p, level, use_colors=False):
             "anti_knight": False, "colors": {}, "center_clues": {}, "corner_clues": [], "fog_lit": None,
         }
         hl = {0: HL_UNIT, 1: HL_UNIT, 4: HL_UNIT, 6: HL_UNIT, 7: HL_UNIT, 9: HL_UNIT, 13: HL_UNIT, 5: HL_TARGET}
-        cap = (f"Look at row 2, column 2 (green): its row, column and box already have "
-               f"{tok(1)}, {tok(2)} and {tok(4)}. The only {noun} left is {tok(3)}!")
-        return {"_p": demo_p, "hl": hl, "block_arrows": [(4, 5), (7, 5), (13, 5)],
-                "target": (5, 3)}, cap
+        step1 = {
+            "_p": demo_p,
+            "hl": hl,
+            "block_arrows": [(4, 5), (7, 5), (13, 5)],
+        }
+        step2 = {
+            "_p": demo_p,
+            "hl": hl,
+            "target": (5, 3),
+        }
+        cap = (f"1. Look at row 2, column 2 (green): its row, column and box already have "
+               f"{tok(1)}, {tok(2)} and {tok(4)}.  "
+               f"2. The only {noun} left is {tok(3)}, so place {tok(3)} there!")
+        return [(f"Sees {tok(1)}, {tok(2)} and {tok(4)}", step1), (f"Place missing {tok(3)}", step2)], cap
     if level == 3:
-        # Clean, self-contained teaching board for Center Marks:
-        # - R1C2 has 4 (Green) in the top-left box, R2C3 has 2 (Red) in row 2
-        #   -> so R2C1 (green cell) is narrowed down to center marks 1 & 3 (Blue & Tan).
-        # - R4C1 in column 1 has 3 (Tan), which crosses out the 3 (Tan) center mark in R2C1,
-        #   leaving only 1 (Blue)!
+        # Clean, self-contained 2-step teaching board for Center Marks:
+        # Step 1: R1C2 = 4 (Green) in box, R2C3 = 2 (Red) in row 2 -> R2C1 gets 2 clean center pegs (1 & 3).
+        # Step 2: R4C1 = 3 (Tan) is placed in col 1 -> crosses out 3 center peg, leaving 1 (Blue) circled!
         demo_p = {
             "givens": [0, 4, 0, 0,
                        0, 0, 2, 0,
@@ -615,23 +634,31 @@ def lesson_example(p, level, use_colors=False):
             "corner_clues": [],
             "fog_lit": None,
         }
-        vals = list(demo_p["givens"])
-        vals[12] = 3  # R4C1 placed as 3 (Tan) in column 1
-        hl = {1: HL_UNIT, 6: HL_UNIT, 12: HL_UNIT, 4: HL_TARGET}
-        cap = (f"1. Why does the green cell (row 2, column 1) have {tok(1)} and {tok(3)} center "
-               f"marks? Because {tok(4)} is already in its box (row 1, column 2) and {tok(2)} is "
-               f"already in row 2 (row 2, column 3), leaving only {tok(1)} or {tok(3)}.  "
-               f"2. Now look down column 1 at row 4, column 1: {tok(3)} is placed there, so cross "
-               f"out the {tok(3)} center mark (X).  "
-               f"3. Only {tok(1)} is left (circled in green), so place {tok(1)} here!")
-        return {"_p": demo_p, "hl": hl, "values": vals,
-                "strikes": [(4, 3)], "peg_target": (4, 1)}, cap
+        vals2 = list(demo_p["givens"])
+        vals2[12] = 3  # R4C1 placed as 3 (Tan) in column 1
+        step1 = {
+            "_p": demo_p,
+            "hl": {1: HL_UNIT, 6: HL_UNIT, 4: HL_TARGET},
+            "block_arrows": [(1, 4), (6, 4)],
+        }
+        step2 = {
+            "_p": demo_p,
+            "hl": {12: HL_UNIT, 4: HL_TARGET},
+            "values": vals2,
+            "block_arrows": [(12, 4)],
+            "strikes": [(4, 3)],
+            "peg_target": (4, 1),
+        }
+        cap = (f"1. Because {tok(4)} is in its box (row 1, column 2) and {tok(2)} is in row 2 "
+               f"(row 2, column 3), row 2, column 1 gets TWO center pegs: {tok(1)} and {tok(3)}.  "
+               f"2. Later, {tok(3)} is placed in row 4, column 1, crossing out the {tok(3)} center peg (X). "
+               f"Only {tok(1)} is left (circled in green), so place {tok(1)}!")
+        return [(f"Mark {tok(1)} & {tok(3)} center pegs", step1), (f"{tok(3)} in col -> {tok(1)} wins", step2)], cap
     if level == 4:
-        # Clean, self-contained teaching board for Snyder Corner Marks:
-        # - In the top-right box (2, 3, 6, 7), R4C3 (14) = 1 blocks column 3 (R1C3, R2C3),
-        #   so 1 in the top-right box can only go in R1C4 (3) or R2C4 (7) -> corner marks [1, [3, 7]].
-        # - Then R1C4 (3) gets filled with 4 (since R1C3 = 2 and R2C1 = 4 blocks row 2),
-        #   so 1 must go in the other corner-marked cell, R2C4 (7)!
+        # Clean, self-contained 2-step teaching board for Snyder Corner Marks:
+        # Step 1: R4C3 (14) = 1 blocks col 3, so 1 in top-right box can only go in R1C4 (3) or R2C4 (7)
+        #         -> BOTH corner pegs [1, [3, 7]] are shown cleanly before anything fills up!
+        # Step 2: R1C4 (3) fills up with 4, crossing out its 1 corner peg -> 1 MUST go in R2C4 (7)!
         demo_p = {
             "givens": [0, 0, 2, 0,
                        4, 0, 0, 0,
@@ -646,20 +673,28 @@ def lesson_example(p, level, use_colors=False):
             "corner_clues": [[1, [3, 7]]],
             "fog_lit": None,
         }
-        vals = list(demo_p["givens"])
-        vals[3] = 4
-        hl = {2: HL_UNIT, 3: HL_BAD, 6: HL_UNIT, 7: HL_TARGET, 14: HL_UNIT}
-        cap = (f"Because {tok(1)} in row 4, column 3 blocks column 3, {tok(1)} in the top-right box "
-               f"can only go in row 1, column 4 or row 2, column 4 (the two corner marks). "
-               f"Once row 1, column 4 fills up with {tok(4)}, {tok(1)} must go in row 2, column 4!")
-        return {"_p": demo_p, "hl": hl, "values": vals, "target": (7, 1),
-                "strikes": [(3, 1)]}, cap
+        vals2 = list(demo_p["givens"])
+        vals2[3] = 4
+        step1 = {
+            "_p": demo_p,
+            "hl": {2: HL_UNIT, 3: HL_UNIT, 6: HL_UNIT, 7: HL_UNIT, 14: HL_TARGET},
+            "block_arrows": [(14, 2)],
+        }
+        step2 = {
+            "_p": demo_p,
+            "hl": {2: HL_UNIT, 3: HL_BAD, 6: HL_UNIT, 7: HL_TARGET, 14: HL_UNIT},
+            "values": vals2,
+            "strikes": [(3, 1)],
+            "target": (7, 1),
+        }
+        cap = (f"1. {tok(1)} in row 4, column 3 blocks column 3, so {tok(1)} in the top-right box "
+               f"can only go in row 1, column 4 or row 2, column 4 - place TWO {tok(1)} corner pegs!  "
+               f"2. Once row 1, column 4 fills up with {tok(4)} (red), {tok(1)} must go in the other corner cell, row 2, column 4!")
+        return [(f"Place 2 {tok(1)} corner pegs", step1), (f"{tok(4)} fills 1 -> {tok(1)} in other", step2)], cap
     if level == 5:
-        # Clean, self-contained teaching board for Pointing Pairs:
-        # - Top-right box has R1C3 = 4 and R2C3 = 3, so 2 can only go in R1C4 (3) or R2C4 (7) (both in col 4).
-        # - Bottom-right box has R3C1 = 2 blocking row 3, so 2 can only go in R4C3 (14) or R4C4 (15).
-        # - The two 2 corner marks in the top-right box point down column 4 and zap R4C4 (15),
-        #   leaving R4C3 (14) as the only spot for 2 in the bottom-right box!
+        # Clean, self-contained 2-step teaching board for Pointing Pairs:
+        # Step 1: Top-right box has two 2 corner marks aligned in col 4 -> shoot laser down col 4 to zap R4C4!
+        # Step 2: Only R4C3 is left for 2 in the bottom-right box -> place big 2 there!
         demo_p = {
             "givens": [0, 0, 4, 0,
                        0, 0, 3, 0,
@@ -674,17 +709,27 @@ def lesson_example(p, level, use_colors=False):
             "corner_clues": [[2, [3, 7]], [2, [14, 15]]],
             "fog_lit": None,
         }
-        hl = {3: HL_TARGET, 7: HL_TARGET, 11: HL_UNIT, 15: HL_BAD, 14: HL_UNIT}
-        cap = (f"In the top-right box, the two {tok(2)} corner marks (green) sit in column 4, so {tok(2)} "
-               f"in that box must go in column 4. Shoot a laser down column 4 to cross out the {tok(2)} "
-               f"corner mark in row 4, column 4 (red) - leaving row 4, column 3 (circled) as the only spot for {tok(2)}!")
-        return {"_p": demo_p, "hl": hl, "block_arrows": [(7, 15)],
-                "strikes": [(15, 2)], "corner_target": (14, 2)}, cap
+        step1 = {
+            "_p": demo_p,
+            "hl": {3: HL_TARGET, 7: HL_TARGET, 11: HL_UNIT, 15: HL_BAD, 14: HL_UNIT},
+            "block_arrows": [(7, 15)],
+            "strikes": [(15, 2)],
+            "corner_target": (14, 2),
+        }
+        step2 = {
+            "_p": demo_p,
+            "hl": {3: HL_UNIT, 7: HL_UNIT, 15: HL_BAD, 14: HL_TARGET},
+            "strikes": [(15, 2)],
+            "target": (14, 2),
+        }
+        cap = (f"1. In the top-right box, the two {tok(2)} corner pegs (green) sit in column 4. "
+               f"Shoot a laser down column 4 to cross out the {tok(2)} corner peg in row 4, column 4 (red).  "
+               f"2. Now row 4, column 3 is the only spot left for {tok(2)} in the bottom-right box!")
+        return [(f"Aligned {tok(2)}s zap col 4", step1), (f"Place {tok(2)} in last corner", step2)], cap
     if level == 6:
-        # Clean, self-contained teaching board for Naked Pair in Row 1:
-        # - Top-left box has R2C1 = 2 and R2C2 = 4, so both R1C1 (0) and R1C2 (1) can only be 1 or 3 (Twins!).
-        # - Row 1 has R1C4 = 4, so R1C3 (2) can only be 1, 2 or 3.
-        # - The [1, 3] Twins in R1C1 & R1C2 use up 1 and 3 in Row 1, so cross 1 and 3 off R1C3 -> only 2 is left!
+        # Clean, self-contained 2-step teaching board for Naked Pair in Row 1:
+        # Step 1: Twins [1, 3] in R1C1 & R1C2 zap 1 & 3 from R1C3 -> only 2 left (circled).
+        # Step 2: Place big 2 in R1C3!
         demo_p = {
             "givens": [0, 0, 0, 4,
                        2, 4, 0, 0,
@@ -699,13 +744,23 @@ def lesson_example(p, level, use_colors=False):
             "center_clues": {"0": [1, 3], "1": [1, 3], "2": [1, 2, 3]},
             "corner_clues": [], "fog_lit": None,
         }
-        hl = {0: HL_TARGET, 1: HL_TARGET, 2: HL_UNIT, 3: HL_UNIT}
-        cap = (f"In row 1, the two green twin cells (row 1, column 1 and row 1, column 2) can only be "
-               f"{tok(1)} or {tok(3)} (since {tok(2)} and {tok(4)} are already in their box). Between them "
-               f"they use up {tok(1)} and {tok(3)} in row 1, so cross {tok(1)} and {tok(3)} off row 1, column 3 "
-               f"(yellow) - leaving only {tok(2)} (circled)!")
-        return {"_p": demo_p, "hl": hl, "pair_link": (0, 1),
-                "strikes": [(2, 1), (2, 3)], "peg_target": (2, 2)}, cap
+        step1 = {
+            "_p": demo_p,
+            "hl": {0: HL_TARGET, 1: HL_TARGET, 2: HL_UNIT, 3: HL_UNIT},
+            "pair_link": (0, 1),
+            "strikes": [(2, 1), (2, 3)],
+            "peg_target": (2, 2),
+        }
+        step2 = {
+            "_p": demo_p,
+            "hl": {0: HL_UNIT, 1: HL_UNIT, 2: HL_TARGET, 3: HL_UNIT},
+            "pair_link": (0, 1),
+            "target": (2, 2),
+        }
+        cap = (f"1. In row 1, the two green twin cells can only be {tok(1)} or {tok(3)}, so they "
+               f"use up {tok(1)} and {tok(3)} in row 1 - cross {tok(1)} and {tok(3)} off row 1, column 3 (yellow).  "
+               f"2. Only {tok(2)} is left, so place {tok(2)} in row 1, column 3!")
+        return [(f"Twins zap {tok(1)} & {tok(3)}", step1), (f"Place remaining {tok(2)}", step2)], cap
     if level == 7:
         s = _first_step(p, ("hs_box", "hs_line", "ns"), ("hs_box", "hs_line"))
         unit = s.get("unit", [])
@@ -716,39 +771,98 @@ def lesson_example(p, level, use_colors=False):
             src = next((q for q in peers[bc] if p["givens"][q] == s["digit"]), None)
             if src is not None:
                 block_arrows.append((src, bc))
-        hl = {c: HL_UNIT for c in unit}
+        hl1 = {c: HL_UNIT for c in unit}
         for bc in blocked:
-            hl[bc] = HL_BAD
-        hl[s["cell"]] = HL_TARGET
-        cap = (f"In the yellow wobbly shape, {tok(s['digit'])} is blocked from the two red cells (X), "
-               f"so it goes in {rcname(s['cell'])}.")
-        return {"hl": hl, "values": s["before"]["values"], "block_arrows": block_arrows,
-                "cell_strikes": blocked, "target": (s["cell"], s["digit"])}, cap
+            hl1[bc] = HL_BAD
+        hl2 = dict(hl1)
+        hl2[s["cell"]] = HL_TARGET
+        step1 = {
+            "hl": hl1,
+            "values": s["before"]["values"],
+            "block_arrows": block_arrows,
+            "cell_strikes": blocked,
+        }
+        step2 = {
+            "hl": hl2,
+            "values": s["before"]["values"],
+            "cell_strikes": blocked,
+            "target": (s["cell"], s["digit"]),
+        }
+        cap = (f"1. Trace the yellow 4-cell wobbly shape: {tok(s['digit'])} is blocked from the "
+               f"two red cells (X).  2. Only {rcname(s['cell'])} is open, so place {tok(s['digit'])} there!")
+        return [("Trace shape & spot X's", step1), (f"Place {tok(s['digit'])} in open cell", step2)], cap
     if level == 8:
+        # Step 1: How a knight jumps (L-shape: 2 + 1)
+        # Step 2: Row + Knight jump blocks 3 cells in top-right box -> place 1 in R1C4!
+        demo_p = {
+            "givens": [0, 0, 0, 0,
+                       1, 0, 0, 0,
+                       0, 0, 0, 2,
+                       0, 3, 0, 0],
+            "solution": [2, 3, 4, 1,
+                         1, 4, 2, 3,
+                         3, 1, 4, 2,
+                         4, 2, 1, 3],
+            "regions": list(G.STANDARD_REGIONS),
+            "anti_knight": True, "colors": {}, "center_clues": {}, "corner_clues": [], "fog_lit": None,
+        }
+        empty_p = dict(demo_p, givens=[0] * 16)
         i = 5
         kn = G.knight_neighbors(i)
-        hl = {c: HL_BAD for c in kn}
-        hl[i] = HL_TARGET
-        q = dict(p, givens=[0] * 16, center_clues={}, corner_clues=[], colors={})
-        return {"hl": hl, "knight_from": i, "knight_jumps": [(i, c) for c in kn], "_p": q}, (
-            f"The knight jumps in an L (2 cells one way, 1 sideways). Whatever {noun} sits on "
-            f"the green cell can't also be on any of the 4 red cells.")
+        step1 = {
+            "_p": empty_p,
+            "hl": {i: HL_TARGET, **{c: HL_BAD for c in kn}},
+            "knight_from": i,
+            "knight_jumps": [(i, c) for c in kn],
+        }
+        step2 = {
+            "_p": demo_p,
+            "hl": {2: HL_BAD, 6: HL_BAD, 7: HL_BAD, 4: HL_UNIT, 3: HL_TARGET},
+            "block_arrows": [(4, 7)],
+            "knight_jumps": [(4, 2)],
+            "cell_strikes": [2, 6, 7],
+            "target": (3, 1),
+        }
+        cap = (f"1. A chess knight jumps in an L (2 cells one way, 1 sideways): the green cell's {noun} "
+               f"can't sit on any of the 4 red cells.  2. Here, {tok(1)} in row 2, column 1 blocks row 2 AND "
+               f"knight-jumps to block row 1, column 3 (X), leaving only row 1, column 4 for {tok(1)}!")
+        return [("Knight jumps 2 + 1 (L)", step1), (f"Row + knight solve {tok(1)}", step2)], cap
     if level == 9:
-        s = _first_step(p, S + ("point", "npair", "xwing"), ("xwing",))
+        _, steps2 = L.solve_logic(p["givens"], variant_of(p), S + ("point", "npair", "xwing"),
+                                  record=True, allowed=allowed_of(p))
+        idx_xw = next(i for i, st in enumerate(steps2) if st["tech"] == "xwing")
+        s = steps2[idx_xw]
+        s_next = next(st for st in steps2[idx_xw + 1:] if "cell" in st)
         d = s["digit"]
-        hl = {c: HL_TARGET for c in s["pattern"]}
+        hl1 = {c: HL_TARGET for c in s["pattern"]}
         for c, _ in s["elims"]:
-            hl[c] = HL_BAD
+            hl1[c] = HL_BAD
+        hl2 = {c: HL_UNIT for c, _ in s["elims"]}
+        hl2[s_next["cell"]] = HL_TARGET
         cands = {i: ds for i, ds in enumerate(s["before"]["cands"])
                  if ds and str(i) not in p["center_clues"]}
         a, b, c2, d2 = s["pattern"]
         lines_word = "rows" if s["axis"] == "row" else "columns"
         other = "columns" if s["axis"] == "row" else "rows"
-        cap = (f"In two {lines_word}, {tok(d)} fits only in the green corner cells of the X. One {tok(d)} goes "
-               f"on each diagonal, so {tok(d)} is zapped from the rest of those {other} (red) - leaving only "
-               f"{tok(4)} (circled) in row 2, column 2! (Works the same way when two {other} lock two {lines_word}!)")
-        return {"hl": hl, "values": s["before"]["values"], "strikes": s["elims"], "cands": cands,
-                "lines": [(a, d2), (b, c2)], "peg_target": (5, 4)}, cap
+        step1 = {
+            "hl": hl1,
+            "values": s["before"]["values"],
+            "strikes": s["elims"],
+            "cands": cands,
+            "lines": [(a, d2), (b, c2)],
+            "peg_target": (s_next["cell"], s_next["digit"]),
+        }
+        step2 = {
+            "hl": hl2,
+            "values": s_next["before"]["values"],
+            "strikes": s["elims"],
+            "cands": cands,
+            "target": (s_next["cell"], s_next["digit"]),
+        }
+        cap = (f"1. In two {lines_word}, {tok(d)} fits only in the 4 green X-corners, zapping {tok(d)} "
+               f"from the rest of those {other} (red X).  2. That leaves only {tok(s_next['digit'])} "
+               f"in {rcname(s_next['cell'])}! (Works the same way when two {other} lock two {lines_word}!)")
+        return [(f"X-corners zap {tok(d)}", step1), (f"Place unlocked {tok(s_next['digit'])}", step2)], cap
     if level == 10:
         demo_p = {
             "givens": [0, 4, 3, 0,
@@ -767,13 +881,25 @@ def lesson_example(p, level, use_colors=False):
             "fog_lit": None,
         }
         cands = {0: [1, 2], 4: [1, 2], 12: [1, 4]}
-        hl = {0: HL_UNIT, 4: HL_UNIT, 12: HL_TARGET}
-        cap = (f"No marks printed? Add your OWN pegs! In column 1, row 1 and row 2 can only be "
-               f"{tok(1)} or {tok(2)}. Your pegs show {tok(1)} and {tok(2)} are used up there, "
-               f"so cross {tok(1)} off row 4, column 1 (green) - it must be {tok(4)}!")
-        return {"_p": demo_p, "hl": hl, "cands": cands, "pair_link": (0, 4),
-                "strikes": [(12, 1)], "peg_target": (12, 4)}, cap
-    return {}, ""
+        step1 = {
+            "_p": demo_p,
+            "hl": {0: HL_UNIT, 4: HL_UNIT, 12: HL_TARGET},
+            "cands": cands,
+            "pair_link": (0, 4),
+            "strikes": [(12, 1)],
+            "peg_target": (12, 4),
+        }
+        step2 = {
+            "_p": demo_p,
+            "hl": {0: HL_UNIT, 4: HL_UNIT, 12: HL_TARGET},
+            "cands": cands,
+            "target": (12, 4),
+        }
+        cap = (f"1. No marks printed? Add your OWN pegs! In column 1, row 1 and row 2 can only be "
+               f"{tok(1)} or {tok(2)}, so those twins cross {tok(1)} off row 4, column 1 (X).  "
+               f"2. Only {tok(4)} is left, so place {tok(4)} in row 4, column 1!")
+        return [("Add pegs & spot twins", step1), (f"Place remaining {tok(4)}", step2)], cap
+    return [], ""
 
 
 def _draw_peg_spots_legend(pg, y_baseline, use_colors=False):
@@ -809,16 +935,34 @@ def lesson_page(pdf, level, example, page_no, use_colors=False):
     for head, key in (("What it means", "what"), ("On the board", "board"), ("Dad tip", "dad")):
         pg.text(MARGIN, y, head, 13, True, color=INK)
         y = pg.paragraph(MARGIN, y + 2, les[key], 11, width, leading=1.32, color="#222222") + 14
-    # example diagram
-    kw, cap = lesson_example(example, level, use_colors=use_colors)
-    p = kw.pop("_p", example)
-    size = 250
-    bx = (pg.w - size) / 2
+    # example diagram (2-step side-by-side sequence: Step 1 -> Step 2)
+    steps, cap = lesson_example(example, level, use_colors=use_colors)
     pg.text(MARGIN, y + 4, "Example", 13, True, color=INK)
-    by = y + 14
-    draw_board(pg, bx, by, size, p, use_colors=use_colors, **kw)
-    y = by + size + 6
-    y = pg.paragraph(MARGIN + 30, y, cap, 11, width - 60, leading=1.3, color="#222222")
+    label_y = y + 24
+    by = y + 36
+    gap = 34.0
+    max_h = max(165.0, pg.h - MARGIN - 98 - by)
+    size = min(224.0, (width - gap) / 2.0, max_h)
+    total_w = 2 * size + gap
+    x0 = (pg.w - total_w) / 2.0
+    step_colors = ("#1d6fd8", GOOD)
+    for idx_s, (step_label, raw_kw) in enumerate(steps):
+        kw = dict(raw_kw)
+        p_rec = kw.pop("_p", example)
+        bx = x0 + idx_s * (size + gap)
+        # Step number badge + short label above each board
+        pg.fill_color(step_colors[idx_s])
+        pg.circle(bx + 10, label_y - 3.5, 9.0, fill=True, stroke=False)
+        pg.text_centered_in(bx + 10, label_y - 3.5, str(idx_s + 1), 10.5, True, "#ffffff")
+        pg.text(bx + 24, label_y, step_label, 10.5, True, color=INK)
+        draw_board(pg, bx, by, size, p_rec, use_colors=use_colors, **kw)
+    if len(steps) == 2:
+        ax1 = x0 + size + 5.0
+        ax2 = x0 + size + gap - 5.0
+        ay = by + size / 2.0
+        draw_arrow(pg, ax1, ay, ax2, ay, color="#495057", width=2.4, head=6.0)
+    y = by + size + 8
+    y = pg.paragraph(MARGIN + 20, y, cap, 10.5, width - 40, leading=1.28, color="#222222")
     book_label = "4x4 Color Sudoku Workbook" if use_colors else "4x4 Sudoku Workbook"
     footer(pg, f"{book_label}  -  page {page_no}")
     return page_no + 1

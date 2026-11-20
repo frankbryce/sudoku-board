@@ -10,7 +10,7 @@ CAMERA   := -110,-270,380,70,75,20
 
 export PYTHONPATH := $(CURDIR)
 
-.PHONY: all puzzles pdf instructions clean
+.PHONY: all puzzles pdf booklet240 instructions clean
 
 all: pdf
 
@@ -24,6 +24,10 @@ puzzles/puzzles.json:
 ## Render output/workbook.pdf + output/answers.pdf AND output/workbook_colors.pdf + output/answers_colors.pdf
 pdf: puzzles/puzzles.json
 	$(PYTHON) -m sudoku4.render
+
+## Generate & render the 240-puzzle Multi-Technique Progressive Pocket Booklet (Half-Letter, 1/page + back timer)
+booklet240:
+	$(PYTHON) -m sudoku4.booklet240
 
 ## Render the LEGO-style build-step pictures with OpenSCAD
 instructions: $(STEP_PNGS)
