@@ -53,8 +53,8 @@ region_bar_crown_height = 2.4;
 /* [Full-Cell Solved Piece & Deep Anti-Tip Peg Dimensions (mm)] */
 // Visible top crown width of solved piece
 main_tile_crown_width = 25.8;
-// Total height of chunky solved tile (3.8 mm deep plinth + elevated finger scoop)
-main_tile_height = 16.0;
+// Total height of chunky solved tile (3.8 mm deep plinth + elevated finger scoop; aligned to 0.20 mm first layer + 0.28 mm layers -> 57 layers = 15.88 mm)
+main_tile_height = 15.88;
 // Depth of framed central candidate zone recess on cell floor
 center_zone_recess_depth = 0.5;
 
@@ -795,12 +795,12 @@ module main_piece(paint_color = undef, label = "") {
     taper_dn = (tile_base_w - tile_waist_w) / 2;
     z_w2 = plinth_h + taper_dn;
     taper_up = (tile_crown_w - tile_waist_w) / 2;
-    paint_pad_h = 0.90;
+    paint_pad_h = 0.84; // 3 x 0.28 mm layers (15.04 -> 15.88 mm, Layers 55-57 on 0.20 mm first layer)
     crown_h = 4.6;
     z_w4 = (main_tile_height - paint_pad_h) - crown_h;
     z_w3 = z_w4 - taper_up;
     pad_w = tile_crown_w - 2.4;
-    label_h = 0.80;
+    label_h = 0.84; // 3 x 0.28 mm layers (15.88 -> 16.72 mm, Layers 58-60)
 
     // Deep 4-side rubber-band retention channel parameters (1.25 mm deep x 2.6 mm tall)
     rb_z_bot = main_tile_height - paint_pad_h - 3.9; // 11.2 mm
@@ -838,12 +838,12 @@ module main_piece(paint_color = undef, label = "") {
                         linear_extrude(height = (main_tile_height - paint_pad_h) - z_w4 - 0.5)
                             rounded_rect_2d(tile_crown_w, tile_crown_w, 3.8);
                 }
-                // 4. White upper shoulder bevel (sits 0.9 mm BELOW the flat paint pad)
+                // 4. White upper shoulder bevel (ends cleanly at 15.04 mm = Layer 54 top)
                 hull() {
                     translate([0, 0, main_tile_height - paint_pad_h - 0.5 - eps])
                         linear_extrude(height = eps)
                             rounded_rect_2d(tile_crown_w, tile_crown_w, 3.8);
-                    translate([0, 0, main_tile_height - paint_pad_h])
+                    translate([0, 0, main_tile_height - paint_pad_h - eps])
                         linear_extrude(height = eps)
                             rounded_rect_2d(pad_w + 0.6, pad_w + 0.6, 3.2);
                 }
