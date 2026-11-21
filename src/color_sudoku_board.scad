@@ -145,12 +145,12 @@ board_total_h = total_plate_h + border_total_h;           // 16.75 mm total heig
 
 // Unified Center-Slot Board + Straight Arched Border + Reversible Killer Cage (R1) constants
 center_slot_len        = 7.40;  // centered 7.40 x 3.00 x 7.00 mm pocket per interior cell edge
-border_top_groove_len  = 7.20;  // single centered top groove on borders (79.4% of dark border unobstructed!)
-border_top_groove_d    = 2.25;  // cuts from Z=16.75 down to Z=14.50 (1.00 mm deck + 6.60 mm tab underneath!)
-killer_rail_len        = 28.60; // trimmed for 0.45 mm nominal (0.15 mm worst-case) 90-deg corner clearance!
+border_top_groove_len  = 4.80;  // single centered top groove (narrower than 7.00 mm bottom tab! 86.3% dark border visible!)
+border_top_groove_d    = 2.05;  // cuts from Z=16.75 down to Z=14.70 (1.20 mm deck + 6.60 mm tab = 7.80 mm solid!)
+killer_rail_len        = 26.20; // guarantees >= 0.15 mm 90-deg corner clearance even at max +-1.50 mm X-play in empty slot
 killer_rail_w          = 1.20;  // 3 perimeters on 0.4 mm nozzle (u = +-(1.55..2.75 mm))
 killer_rail_h          = 2.00;  // Z = 13.50..15.50 mm (1.25 mm below dark region border!)
-killer_tab_len         = 6.80;  // 0.30 mm/side X-play in board slot, 0.20 mm/side in border top groove
+killer_tab_len         = 4.40;  // 0.20 mm/side X-play in 4.80 mm border top groove; drops cleanly into 7.40 mm board slot
 killer_tab_drop        = 1.25;  // drops 1.25 mm into board slot; flips flush to Z = 16.75 in border groove!
 
 // Grey Circle Furniture (Option C1 — Cardinal-Tab Gravity Ring) constants
@@ -1398,16 +1398,17 @@ module region_bar_1x_arch(paint_color = undef, with_top_groove = true) {
                         miter_pointed_bar_2d(full_len - 0.6, paint_ridge_w);
         }
 
-        // Arched underside relief between center tab (|x|=3.5) and mitered end-feet (|x|=13.5..17.35)
+        // Arched underside relief starting at |x| = 6.00 mm (well outside 4.80 mm top groove & 7.00 mm bottom tab!)
+        // Leaves 3.60 mm of solid flanking material on EACH side of the top groove (zero brittle neck!)
         for (sx = [-1, 1]) {
-            translate([sx * 8.6, 0, -eps])
+            translate([sx * 9.7, 0, -eps])
                 rotate([90, 0, 0])
                     linear_extrude(height = w + 1.0, center = true)
-                        polygon([[-4.6, 0], [4.6, 0], [3.6, 0.85], [-3.6, 0.85]]);
+                        polygon([[-3.7, 0], [3.7, 0], [2.85, 0.85], [-2.85, 0.85]]);
         }
 
-        // Single centered top groove (7.20 x 2.25 mm) for flush flipped R1 killer cage rail
-        // Leaves 79.4% (27.8/35.0 mm) of the dark border completely unobstructed!
+        // Single centered top groove (4.80 x 2.05 mm) for flush flipped R1 killer cage rail
+        // Strictly narrower than the 7.00 mm bottom tab; leaves 86.3% (30.2/35.0 mm) of dark border unobstructed!
         if (with_top_groove) {
             translate([-border_top_groove_len / 2, -w / 2 - 0.3, border_total_h - border_top_groove_d])
                 cube([border_top_groove_len, w + 0.6, border_top_groove_d + 0.3]);
@@ -1519,22 +1520,22 @@ module killer_cage_rail(rail_color = undef) {
             translate([-rail_len / 2, y_c - rail_w / 2, spine_z0])
                 cube([rail_len, rail_w, spine_h]);
             // 5 symmetric 45-deg trapezoidal dashes on BOTH top (1.45..2.00) and bottom (0.00..0.55)
-            for (dx = [-11.2, -5.6, 0.0, 5.6, 11.2]) {
+            for (dx = [-10.4, -5.2, 0.0, 5.2, 10.4]) {
                 translate([dx, y_c, spine_z0 + spine_h - eps])
                     rotate([90, 0, 0])
                         linear_extrude(height = rail_w, center = true)
-                            polygon([[-1.95, 0], [1.95, 0], [1.45, 0.55 + eps], [-1.45, 0.55 + eps]]);
+                            polygon([[-1.80, 0], [1.80, 0], [1.35, 0.55 + eps], [-1.35, 0.55 + eps]]);
                 translate([dx, y_c, spine_z0 + eps])
                     rotate([90, 0, 0])
                         linear_extrude(height = rail_w, center = true)
-                            polygon([[-1.95, 0], [1.95, 0], [1.45, -(0.55 + eps)], [-1.45, -(0.55 + eps)]]);
+                            polygon([[-1.80, 0], [1.80, 0], [1.35, -(0.55 + eps)], [-1.35, -(0.55 + eps)]]);
             }
         }
 
-        // Single centered cross-bridge + engagement tab (x in [-3.40, +3.40])
-        // Tie bar connecting both side rails (z = 0.00..0.90)
+        // Single centered cross-bridge + engagement tab (x in [-2.20, +2.20], 4.40 mm wide)
+        // Tie bar connecting both side rails (z = 0.00..0.75 -> flips to Z = 14.75..15.50 inside 2.05 mm groove!)
         translate([-tab_l / 2, -2.15, 0.00])
-            cube([tab_l, 4.30, 0.90]);
+            cube([tab_l, 4.30, 0.75]);
         // Center slot / border-groove engagement tab (2.80 mm wide, drops to z = -1.25 mm)
         hull() {
             translate([0, 0, -tab_drop])
@@ -1544,10 +1545,10 @@ module killer_cage_rail(rail_color = undef) {
             translate([0, 0, 0.05])
                 cube([tab_l, w, eps], center = true);
         }
-        // Subtle +-0.04 mm centering bumps on tab flanks at x = +-2.0 mm (<0.7 deg yaw!)
-        for (rx = [-2.0, 2.0]) {
-            translate([rx - 0.5, -(w / 2 + 0.04), -tab_drop + 0.30])
-                cube([1.0, w + 0.08, tab_drop - 0.35]);
+        // Subtle +-0.04 mm centering bumps on tab flanks at x = +-1.3 mm (<1.0 deg yaw!)
+        for (rx = [-1.3, 1.3]) {
+            translate([rx - 0.45, -(w / 2 + 0.04), -tab_drop + 0.30])
+                cube([0.9, w + 0.08, tab_drop - 0.35]);
         }
     }
 }
