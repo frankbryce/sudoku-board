@@ -22,16 +22,19 @@
 
 /* [Render Selection] */
 // Select which part to preview / export:
-render_mode = "assembly_preview"; // ["assembly_preview", "full_board_preview", "board_4x4_preview", "shapes_preview", "board_4x4", "tile_center", "tile_edge_n", "tile_edge_s", "tile_edge_w", "tile_edge_e", "tile_corner_nw", "tile_corner_ne", "tile_corner_sw", "tile_corner_se", "main_piece", "pencil_peg", "region_bar_1x", "region_bar_2x", "region_bar_3x"]
+render_mode = "assembly_preview"; // ["assembly_preview", "full_board_preview", "board_4x4_preview", "shapes_preview", "board_4x4", "tile_center", "tile_edge_n", "tile_edge_s", "tile_edge_w", "tile_edge_e", "tile_corner_nw", "tile_corner_ne", "tile_corner_sw", "tile_corner_se", "main_piece", "pencil_peg", "region_bar_1x", "region_bar_2x", "region_bar_3x", "region_bar_1x_arch", "region_grid_9x9_quadrant", "killer_cage_rail", "circle_marker"]
 
 // Optional raised character on main_piece / pencil_peg ("" = blank, "1"-"9", "A"-"I")
 piece_label = ""; // ["", "1", "2", "3", "4", "5", "6", "7", "8", "9", "A", "B", "C", "D", "E", "F", "G", "H", "I"]
 
-// Optional tactile / colorblind-friendly top pad shape on main_piece ("" = classic full rounded-square pad)
+// Optional tactile / colorblind-friendly top pad shape on main_piece or N2 flared pencil_peg
 piece_shape = ""; // ["", "circle", "square", "triangle", "star", "asterisk", "heart", "crescent", "clover", "hexagon"]
 
 // Central pencil-mark layout ("2x2" = 4 wide-spaced holes for 6yo fingers; "3x2" = 6 holes for dense CTC puzzles)
 center_mark_mode = "2x2"; // ["2x2", "3x2"]
+
+// Board border slot style ("center_slot" = unified center pockets + narrowed 2.8 mm outer border; "full_slot" = legacy continuous trenches)
+board_slot_style = "center_slot"; // ["center_slot", "full_slot"]
 
 /* [Board & Grid Dimensions — Compact 2/3 Scale (~35 mm Pitch)] */
 // Center-to-center cell pitch (35 mm -> ~315 mm 9x9 board, ~2/3 of 50 mm original)
@@ -135,10 +138,31 @@ bar_bevel_h = (region_bar_crown_width - bar_tongue_w) / 2; // 45-deg print-safe 
 
 // Permanent outer border derived dimensions (matches seated region_bar height & profile)
 border_paint_ridge_h = 0.70;
-border_paint_ridge_w = region_bar_crown_width - 1.1; // 2.9 mm flat paint ridge
+border_paint_ridge_w = region_bar_crown_width - 1.1; // 2.9 mm flat paint ridge (legacy)
 border_shoulder_h = (bar_tongue_h - region_slot_depth) + bar_bevel_h + (region_bar_crown_height - border_paint_ridge_h);
 border_total_h = border_shoulder_h + border_paint_ridge_h; // 3.25 mm above total_plate_h
 board_total_h = total_plate_h + border_total_h;           // 16.75 mm total height with border
+
+// Unified Center-Slot Board + Straight Arched Border + Reversible Killer Cage (R1) constants
+center_slot_len        = 7.40;  // centered 7.40 x 3.00 x 7.00 mm pocket per interior cell edge
+border_top_groove_len  = 7.20;  // single centered top groove on borders (79.4% of dark border unobstructed!)
+border_top_groove_d    = 2.25;  // cuts from Z=16.75 down to Z=14.50 (1.00 mm deck + 6.60 mm tab underneath!)
+killer_rail_len        = 28.60; // trimmed for 0.45 mm nominal (0.15 mm worst-case) 90-deg corner clearance!
+killer_rail_w          = 1.20;  // 3 perimeters on 0.4 mm nozzle (u = +-(1.55..2.75 mm))
+killer_rail_h          = 2.00;  // Z = 13.50..15.50 mm (1.25 mm below dark region border!)
+killer_tab_len         = 6.80;  // 0.30 mm/side X-play in board slot, 0.20 mm/side in border top groove
+killer_tab_drop        = 1.25;  // drops 1.25 mm into board slot; flips flush to Z = 16.75 in border groove!
+
+// Grey Circle Furniture (Option C1 — Cardinal-Tab Gravity Ring) constants
+circle_od              = 28.60; // R_out = 14.30 mm (0.40 mm clearance/side in 29.4 mm cell)
+circle_id              = 22.00; // R_in  = 11.00 mm (clears 4 central pegs & all shapes/labels)
+circle_ring_h          = 1.80;
+circle_tab_h           = 2.50;  // total H = 4.30 mm
+circle_tab_w           = 7.00;
+circle_tab_in          = 13.10; // 0.20 mm clearance/side around 25.8 mm main_piece crown
+circle_tab_out         = 14.30; // 1.20 mm wall (3x 0.4 mm perimeters)
+circle_seat_h          = 0.90;  // clears 0.84 mm paint pad on main_piece
+circle_seat_in         = 11.95;
 
 // ============================================================================
 // 2D / 3D Helper Primitives
@@ -381,11 +405,49 @@ module region_slot_y(x_pos, y_start, y_end) {
     }
 }
 
+// Unified Center-Slot Pocket along X or Y (7.40 x 3.00 x 7.00 mm, 0.25 mm entry chamfer)
+module center_slot_x(y_pos, x_center) {
+    chamf = 0.25;
+    translate([x_center - center_slot_len / 2, y_pos - region_slot_width / 2, slot_floor_z])
+        cube([center_slot_len, region_slot_width, region_slot_depth + eps]);
+    hull() {
+        translate([x_center - center_slot_len / 2, y_pos - region_slot_width / 2, total_plate_h - chamf])
+            cube([center_slot_len, region_slot_width, eps]);
+        translate([x_center - center_slot_len / 2 - chamf, y_pos - region_slot_width / 2 - chamf, total_plate_h + eps])
+            cube([center_slot_len + 2 * chamf, region_slot_width + 2 * chamf, eps]);
+    }
+}
+
+module center_slot_y(x_pos, y_center) {
+    chamf = 0.25;
+    translate([x_pos - region_slot_width / 2, y_center - center_slot_len / 2, slot_floor_z])
+        cube([region_slot_width, center_slot_len, region_slot_depth + eps]);
+    hull() {
+        translate([x_pos - region_slot_width / 2, y_center - center_slot_len / 2, total_plate_h - chamf])
+            cube([region_slot_width, center_slot_len, eps]);
+        translate([x_pos - region_slot_width / 2 - chamf, y_center - center_slot_len / 2 - chamf, total_plate_h + eps])
+            cube([region_slot_width + 2 * chamf, center_slot_len + 2 * chamf, eps]);
+    }
+}
+
+// Single centered top groove cut into narrowed outer borders / region borders for flipped R1 killer cage rail
+// Centered at (0, 0) along X, cutting from board_total_h down by border_top_groove_d (2.25 mm)
+module border_top_groove_cut_x(cx, cy) {
+    translate([cx - border_top_groove_len / 2, cy - bar_tongue_w / 2 - 0.3, board_total_h - border_top_groove_d])
+        cube([border_top_groove_len, bar_tongue_w + 0.6, border_top_groove_d + 0.3]);
+}
+
+module border_top_groove_cut_y(cx, cy) {
+    translate([cx - bar_tongue_w / 2 - 0.3, cy - border_top_groove_len / 2, board_total_h - border_top_groove_d])
+        cube([bar_tongue_w + 0.6, border_top_groove_len, border_top_groove_d + 0.3]);
+}
+
 // 45-degree mitered notch cut into the inner side of the permanent outer border
-// so perpendicular region_bar_1x / 2x / 3x crowns seat flush into the border.
+// so perpendicular region bars seat flush into the border.
 // Centered at (0, 0) on the perimeter grid line; bar enters from +Y toward y = 0.
 module border_bar_notch() {
-    nw = region_bar_crown_width / 2 + max(region_bar_clearance, 0.12); // 2.12 mm half-width
+    bar_w_eff = (board_slot_style == "center_slot") ? bar_tongue_w : region_bar_crown_width;
+    nw = bar_w_eff / 2 + max(region_bar_clearance, 0.12);
     apex_y = -0.05; // slight apex relief so 0.4 mm nozzle inside-corner radius never pinches miter tip
     reach = divider_hw + 0.6;
 
@@ -511,6 +573,12 @@ module tile_border_notches(has_n, has_s, has_e, has_w) {
     if (has_e && !has_s) translate([cell_pitch, 0,          0]) rotate([0, 0,  90]) border_bar_notch();
     if (has_s && !has_e) translate([cell_pitch, 0,          0]) rotate([0, 0,   0]) border_bar_notch();
     if (has_n && !has_e) translate([cell_pitch, cell_pitch, 0]) rotate([0, 0, 180]) border_bar_notch();
+    if (board_slot_style == "center_slot") {
+        if (has_s) border_top_groove_cut_x(0.5 * cell_pitch, 0);
+        if (has_n) border_top_groove_cut_x(0.5 * cell_pitch, cell_pitch);
+        if (has_w) border_top_groove_cut_y(0, 0.5 * cell_pitch);
+        if (has_e) border_top_groove_cut_y(cell_pitch, 0.5 * cell_pitch);
+    }
 }
 
 module board_tile(
@@ -527,6 +595,11 @@ module board_tile(
     w_x = x1 - x0;
     w_y = y1 - y0;
     has_any_outer = has_north_wall || has_south_wall || has_east_wall || has_west_wall;
+    use_center_slot = (board_slot_style == "center_slot");
+    ob_hw_in  = use_center_slot ? (bar_tongue_w / 2) : (region_bar_crown_width / 2);
+    ob_hw_out = use_center_slot ? (bar_tongue_w / 2) : divider_hw;
+    pr_hw_in  = use_center_slot ? (bar_tongue_w / 2 - 0.30) : (border_paint_ridge_w / 2);
+    pr_hw_out = use_center_slot ? (bar_tongue_w / 2 - 0.30) : (divider_hw - 0.55);
 
     // Extend interior region slots all the way to the outer perimeter grid line (0.0 mm)
     // so region_bar_1x / 2x / 3x tips (at 0.25 mm) have 0.25 mm end clearance while keeping
@@ -564,20 +637,20 @@ module board_tile(
                 // 3. Cell interior & peg sockets
                 cell_interior_cuts(0.5 * cell_pitch, 0.5 * cell_pitch);
 
-                // 4. Interior region slots on Bottom (South) and Right (East), stopped at outer grid line
-                if (!has_south_wall) {
-                    region_slot_x(0, slot_x_min, slot_x_max);
-                }
-                if (!has_east_wall) {
-                    region_slot_y(cell_pitch, slot_y_min, slot_y_max);
-                }
-
-                // 4b. Remove isolated 1.3x1.3 mm corner nubbin at Bottom-Right only when both S & E slots exist
-                if (!has_south_wall && !has_east_wall) {
-                    nub_w = slot_wall_thickness + 2 * eps;
-                    nub_h = region_slot_depth + 2 * eps;
-                    translate([cell_pitch + region_slot_width / 2 - eps, -divider_hw - eps, slot_floor_z])
-                        cube([nub_w, nub_w, nub_h]);
+                // 4. Interior region slots on Bottom (South) and Right (East)
+                if (use_center_slot) {
+                    if (!has_south_wall) center_slot_x(0, 0.5 * cell_pitch);
+                    if (!has_east_wall)  center_slot_y(cell_pitch, 0.5 * cell_pitch);
+                } else {
+                    if (!has_south_wall) region_slot_x(0, slot_x_min, slot_x_max);
+                    if (!has_east_wall)  region_slot_y(cell_pitch, slot_y_min, slot_y_max);
+                    // 4b. Remove isolated 1.3x1.3 mm corner nubbin at Bottom-Right only when both S & E slots exist
+                    if (!has_south_wall && !has_east_wall) {
+                        nub_w = slot_wall_thickness + 2 * eps;
+                        nub_h = region_slot_depth + 2 * eps;
+                        translate([cell_pitch + region_slot_width / 2 - eps, -divider_hw - eps, slot_floor_z])
+                            cube([nub_w, nub_w, nub_h]);
+                    }
                 }
 
                 // 5. Inward Female vaulted-roof jigsaw sockets on Top (North) and Left (West) only when interior
@@ -592,13 +665,13 @@ module board_tile(
                 }
             }
 
-            // 1b. Permanent raised outer border crown shoulder (flush with outer board wall: 4.8 mm wide!)
+            // 1b. Permanent raised outer border crown shoulder (2.80 mm centered in center_slot mode!)
             if (has_any_outer) {
                 difference() {
                     translate([0, 0, total_plate_h - eps])
                         linear_extrude(height = border_shoulder_h + eps)
                             tile_perimeter_2d(
-                                region_bar_crown_width / 2, divider_hw, 0.1,
+                                ob_hw_in, ob_hw_out, 0.1,
                                 x0, x1, y0, y1,
                                 has_north_wall, has_south_wall, has_east_wall, has_west_wall
                             );
@@ -614,7 +687,7 @@ module board_tile(
                     translate([0, 0, total_plate_h + border_shoulder_h - eps])
                         linear_extrude(height = border_paint_ridge_h + eps)
                             tile_perimeter_2d(
-                                border_paint_ridge_w / 2, divider_hw - 0.55, 0.8,
+                                pr_hw_in, pr_hw_out, 0.4,
                                 x0, x1, y0, y1,
                                 has_north_wall, has_south_wall, has_east_wall, has_west_wall
                             );
@@ -638,13 +711,21 @@ module board_grid_tile(ix, iy, ncols, nrows, border_color = undef) {
 }
 
 module monolithic_border_notches(n_cells) {
+    span = n_cells * cell_pitch;
     if (n_cells > 1) {
-        span = n_cells * cell_pitch;
         for (k = [1 : n_cells - 1]) {
             translate([k * cell_pitch, 0,    0]) rotate([0, 0,   0]) border_bar_notch();
             translate([k * cell_pitch, span, 0]) rotate([0, 0, 180]) border_bar_notch();
             translate([0,    k * cell_pitch, 0]) rotate([0, 0, -90]) border_bar_notch();
             translate([span, k * cell_pitch, 0]) rotate([0, 0,  90]) border_bar_notch();
+        }
+    }
+    if (board_slot_style == "center_slot") {
+        for (i = [0 : n_cells - 1]) {
+            border_top_groove_cut_x((i + 0.5) * cell_pitch, 0);
+            border_top_groove_cut_x((i + 0.5) * cell_pitch, span);
+            border_top_groove_cut_y(0,    (i + 0.5) * cell_pitch);
+            border_top_groove_cut_y(span, (i + 0.5) * cell_pitch);
         }
     }
 }
@@ -657,9 +738,12 @@ module monolithic_board(n_cells = 4, border_color = undef) {
     x0 = -divider_hw;
     y0 = -divider_hw;
     w = span + 2 * divider_hw;
-    // Extend interior region slots to the perimeter grid line (0.0 mm) so region_bar tips (at 0.25 mm)
-    // have 0.25 mm end clearance while keeping the full 2.80 mm outer barrier wall solid.
     outer_slot_stop = 0.0;
+    use_center_slot = (board_slot_style == "center_slot");
+    ob_hw_in  = use_center_slot ? (bar_tongue_w / 2) : (region_bar_crown_width / 2);
+    ob_hw_out = use_center_slot ? (bar_tongue_w / 2) : divider_hw;
+    pr_hw_in  = use_center_slot ? (bar_tongue_w / 2 - 0.30) : (border_paint_ridge_w / 2);
+    pr_hw_out = use_center_slot ? (bar_tongue_w / 2 - 0.30) : (divider_hw - 0.55);
 
     union() {
         color(border_color == undef ? undef : "#F5F5F2") {
@@ -677,37 +761,41 @@ module monolithic_board(n_cells = 4, border_color = undef) {
                     cell_interior_cuts((ix + 0.5) * cell_pitch, (iy + 0.5) * cell_pitch);
                 }
 
-                // 3. Full grid of interior region slots (k = 1..n_cells-1 in both X and Y) for
-                //    both standard 2x2 box bars and 1x1 Jigsaw bars, stopped at the outer grid line.
+                // 3. Interior region slots
                 if (n_cells > 1) {
-                    for (k = [1 : n_cells - 1]) {
-                        region_slot_x(k * cell_pitch, outer_slot_stop, span - outer_slot_stop);
-                        region_slot_y(k * cell_pitch, outer_slot_stop, span - outer_slot_stop);
-                    }
-                    // Remove isolated 1.3x1.3 mm corner posts at interior slot intersections (kx, ky = 1..n_cells-1)
-                    // so adjacent perpendicular region bars (like Jigsaw turns) never collide with corner posts!
-                    nub_w = slot_wall_thickness + 2 * eps;
-                    nub_h = region_slot_depth + 2 * eps;
-                    for (kx = [1 : n_cells - 1], ky = [1 : n_cells - 1]) {
-                        for (sx = [-1, 1], sy = [-1, 1]) {
-                            cx_post = kx * cell_pitch + sx * (region_slot_width / 2 - eps);
-                            cy_post = ky * cell_pitch + sy * (region_slot_width / 2 - eps);
-                            translate([
-                                sx > 0 ? cx_post : (cx_post - nub_w),
-                                sy > 0 ? cy_post : (cy_post - nub_w),
-                                slot_floor_z
-                            ])
-                                cube([nub_w, nub_w, nub_h]);
+                    if (use_center_slot) {
+                        for (k = [1 : n_cells - 1], i = [0 : n_cells - 1]) {
+                            center_slot_x(k * cell_pitch, (i + 0.5) * cell_pitch);
+                            center_slot_y(k * cell_pitch, (i + 0.5) * cell_pitch);
+                        }
+                    } else {
+                        for (k = [1 : n_cells - 1]) {
+                            region_slot_x(k * cell_pitch, outer_slot_stop, span - outer_slot_stop);
+                            region_slot_y(k * cell_pitch, outer_slot_stop, span - outer_slot_stop);
+                        }
+                        nub_w = slot_wall_thickness + 2 * eps;
+                        nub_h = region_slot_depth + 2 * eps;
+                        for (kx = [1 : n_cells - 1], ky = [1 : n_cells - 1]) {
+                            for (sx = [-1, 1], sy = [-1, 1]) {
+                                cx_post = kx * cell_pitch + sx * (region_slot_width / 2 - eps);
+                                cy_post = ky * cell_pitch + sy * (region_slot_width / 2 - eps);
+                                translate([
+                                    sx > 0 ? cx_post : (cx_post - nub_w),
+                                    sy > 0 ? cy_post : (cy_post - nub_w),
+                                    slot_floor_z
+                                ])
+                                    cube([nub_w, nub_w, nub_h]);
+                            }
                         }
                     }
                 }
             }
 
-            // 1b. Permanent raised outer border crown shoulder (flush with outer board wall: 4.8 mm wide!)
+            // 1b. Permanent raised outer border crown shoulder
             difference() {
                 translate([0, 0, total_plate_h - eps])
                     linear_extrude(height = border_shoulder_h + eps)
-                        perimeter_ring_2d(span, span, region_bar_crown_width / 2, divider_hw, 0.1);
+                        perimeter_ring_2d(span, span, ob_hw_in, ob_hw_out, 0.1);
                 monolithic_border_notches(n_cells);
             }
         }
@@ -717,7 +805,7 @@ module monolithic_board(n_cells = 4, border_color = undef) {
             difference() {
                 translate([0, 0, total_plate_h + border_shoulder_h - eps])
                     linear_extrude(height = border_paint_ridge_h + eps)
-                        perimeter_ring_2d(span, span, border_paint_ridge_w / 2, divider_hw - 0.55, 0.8);
+                        perimeter_ring_2d(span, span, pr_hw_in, pr_hw_out, 0.4);
                 monolithic_border_notches(n_cells);
             }
     }
@@ -1037,6 +1125,126 @@ module pencil_peg(paint_color = undef, label = "") {
 }
 
 // ============================================================================
+// Outward-Tapered Shaped Pencil-Mark Peg (Option N2 — Locked)
+// - 7.8 mm 12-gon shaft (Z=0..9.2) -> 7.1 mm finger-pinch waist -> 9.0 mm flared rim
+// - 0.84 mm raised colored shape relief (8.0 mm max width) framed by crisp white rim
+// - FDM-tuned 9 shape motifs (>= 0.85 mm min feature for 0.4 mm nozzle)
+// ============================================================================
+
+module peg_shape_2d(shape = "circle", max_w = 8.0) {
+    if (shape == "circle") {
+        circle(d = max_w, $fn = 48);
+    } else if (shape == "square") {
+        rounded_rect_2d(max_w * 0.88, max_w * 0.88, 0.6);
+    } else if (shape == "triangle") {
+        R = max_w * 0.57;
+        translate([0, -R / 4])
+            offset(r = 0.45, $fn = 20)
+                offset(delta = -0.45)
+                    polygon([for (i = [0 : 2]) let(a = 90 + i * 120) [R * cos(a), R * sin(a)]]);
+    } else if (shape == "star") {
+        R_out = max_w * 0.56;
+        R_in  = max_w * 0.27;
+        translate([0, -0.25])
+            offset(r = 0.42, $fn = 16)
+                offset(delta = -0.42)
+                    polygon([for (i = [0 : 9]) let(a = 90 + i * 36, r = (i % 2 == 0) ? R_out : R_in) [r * cos(a), r * sin(a)]]);
+    } else if (shape == "asterisk") {
+        for (a = [0, 60, 120]) {
+            rotate([0, 0, a])
+                hull() {
+                    translate([0,  max_w * 0.40]) circle(r = 0.78, $fn = 20);
+                    translate([0, -max_w * 0.40]) circle(r = 0.78, $fn = 20);
+                }
+        }
+    } else if (shape == "heart") {
+        translate([0, 0.25]) {
+            hull() {
+                translate([-max_w * 0.22, max_w * 0.17]) circle(r = max_w * 0.26, $fn = 32);
+                translate([0, -max_w * 0.44]) circle(r = 0.55, $fn = 20);
+            }
+            hull() {
+                translate([ max_w * 0.22, max_w * 0.17]) circle(r = max_w * 0.26, $fn = 32);
+                translate([0, -max_w * 0.44]) circle(r = 0.55, $fn = 20);
+            }
+        }
+    } else if (shape == "crescent") {
+        rotate([0, 0, -20])
+            translate([0.75, 0])
+                offset(r = 0.42, $fn = 20)
+                    offset(delta = -0.42)
+                        difference() {
+                            circle(r = max_w * 0.50, $fn = 48);
+                            translate([max_w * 0.23, 0]) circle(r = max_w * 0.39, $fn = 48);
+                        }
+    } else if (shape == "clover") {
+        union() {
+            for (sx = [-1, 1], sy = [-1, 1]) {
+                translate([sx * max_w * 0.22, sy * max_w * 0.22]) circle(r = max_w * 0.23, $fn = 28);
+            }
+            circle(r = max_w * 0.18, $fn = 24);
+        }
+    } else if (shape == "hexagon") {
+        offset(r = 0.35, $fn = 16)
+            offset(delta = -0.35)
+                circle(r = max_w * 0.53, $fn = 6);
+    } else {
+        circle(d = max_w, $fn = 48);
+    }
+}
+
+module pencil_peg_n2(paint_color = undef, shape = "circle", label = "") {
+    cap_h = 0.84;
+    z_top_white = peg_height - cap_h; // 17.16 mm
+    flare_top_d = (center_mark_mode == "3x2") ? 6.3 : 9.0;
+    waist_d     = (center_mark_mode == "3x2") ? 4.9 : 7.1;
+    shape_w     = (center_mark_mode == "3x2") ? 5.5 : 8.0;
+    label_h     = 0.60;
+
+    union() {
+        color(paint_color == undef ? undef : "#F5F5F2") {
+            // Straight shaft (full 7.4 mm socket + 1.8 mm margin)
+            hull() {
+                linear_extrude(height = eps)
+                    peg_profile_2d(peg_eff_flat_d - 0.7);
+                translate([0, 0, 0.40])
+                    linear_extrude(height = 8.8)
+                        peg_profile_2d(peg_eff_flat_d);
+            }
+            // Gentle finger-pinch waist (Z=9.2..12.2 mm)
+            hull() {
+                translate([0, 0, 9.2 - eps])
+                    linear_extrude(height = eps)
+                        peg_profile_2d(peg_eff_flat_d);
+                translate([0, 0, 11.2])
+                    linear_extrude(height = 1.0)
+                        peg_profile_2d(waist_d);
+            }
+            // Support-free outward flare (~12 deg) to white rim
+            hull() {
+                translate([0, 0, 12.2 - eps])
+                    linear_extrude(height = eps)
+                        peg_profile_2d(waist_d);
+                translate([0, 0, 16.6])
+                    linear_extrude(height = z_top_white - 16.6)
+                        peg_profile_2d(flare_top_d);
+            }
+        }
+        // Proud colored shape relief framed by crisp white rim
+        color(paint_color)
+            translate([0, 0, z_top_white - eps])
+                linear_extrude(height = cap_h + eps)
+                    peg_shape_2d(shape, max_w = shape_w);
+        // Optional raised character
+        if (label != undef && label != "") {
+            color(paint_color)
+                translate([0, 0, peg_height - eps])
+                    raised_label(label, text_size = shape_w * 0.55, height = label_h, bold_offset = 0.04);
+        }
+    }
+}
+
+// ============================================================================
 // Deep-Tongue 45-Degree Mitered Region-Line Bar (7.25 mm Tongue + Snug Ribs)
 // ============================================================================
 
@@ -1144,6 +1352,254 @@ module region_bar(cells = 1, paint_color = undef) {
             translate([0, 0, bar_tongue_h + bar_bevel_h + region_bar_crown_height - paint_ridge_h - eps])
                 linear_extrude(height = paint_ridge_h + eps)
                     miter_pointed_bar_2d(full_len - 0.8, paint_ridge_w);
+    }
+}
+
+// ============================================================================
+// Center-Slot Arched 1-Long Straight Region Border (2.80 mm Straight Walls)
+// - Fits unified 7.40 x 3.00 x 7.00 mm center-slot board pockets
+// - Single centered 7.20 x 2.25 mm top groove accepts flipped R1 killer cage rail flush!
+// - Seated origin: z = 0 sits on board deck (total_plate_h = 13.50 mm); tab drops to z = -6.60
+// ============================================================================
+
+module region_bar_1x_arch(paint_color = undef, with_top_groove = true) {
+    full_len = cell_pitch - 0.30; // 34.70 mm
+    tab_l = 7.00;                 // 0.20 mm/side clearance in 7.40 mm board center slot
+    tab_d = 6.60;                 // deep anti-tip engagement into 7.00 mm center slot
+    w = bar_tongue_w;             // 2.80 mm straight up-and-down walls
+    paint_ridge_h = border_paint_ridge_h; // 0.70 mm
+    paint_ridge_w = w - 0.60;     // 2.20 mm raised paint ridge
+
+    difference() {
+        union() {
+            color(paint_color == undef ? undef : "#F5F5F2") {
+                // Upper straight mitered beam (z = 0..2.55 mm; paint ridge brings top to 3.25 mm -> Z=16.75)
+                linear_extrude(height = border_total_h - paint_ridge_h)
+                    miter_pointed_bar_2d(full_len, w);
+                // Center tab dropping 6.60 mm into board center slot (0.40 mm bottom lead-in bevel)
+                hull() {
+                    translate([0, 0, -tab_d])
+                        cube([tab_l - 0.8, w - 0.8, eps], center = true);
+                    translate([0, 0, -tab_d + 0.4])
+                        cube([tab_l, w, eps], center = true);
+                    translate([0, 0, eps])
+                        cube([tab_l, w, eps], center = true);
+                }
+                // Subtle snug ribs on center tab at x = +-2.2 mm (+0.05 mm/side -> <0.7 deg roll/yaw!)
+                for (rx = [-2.2, 2.2]) {
+                    translate([rx - 0.6, -(w / 2 + 0.05), -tab_d + 0.8])
+                        cube([1.2, w + 0.10, tab_d - 1.2]);
+                }
+            }
+            // Raised flat paint ridge on top (0.70 mm proud -> total 3.25 mm above board deck)
+            color(paint_color)
+                translate([0, 0, border_total_h - paint_ridge_h - eps])
+                    linear_extrude(height = paint_ridge_h + eps)
+                        miter_pointed_bar_2d(full_len - 0.6, paint_ridge_w);
+        }
+
+        // Arched underside relief between center tab (|x|=3.5) and mitered end-feet (|x|=13.5..17.35)
+        for (sx = [-1, 1]) {
+            translate([sx * 8.6, 0, -eps])
+                rotate([90, 0, 0])
+                    linear_extrude(height = w + 1.0, center = true)
+                        polygon([[-4.6, 0], [4.6, 0], [3.6, 0.85], [-3.6, 0.85]]);
+        }
+
+        // Single centered top groove (7.20 x 2.25 mm) for flush flipped R1 killer cage rail
+        // Leaves 79.4% (27.8/35.0 mm) of the dark border completely unobstructed!
+        if (with_top_groove) {
+            translate([-border_top_groove_len / 2, -w / 2 - 0.3, border_total_h - border_top_groove_d])
+                cube([border_top_groove_len, w + 0.6, border_top_groove_d + 0.3]);
+        }
+    }
+}
+
+// ============================================================================
+// Big Connected 9x9 Standard Border — 4-Quadrant Rotationally Symmetric # Frame
+// - Print 4x identical STLs (157.4 x 157.4 mm each -> fits flat on 180x180 A1 Mini!)
+// - Snaps together at the 4 midpoints (4.5P = 157.5 mm) via half-lap + 1.6 mm snap-pin
+// - Fits into the EXACT same 7.40 x 3.00 x 7.00 mm board center slots!
+// - Single centered 7.20 x 2.25 mm top grooves on every cell edge for flipped R1 killer cages
+// ============================================================================
+
+module region_grid_9x9_quadrant(paint_color = undef, with_top_grooves = true) {
+    P = cell_pitch;
+    w = bar_tongue_w;             // 2.80 mm straight walls
+    h = border_total_h;           // 3.25 mm above board deck
+    tab_l = 6.80;                 // slightly looser for effortless 16-tab drop-in
+    tab_d = 5.20;
+    lap_l = 6.00;
+    pin_d = 1.60;
+    joint_clear = 0.12;
+
+    color(paint_color)
+    difference() {
+        union() {
+            // Horizontal arm (x = 0.2..4.5P at y = 3P)
+            translate([0.2, 3 * P - w / 2, 0])
+                cube([4.5 * P - 0.2, w, h]);
+            // Vertical arm (y = 0.2..4.5P at x = 3P)
+            translate([3 * P - w / 2, 0.2, 0])
+                cube([w, 4.5 * P - 0.2, h]);
+
+            // Male half-lap tongue + snap pin on East end (x = 4.5P -> 4.5P + 6.0 mm, lower half z = 0..h/2)
+            translate([4.5 * P - eps, 3 * P - w / 2, 0])
+                cube([lap_l - joint_clear, w, h / 2 - joint_clear]);
+            translate([4.5 * P + lap_l / 2, 3 * P, h / 2 - joint_clear - eps])
+                cylinder(d = pin_d, h = 1.20 + eps, $fn = 24);
+
+            // Center-slot locator tabs at every cell-edge midpoint (0.5P, 1.5P, 2.5P, 3.5P)
+            for (k = [0.5, 1.5, 2.5, 3.5]) {
+                // Along horizontal arm
+                hull() {
+                    translate([k * P, 3 * P, -tab_d])
+                        cube([tab_l - 0.8, w - 0.8, eps], center = true);
+                    translate([k * P, 3 * P, -tab_d + 0.4])
+                        cube([tab_l, w, eps], center = true);
+                    translate([k * P, 3 * P, eps])
+                        cube([tab_l, w, eps], center = true);
+                }
+                // Along vertical arm
+                hull() {
+                    translate([3 * P, k * P, -tab_d])
+                        cube([w - 0.8, tab_l - 0.8, eps], center = true);
+                    translate([3 * P, k * P, -tab_d + 0.4])
+                        cube([w, tab_l, eps], center = true);
+                    translate([3 * P, k * P, eps])
+                        cube([w, tab_l, eps], center = true);
+                }
+            }
+        }
+
+        // Female half-lap pocket + pin socket on North end (y = 4.5P - 6.0 .. 4.5P, lower half)
+        // Rotated 90 deg CCW, adjacent quadrant's East male tongue drops right into this North female pocket!
+        translate([3 * P - w / 2 - 0.2, 4.5 * P - lap_l, -eps])
+            cube([w + 0.4, lap_l + 0.2, h / 2 + joint_clear + eps]);
+        translate([3 * P, 4.5 * P - lap_l / 2, h / 2 - eps])
+            cylinder(d = pin_d + 2 * joint_clear, h = 1.35 + eps, $fn = 24);
+
+        // Single centered top grooves (7.20 x 2.25 mm) on every cell edge for flipped R1 killer cages
+        if (with_top_grooves) {
+            for (k = [0.5, 1.5, 2.5, 3.5]) {
+                translate([k * P - border_top_groove_len / 2, 3 * P - w / 2 - 0.3, h - border_top_groove_d])
+                    cube([border_top_groove_len, w + 0.6, border_top_groove_d + 0.3]);
+                translate([3 * P - w / 2 - 0.3, k * P - border_top_groove_len / 2, h - border_top_groove_d])
+                    cube([w + 0.6, border_top_groove_len, border_top_groove_d + 0.3]);
+            }
+        }
+    }
+}
+
+// ============================================================================
+// Reversible Grey Killer Cage Edge Rail (Option R1 — Single Center Tab)
+// - ONE single STL handles empty interior edges, bordered interior edges, AND outer edges!
+// - Orientation 1 (Right-Side-Up, z=0 on board deck 13.50): single 6.80 x 2.80 mm center tab
+//   drops 1.25 mm into the 7.40 x 3.00 mm board center slot; dashed rails sit at Z = 13.50..15.50.
+// - Orientation 2 (Flipped 180 deg around X, translate Z + 2.00): center tab drops into the
+//   border's 7.20 x 2.25 mm top groove, landing 100% FLUSH at Z = 16.75 mm (79.4% of dark border visible!).
+// - Rail length trimmed to 28.60 mm for clean 0.45 mm nominal (0.15 mm worst-case) 90-deg corner clearance.
+// ============================================================================
+
+module killer_cage_rail(rail_color = undef) {
+    rail_len = killer_rail_len;   // 28.60 mm
+    rail_w   = killer_rail_w;     // 1.20 mm (u = +-(1.55..2.75 mm))
+    spine_z0 = 0.55;
+    spine_h  = 0.90;
+    tab_l    = killer_tab_len;    // 6.80 mm
+    tab_drop = killer_tab_drop;   // 1.25 mm
+    w        = bar_tongue_w;      // 2.80 mm
+
+    color(rail_color)
+    union() {
+        // Two symmetric dashed side rails (u = +-2.15 mm -> span 1.55..2.75 mm)
+        for (sy = [-1, 1]) {
+            y_c = sy * 2.15;
+            // Continuous center spine (z = 0.55..1.45)
+            translate([-rail_len / 2, y_c - rail_w / 2, spine_z0])
+                cube([rail_len, rail_w, spine_h]);
+            // 5 symmetric 45-deg trapezoidal dashes on BOTH top (1.45..2.00) and bottom (0.00..0.55)
+            for (dx = [-11.2, -5.6, 0.0, 5.6, 11.2]) {
+                translate([dx, y_c, spine_z0 + spine_h - eps])
+                    rotate([90, 0, 0])
+                        linear_extrude(height = rail_w, center = true)
+                            polygon([[-1.95, 0], [1.95, 0], [1.45, 0.55 + eps], [-1.45, 0.55 + eps]]);
+                translate([dx, y_c, spine_z0 + eps])
+                    rotate([90, 0, 0])
+                        linear_extrude(height = rail_w, center = true)
+                            polygon([[-1.95, 0], [1.95, 0], [1.45, -(0.55 + eps)], [-1.45, -(0.55 + eps)]]);
+            }
+        }
+
+        // Single centered cross-bridge + engagement tab (x in [-3.40, +3.40])
+        // Tie bar connecting both side rails (z = 0.00..0.90)
+        translate([-tab_l / 2, -2.15, 0.00])
+            cube([tab_l, 4.30, 0.90]);
+        // Center slot / border-groove engagement tab (2.80 mm wide, drops to z = -1.25 mm)
+        hull() {
+            translate([0, 0, -tab_drop])
+                cube([tab_l - 0.5, w - 0.5, eps], center = true);
+            translate([0, 0, -tab_drop + 0.25])
+                cube([tab_l, w, eps], center = true);
+            translate([0, 0, 0.05])
+                cube([tab_l, w, eps], center = true);
+        }
+        // Subtle +-0.04 mm centering bumps on tab flanks at x = +-2.0 mm (<0.7 deg yaw!)
+        for (rx = [-2.0, 2.0]) {
+            translate([rx - 0.5, -(w / 2 + 0.04), -tab_drop + 0.30])
+                cube([1.0, w + 0.08, tab_drop - 0.35]);
+        }
+    }
+}
+
+// ============================================================================
+// Grey Circle Furniture Piece (Option C1 — Cardinal-Tab Gravity Ring)
+// - Dual-fits empty board cell base AND on top of main_piece crown!
+// - Pure circular ring: OD = 28.6 mm, ID = 22.0 mm, H = 1.80 mm
+// - 4 rigid cardinal alignment tabs (7.0 x 1.20 x 2.50 mm) + 0.90 mm seating shoulder
+// - Prints upside-down (print_orientation = true), 100% support-free!
+// ============================================================================
+
+module circle_marker(marker_color = undef, print_orientation = false) {
+    r_out = circle_od / 2;
+    r_in  = circle_id / 2;
+    ch    = 0.30;
+
+    translate([0, 0, print_orientation ? (circle_tab_h + circle_ring_h) : 0])
+    rotate([print_orientation ? 180 : 0, 0, 0])
+    color(marker_color)
+    union() {
+        // 1. Main circular top ring (z = circle_tab_h .. circle_tab_h + circle_ring_h)
+        translate([0, 0, circle_tab_h])
+            difference() {
+                union() {
+                    cylinder(r = r_out, h = circle_ring_h - ch, $fn = 64);
+                    translate([0, 0, circle_ring_h - ch - eps])
+                        cylinder(r1 = r_out, r2 = r_out - ch, h = ch + eps, $fn = 64);
+                }
+                translate([0, 0, -eps])
+                    cylinder(r = r_in, h = circle_ring_h + 2 * eps, $fn = 64);
+                translate([0, 0, circle_ring_h - ch])
+                    cylinder(r1 = r_in, r2 = r_in + ch, h = ch + 2 * eps, $fn = 64);
+            }
+
+        // 2. Four cardinal alignment tabs + 45-deg self-centering shoulder seats
+        for (a = [0, 90, 180, 270]) {
+            rotate([0, 0, a]) {
+                hull() {
+                    translate([circle_tab_in + 0.20, -circle_tab_w / 2 + 0.20, 0])
+                        cube([circle_tab_out - circle_tab_in - 0.40, circle_tab_w - 0.40, eps]);
+                    translate([circle_tab_in, -circle_tab_w / 2, 0.25])
+                        cube([circle_tab_out - circle_tab_in, circle_tab_w, circle_tab_h - 0.25 + eps]);
+                }
+                hull() {
+                    translate([circle_seat_in, -circle_tab_w / 2, circle_tab_h - circle_seat_h])
+                        cube([circle_tab_out - circle_seat_in, circle_tab_w, circle_seat_h + eps]);
+                    translate([circle_tab_in, -circle_tab_w / 2, circle_tab_h - circle_seat_h - 0.55])
+                        cube([circle_tab_out - circle_tab_in, circle_tab_w, eps]);
+                }
+            }
+        }
     }
 }
 
@@ -1395,11 +1851,23 @@ if (render_mode == "assembly_preview") {
 } else if (render_mode == "main_piece") {
     main_piece(label = piece_label, shape = piece_shape);
 } else if (render_mode == "pencil_peg") {
-    pencil_peg(label = piece_label);
+    if (piece_shape != "" && piece_shape != undef) {
+        pencil_peg_n2(shape = piece_shape, label = piece_label);
+    } else {
+        pencil_peg(label = piece_label);
+    }
 } else if (render_mode == "region_bar_1x") {
     region_bar(1);
 } else if (render_mode == "region_bar_2x") {
     region_bar(2);
 } else if (render_mode == "region_bar_3x") {
     region_bar(3);
+} else if (render_mode == "region_bar_1x_arch") {
+    region_bar_1x_arch();
+} else if (render_mode == "region_grid_9x9_quadrant") {
+    region_grid_9x9_quadrant();
+} else if (render_mode == "killer_cage_rail") {
+    killer_cage_rail();
+} else if (render_mode == "circle_marker") {
+    circle_marker(print_orientation = true);
 }

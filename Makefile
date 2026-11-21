@@ -9,6 +9,7 @@ SHAPES := circle square triangle star asterisk heart crescent clover hexagon
 MAIN_LABELED_STLS := $(addprefix stl/pieces/main_piece_,$(addsuffix .stl,$(LABELS)))
 MAIN_SHAPED_STLS := $(addprefix stl/pieces/main_piece_shape_,$(addsuffix .stl,$(SHAPES)))
 PEG_LABELED_STLS := $(addprefix stl/pegs/pencil_peg_,$(addsuffix .stl,$(LABELS)))
+PEG_SHAPED_STLS := $(addprefix stl/pegs/pencil_peg_shape_,$(addsuffix .stl,$(SHAPES)))
 
 STLS := \
 	stl/boards/board_4x4.stl \
@@ -27,9 +28,14 @@ STLS := \
 	stl/borders/region_bar_1x.stl \
 	stl/borders/region_bar_2x.stl \
 	stl/borders/region_bar_3x.stl \
+	stl/borders/region_bar_1x_arch.stl \
+	stl/borders/region_grid_9x9_quadrant.stl \
+	stl/furniture/killer_cage_rail.stl \
+	stl/furniture/circle_marker.stl \
 	$(MAIN_LABELED_STLS) \
 	$(MAIN_SHAPED_STLS) \
-	$(PEG_LABELED_STLS)
+	$(PEG_LABELED_STLS) \
+	$(PEG_SHAPED_STLS)
 
 .PHONY: all renders clean
 
@@ -73,6 +79,10 @@ stl/pieces/main_piece.stl: $(SCAD)
 	@mkdir -p $(dir $@)
 	$(OPENSCAD) -o $@ -D 'render_mode="main_piece"' -D 'center_mark_mode="$(CENTER_MARK_MODE)"' $<
 
+stl/pegs/pencil_peg_shape_%.stl: $(SCAD)
+	@mkdir -p $(dir $@)
+	$(OPENSCAD) -o $@ -D 'render_mode="pencil_peg"' -D 'piece_shape="$*"' -D 'center_mark_mode="$(CENTER_MARK_MODE)"' $<
+
 stl/pegs/pencil_peg_%.stl: $(SCAD)
 	@mkdir -p $(dir $@)
 	$(OPENSCAD) -o $@ -D 'render_mode="pencil_peg"' -D 'piece_label="$*"' -D 'center_mark_mode="$(CENTER_MARK_MODE)"' $<
@@ -86,6 +96,10 @@ stl/boards/%.stl: $(SCAD)
 	$(OPENSCAD) -o $@ -D 'render_mode="$*"' -D 'center_mark_mode="$(CENTER_MARK_MODE)"' $<
 
 stl/borders/%.stl: $(SCAD)
+	@mkdir -p $(dir $@)
+	$(OPENSCAD) -o $@ -D 'render_mode="$*"' -D 'center_mark_mode="$(CENTER_MARK_MODE)"' $<
+
+stl/furniture/%.stl: $(SCAD)
 	@mkdir -p $(dir $@)
 	$(OPENSCAD) -o $@ -D 'render_mode="$*"' -D 'center_mark_mode="$(CENTER_MARK_MODE)"' $<
 
