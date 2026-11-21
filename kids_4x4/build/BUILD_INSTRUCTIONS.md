@@ -13,7 +13,7 @@ in place, and the teal arrows show where things drop in.
 ![Parts list](images/step_00.png)
 
 > **One-Piece Print Option:** If you only need a 4×4 board and don't want to snap 16 individual tiles
-> together, print **`../stl/board_4x4.stl` (1×)** (`145.6 × 145.6 × 12.5 mm`, fits in one piece on a
+> together, print **`../../stl/boards/board_4x4.stl` (1×)** (`145.6 × 145.6 × 12.5 mm`, fits in one piece on a
 > Bambu Lab A1 Mini) and skip straight to **Step 7**! All interior slots accept both the `2x` box
 > bars and the `1x` Jigsaw bars.
 
@@ -21,21 +21,21 @@ All 4 outside edges of the board have **built-in solid raised barrier walls** an
 (`145.6 × 145.6 mm` total footprint, with no protruding tabs or open sockets on the outside) so the
 finished board sits flush inside a carrying tray and interior region bars can never slide out!
 
-| Qty | Part | STL file (`../stl/`) | Where it goes on a 4×4 board |
+| Qty | Part | STL file (`../../stl/`) | Where it goes on a 4×4 board |
 |---:|---|---|---|
-| 1 | Top-Left (NW) corner tile | `tile_corner_nw.stl` | Row 1, Column 1 (flush N & W walls; S & E tabs) |
-| 2 | Top (N) edge tile | `tile_edge_n.stl` | Row 1, Columns 2–3 (flush N wall; W socket; S & E tabs) |
-| 1 | Top-Right (NE) corner tile | `tile_corner_ne.stl` | Row 1, Column 4 (flush N & E walls; W socket; S tab) |
-| 2 | Left (W) edge tile | `tile_edge_w.stl` | Rows 2–3, Column 1 (flush W wall; N socket; S & E tabs) |
-| 4 | Center tile | `tile_center.stl` | Rows 2–3, Columns 2–3 (N & W sockets; S & E tabs) |
-| 2 | Right (E) edge tile | `tile_edge_e.stl` | Rows 2–3, Column 4 (flush E wall; N & W sockets; S tab) |
-| 1 | Bottom-Left (SW) corner tile | `tile_corner_sw.stl` | Row 4, Column 1 (flush S & W walls; N socket; E tab) |
-| 2 | Bottom (S) edge tile | `tile_edge_s.stl` | Row 4, Columns 2–3 (flush S wall; N & W sockets; E tab) |
-| 1 | Bottom-Right (SE) corner tile | `tile_corner_se.stl` | Row 4, Column 4 (flush S & E walls; N & W sockets) |
-| 4 | Long bar (2x) | `region_bar_2x.stl` | Inside 2×2 box walls (2 across, 2 up-and-down) |
-| 12 | Short bar (1x) | `region_bar_1x.stl` | Wobbly jigsaw walls (Level 9) |
-| 16 | Main pieces | `main_piece_1..4.stl` (4 of each) | The big "answer" pieces |
-| 64 | Pencil pegs | `pencil_peg_1..4.stl` (16 of each) | Center marks and corner marks |
+| 1 | Top-Left (NW) corner tile | `boards/tile_corner_nw.stl` | Row 1, Column 1 (flush N & W walls; S & E tabs) |
+| 2 | Top (N) edge tile | `boards/tile_edge_n.stl` | Row 1, Columns 2–3 (flush N wall; W socket; S & E tabs) |
+| 1 | Top-Right (NE) corner tile | `boards/tile_corner_ne.stl` | Row 1, Column 4 (flush N & E walls; W socket; S tab) |
+| 2 | Left (W) edge tile | `boards/tile_edge_w.stl` | Rows 2–3, Column 1 (flush W wall; N socket; S & E tabs) |
+| 4 | Center tile | `boards/tile_center.stl` | Rows 2–3, Columns 2–3 (N & W sockets; S & E tabs) |
+| 2 | Right (E) edge tile | `boards/tile_edge_e.stl` | Rows 2–3, Column 4 (flush E wall; N & W sockets; S tab) |
+| 1 | Bottom-Left (SW) corner tile | `boards/tile_corner_sw.stl` | Row 4, Column 1 (flush S & W walls; N socket; E tab) |
+| 2 | Bottom (S) edge tile | `boards/tile_edge_s.stl` | Row 4, Columns 2–3 (flush S wall; N & W sockets; E tab) |
+| 1 | Bottom-Right (SE) corner tile | `boards/tile_corner_se.stl` | Row 4, Column 4 (flush S & E walls; N & W sockets) |
+| 4 | Long bar (2x) | `borders/region_bar_2x.stl` | Inside 2×2 box walls (2 across, 2 up-and-down) |
+| 12 | Short bar (1x) | `borders/region_bar_1x.stl` | Wobbly jigsaw walls (Level 9) |
+| 16 | Main pieces | `pieces/main_piece_1..4.stl` (4 of each) | The big "answer" pieces |
+| 64 | Pencil pegs | `pegs/pencil_peg_1..4.stl` (16 of each) | Center marks and corner marks |
 
 **Tip:** Paint (or print) each number its own color: 1 = red, 2 = blue, 3 = green, 4 = orange.
 Do the same for the pegs. Then the same pieces work for the **Coloring** level (Level 8).
