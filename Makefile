@@ -5,7 +5,9 @@ CENTER_MARK_MODE ?= 2x2
 HOLDER_OPTION ?= B
 
 LABELS := 1 2 3 4 5 6 7 8 9 A B C D E F G H I
+SHAPES := circle square triangle star asterisk heart crescent clover hexagon
 MAIN_LABELED_STLS := $(addprefix stl/main_piece_,$(addsuffix .stl,$(LABELS)))
+MAIN_SHAPED_STLS := $(addprefix stl/main_piece_shape_,$(addsuffix .stl,$(SHAPES)))
 PEG_LABELED_STLS := $(addprefix stl/pencil_peg_,$(addsuffix .stl,$(LABELS)))
 
 STLS := \
@@ -26,13 +28,14 @@ STLS := \
 	stl/region_bar_2x.stl \
 	stl/region_bar_3x.stl \
 	$(MAIN_LABELED_STLS) \
+	$(MAIN_SHAPED_STLS) \
 	$(PEG_LABELED_STLS)
 
 .PHONY: all renders clean
 
 all: $(STLS)
 
-renders: renders/finished_board_9x9.png renders/finished_board_closeup.png renders/finished_board_4x4.png renders/holder_option_b_lid_lifting.png
+renders: renders/finished_board_9x9.png renders/finished_board_closeup.png renders/finished_board_4x4.png renders/holder_option_b_lid_lifting.png renders/main_piece_shapes.png
 
 renders/finished_board_9x9.png: $(SCAD)
 	@mkdir -p $(dir $@)
@@ -50,9 +53,17 @@ renders/holder_option_b_lid_lifting.png: $(HOLDER_SCAD) $(SCAD)
 	@mkdir -p $(dir $@)
 	$(OPENSCAD) -o $@ --imgsize=1600,1200 --autocenter --viewall --camera=0,0,0,58,0,28,0 --projection=p --colorscheme=Tomorrow -D 'option="B"' -D 'part="lid_lifting"' $<
 
+renders/main_piece_shapes.png: $(SCAD)
+	@mkdir -p $(dir $@)
+	$(OPENSCAD) -o $@ --imgsize=1600,1200 --autocenter --viewall --camera=0,0,10,25,0,0,0 --projection=p --colorscheme=Tomorrow -D 'render_mode="shapes_preview"' $<
+
 stl/piece_holder.stl: $(HOLDER_SCAD) $(SCAD)
 	@mkdir -p $(dir $@)
 	$(OPENSCAD) -o $@ -D 'option="$(HOLDER_OPTION)"' -D 'part="base"' $<
+
+stl/main_piece_shape_%.stl: $(SCAD)
+	@mkdir -p $(dir $@)
+	$(OPENSCAD) -o $@ -D 'render_mode="main_piece"' -D 'piece_shape="$*"' -D 'center_mark_mode="$(CENTER_MARK_MODE)"' $<
 
 stl/main_piece_%.stl: $(SCAD)
 	@mkdir -p $(dir $@)

@@ -22,10 +22,13 @@
 
 /* [Render Selection] */
 // Select which part to preview / export:
-render_mode = "assembly_preview"; // ["assembly_preview", "full_board_preview", "board_4x4_preview", "board_4x4", "tile_center", "tile_edge_n", "tile_edge_s", "tile_edge_w", "tile_edge_e", "tile_corner_nw", "tile_corner_ne", "tile_corner_sw", "tile_corner_se", "main_piece", "pencil_peg", "region_bar_1x", "region_bar_2x", "region_bar_3x"]
+render_mode = "assembly_preview"; // ["assembly_preview", "full_board_preview", "board_4x4_preview", "shapes_preview", "board_4x4", "tile_center", "tile_edge_n", "tile_edge_s", "tile_edge_w", "tile_edge_e", "tile_corner_nw", "tile_corner_ne", "tile_corner_sw", "tile_corner_se", "main_piece", "pencil_peg", "region_bar_1x", "region_bar_2x", "region_bar_3x"]
 
 // Optional raised character on main_piece / pencil_peg ("" = blank, "1"-"9", "A"-"I")
 piece_label = ""; // ["", "1", "2", "3", "4", "5", "6", "7", "8", "9", "A", "B", "C", "D", "E", "F", "G", "H", "I"]
+
+// Optional tactile / colorblind-friendly top pad shape on main_piece ("" = classic full rounded-square pad)
+piece_shape = ""; // ["", "circle", "square", "triangle", "star", "asterisk", "heart", "crescent", "clover", "hexagon"]
 
 // Central pencil-mark layout ("2x2" = 4 wide-spaced holes for 6yo fingers; "3x2" = 6 holes for dense CTC puzzles)
 center_mark_mode = "2x2"; // ["2x2", "3x2"]
@@ -790,7 +793,81 @@ module raised_label(label, text_size, height, bold_offset = 0) {
     }
 }
 
-module main_piece(paint_color = undef, label = "") {
+// 2D raised top-pad silhouettes for main_piece (all sized to sit cleanly inside the 24.0 mm white crown top)
+// Default "" preserves the classic full 23.4 mm rounded-square pad.
+module paint_pad_shape_2d(shape = "", pad_w = 23.4) {
+    if (shape == "" || shape == undef) {
+        rounded_rect_2d(pad_w, pad_w, 3.0);
+    } else if (shape == "circle") {
+        circle(r = 10.2, $fn = 64);
+    } else if (shape == "square") {
+        rounded_rect_2d(18.6, 18.6, 1.0);
+    } else if (shape == "triangle") {
+        R = 12.2;
+        translate([0, -R / 4])
+            offset(r = 0.8, $fn = 24)
+                offset(delta = -0.8)
+                    polygon([
+                        for (i = [0 : 2])
+                            let (a = 90 + i * 120)
+                                [R * cos(a), R * sin(a)]
+                    ]);
+    } else if (shape == "star") {
+        R_out = 11.4;
+        R_in  = 4.9;
+        translate([0, -0.5])
+            offset(r = 0.4, $fn = 16)
+                offset(delta = -0.4)
+                    polygon([
+                        for (i = [0 : 9])
+                            let (a = 90 + i * 36, r = (i % 2 == 0) ? R_out : R_in)
+                                [r * cos(a), r * sin(a)]
+                    ]);
+    } else if (shape == "asterisk") {
+        for (a = [0, 60, 120]) {
+            rotate([0, 0, a])
+                hull() {
+                    translate([0,  8.6]) circle(r = 2.0, $fn = 24);
+                    translate([0, -8.6]) circle(r = 2.0, $fn = 24);
+                }
+        }
+    } else if (shape == "heart") {
+        translate([0, 0.5]) {
+            hull() {
+                translate([-4.6, 3.6]) circle(r = 5.4, $fn = 48);
+                translate([0, -9.0])   circle(r = 1.0, $fn = 24);
+            }
+            hull() {
+                translate([ 4.6, 3.6]) circle(r = 5.4, $fn = 48);
+                translate([0, -9.0])   circle(r = 1.0, $fn = 24);
+            }
+        }
+    } else if (shape == "crescent") {
+        rotate([0, 0, -20])
+            translate([1.8, 0])
+                offset(r = 0.5, $fn = 24)
+                    offset(delta = -0.5)
+                        difference() {
+                            circle(r = 10.4, $fn = 64);
+                            translate([4.6, 0]) circle(r = 8.4, $fn = 64);
+                        }
+    } else if (shape == "clover") {
+        union() {
+            for (sx = [-1, 1], sy = [-1, 1]) {
+                translate([sx * 4.5, sy * 4.5]) circle(r = 4.6, $fn = 40);
+            }
+            circle(r = 3.5, $fn = 32);
+        }
+    } else if (shape == "hexagon") {
+        offset(r = 0.4, $fn = 16)
+            offset(delta = -0.4)
+                circle(r = 10.8, $fn = 6);
+    } else {
+        rounded_rect_2d(pad_w, pad_w, 3.0);
+    }
+}
+
+module main_piece(paint_color = undef, label = "", shape = "") {
     plinth_h = 3.8; // engages full vertical 4.5 mm cell wall so tiles never skate out when carried
     taper_dn = (tile_base_w - tile_waist_w) / 2;
     z_w2 = plinth_h + taper_dn;
@@ -848,11 +925,11 @@ module main_piece(paint_color = undef, label = "") {
                             rounded_rect_2d(pad_w + 0.6, pad_w + 0.6, 3.2);
                 }
             }
-            // 5. Raised flat paint pad on top (proud 0.9 mm above white shoulder for easy marker painting)
+            // 5. Raised flat paint pad on top (0.84 mm = 3 x 0.28 mm layers above white shoulder)
             color(paint_color)
                 translate([0, 0, main_tile_height - paint_pad_h - eps])
                     linear_extrude(height = paint_pad_h + eps)
-                        rounded_rect_2d(pad_w, pad_w, 3.0);
+                        paint_pad_shape_2d(shape, pad_w);
             // 6. Optional raised character on top of the paint pad
             color(paint_color)
                 translate([0, 0, main_tile_height - eps])
@@ -1271,12 +1348,30 @@ module board_4x4_preview() {
 // Top-Level Dispatcher
 // ============================================================================
 
+// 3x3 showcase preview of all 9 tactile / colorblind-friendly main_piece shapes
+module shapes_preview() {
+    sudoku_colors = [
+        "#E63946", "#F4A261", "#E9C46A", "#2A9D8F", "#00B4D8",
+        "#3A86FF", "#8338EC", "#FF006E", "#6D597A"
+    ];
+    shapes = ["circle", "square", "triangle", "star", "asterisk", "heart", "crescent", "clover", "hexagon"];
+    spacing = 34.0;
+    for (i = [0 : 8]) {
+        col = i % 3;
+        row = floor(i / 3);
+        translate([(col - 1) * spacing, (1 - row) * spacing, 0])
+            main_piece(paint_color = sudoku_colors[i], label = piece_label, shape = shapes[i]);
+    }
+}
+
 if (render_mode == "assembly_preview") {
     assembly_preview();
 } else if (render_mode == "full_board_preview") {
     full_board_preview();
 } else if (render_mode == "board_4x4_preview") {
     board_4x4_preview();
+} else if (render_mode == "shapes_preview") {
+    shapes_preview();
 } else if (render_mode == "board_4x4") {
     monolithic_board(4);
 } else if (render_mode == "tile_center" || render_mode == "tile_2slot") {
@@ -1298,7 +1393,7 @@ if (render_mode == "assembly_preview") {
 } else if (render_mode == "tile_corner_se") {
     board_tile(false, true,  true,  false);
 } else if (render_mode == "main_piece") {
-    main_piece(label = piece_label);
+    main_piece(label = piece_label, shape = piece_shape);
 } else if (render_mode == "pencil_peg") {
     pencil_peg(label = piece_label);
 } else if (render_mode == "region_bar_1x") {
